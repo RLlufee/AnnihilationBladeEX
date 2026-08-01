@@ -18,8 +18,8 @@
     { "id": "minecraft:thorns", "lvl": 10 }
   ],
   "properties": {
-    "attack_base": 1000000.0,
-    "max_damage": 2147483647,
+    "attack_base": 214748367,
+    "max_damage": 2000,
     "slash_art": "annihilationblade:vacuum_decay_collapse",
     "special_effects": [
       "annihilationblade:entropy_dissolution",

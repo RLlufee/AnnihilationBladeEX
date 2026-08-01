@@ -26,6 +26,7 @@
       "annihilationblade:phantom_judgement",
       "annihilationblade:abyssal_decree"
     ],
+    "unbreakable": true,
     "sword_type": [
       "bewitched"
     ]

@@ -46,7 +46,6 @@ public final class BloodPrisonDefinitions {
 
    public static void ensureStats(ItemStack stack, @Nullable Level level) {
       if (!stack.isEmpty()) {
-         NamedBladeStacks.copyDefinitionTag(stack, level, NAME, null);
          ensureIdentity(stack);
       }
    }
@@ -80,6 +79,20 @@ public final class BloodPrisonDefinitions {
       stack.getCapability(ItemSlashBlade.BLADESTATE).ifPresent(state -> state.setTranslationKey(DESCRIPTION_ID));
    }
 
+   private static void ensureBloodPrisonEnchantments(ItemStack stack) {
+      Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
+      int staleMultishotLevel = enchantments.getOrDefault(Enchantments.MULTISHOT, 0);
+      enchantments.remove(Enchantments.MULTISHOT);
+      enchantments.put(Enchantments.UNBREAKING, Math.max(10, enchantments.getOrDefault(Enchantments.UNBREAKING, 0)));
+      enchantments.put(Enchantments.MENDING, Math.max(10, enchantments.getOrDefault(Enchantments.MENDING, 0)));
+      enchantments.put(Enchantments.SHARPNESS, Math.max(10, enchantments.getOrDefault(Enchantments.SHARPNESS, 0)));
+      enchantments.put(
+         Enchantments.POWER_ARROWS,
+         Math.max(10, Math.max(staleMultishotLevel, enchantments.getOrDefault(Enchantments.POWER_ARROWS, 0)))
+      );
+      EnchantmentHelper.setEnchantments(enchantments, stack);
+   }
+
    private static ListTag createSpecialEffects() {
       ListTag effects = new ListTag();
       effects.add(StringTag.valueOf("annihilationblade:blood_leech"));
@@ -89,11 +102,6 @@ public final class BloodPrisonDefinitions {
    }
 
    private static void applyEnchantments(ItemStack stack) {
-      Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
-      enchantments.put(Enchantments.UNBREAKING, Math.max(10, enchantments.getOrDefault(Enchantments.UNBREAKING, 0)));
-      enchantments.put(Enchantments.MENDING, Math.max(10, enchantments.getOrDefault(Enchantments.MENDING, 0)));
-      enchantments.put(Enchantments.SHARPNESS, Math.max(10, enchantments.getOrDefault(Enchantments.SHARPNESS, 0)));
-      enchantments.put(Enchantments.POWER_ARROWS, Math.max(10, enchantments.getOrDefault(Enchantments.POWER_ARROWS, 0)));
-      EnchantmentHelper.setEnchantments(enchantments, stack);
+      ensureBloodPrisonEnchantments(stack);
    }
 }

@@ -121,15 +121,20 @@ public final class BloodPrisonLogic {
          double radius = config.radius.get();
          double visualScale = config.visualScale.get();
          BloodPrisonDefinitions.ensureStats(player.getMainHandItem(), level);
-         DOMAINS.put(player.getUUID(), new BloodPrisonLogic.Domain(player.position(), level.getGameTime() + durationTicks));
+         DOMAINS.put(player.getUUID(),
+               new BloodPrisonLogic.Domain(player.position(), level.getGameTime() + durationTicks));
          if (player instanceof ServerPlayer serverPlayer) {
             ModNetwork.sendBloodPrisonDomain(serverPlayer, durationTicks);
          }
 
-         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.4F, 0.55F);
-         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.PLAYERS, 0.55F, 1.45F);
-         level.sendParticles(ParticleTypes.DRAGON_BREATH, player.getX(), player.getY() + 0.15, player.getZ(), visualCount(120, visualScale), radius * 0.3, 0.15 * visualScale, radius * 0.3, 0.03);
-         level.sendParticles(ParticleTypes.CRIMSON_SPORE, player.getX(), player.getY() + 0.2, player.getZ(), visualCount(180, visualScale), radius * 0.8, 0.25 * visualScale, radius * 0.8, 0.08);
+         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE,
+               SoundSource.PLAYERS, 1.4F, 0.55F);
+         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_SPAWN,
+               SoundSource.PLAYERS, 0.55F, 1.45F);
+         level.sendParticles(ParticleTypes.DRAGON_BREATH, player.getX(), player.getY() + 0.15, player.getZ(),
+               visualCount(120, visualScale), radius * 0.3, 0.15 * visualScale, radius * 0.3, 0.03);
+         level.sendParticles(ParticleTypes.CRIMSON_SPORE, player.getX(), player.getY() + 0.2, player.getZ(),
+               visualCount(180, visualScale), radius * 0.8, 0.25 * visualScale, radius * 0.8, 0.08);
          AnnihilationVisuals.spawnBloodPrisonDomainPulse(level, player.position(), radius * visualScale);
       }
    }
@@ -165,7 +170,7 @@ public final class BloodPrisonLogic {
             LivingEntity target = event.getEntity();
             if (SlashBladeTargeting.canAttack(player, target)) {
                float missing = Math.max(0.0F, player.getMaxHealth() - player.getHealth());
-               float damageBonus = (float)Math.floor(missing / 2.0F) * (player.getMaxHealth() * 0.001F);
+               float damageBonus = (float) Math.floor(missing / 2.0F) * (player.getMaxHealth() * 0.001F);
                event.setAmount(event.getAmount() + damageBonus);
                BloodPrisonLogic.Domain domain = DOMAINS.get(player.getUUID());
                if (domain != null) {
@@ -222,7 +227,8 @@ public final class BloodPrisonLogic {
          AttributeModifier modifier = attribute.getModifier(MAX_HEALTH_MODIFIER_ID);
          if (hasBloodPrison) {
             if (modifier == null) {
-               attribute.addTransientModifier(new AttributeModifier(MAX_HEALTH_MODIFIER_ID, "blood_prison_max_health", 40.0, Operation.ADDITION));
+               attribute.addTransientModifier(new AttributeModifier(MAX_HEALTH_MODIFIER_ID, "blood_prison_max_health",
+                     40.0, Operation.ADDITION));
             }
          } else if (modifier != null) {
             attribute.removeModifier(MAX_HEALTH_MODIFIER_ID);
@@ -240,7 +246,8 @@ public final class BloodPrisonLogic {
          if (newlyTriggered) {
             applyShieldBuffs(player);
          }
-      } else if (player.getHealth() > 20.0F && BLOOD_SHIELDS.remove(id) != null && player.getAbsorptionAmount() <= shield + 0.01F) {
+      } else if (player.getHealth() > 20.0F && BLOOD_SHIELDS.remove(id) != null
+            && player.getAbsorptionAmount() <= shield + 0.01F) {
          player.setAbsorptionAmount(0.0F);
       }
    }
@@ -254,7 +261,8 @@ public final class BloodPrisonLogic {
 
    private static void drainBloodForSwing(Player player) {
       long time = player.level().getGameTime();
-      BloodPrisonLogic.DrainWindow window = DRAIN_WINDOWS.computeIfAbsent(player.getUUID(), ignored -> new BloodPrisonLogic.DrainWindow(time));
+      BloodPrisonLogic.DrainWindow window = DRAIN_WINDOWS.computeIfAbsent(player.getUUID(),
+            ignored -> new BloodPrisonLogic.DrainWindow(time));
       if (time - window.startedAt >= 10L) {
          window.startedAt = time;
          window.drained = 0.0F;
@@ -271,7 +279,7 @@ public final class BloodPrisonLogic {
    private static void tickDomain(Player player) {
       BloodPrisonLogic.Domain domain = DOMAINS.get(player.getUUID());
       if (domain != null) {
-         ServerLevel level = (ServerLevel)player.level();
+         ServerLevel level = (ServerLevel) player.level();
          if (!player.isAlive()) {
             removeDomain(player);
          } else if (level.getGameTime() >= domain.expiresAt) {
@@ -283,17 +291,24 @@ public final class BloodPrisonLogic {
             double visualScale = config.visualScale.get();
             if (level.getGameTime() % config.borderIntervalTicks.get() == 0L) {
                for (double offset = -radius; offset <= radius; offset += 2.0) {
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + offset, domain.center.y + 0.1, domain.center.z - radius, 1, 0.0, 0.0, 0.0, 0.0);
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + offset, domain.center.y + 0.1, domain.center.z + radius, 1, 0.0, 0.0, 0.0, 0.0);
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x - radius, domain.center.y + 0.1, domain.center.z + offset, 1, 0.0, 0.0, 0.0, 0.0);
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + radius, domain.center.y + 0.1, domain.center.z + offset, 1, 0.0, 0.0, 0.0, 0.0);
+                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + offset, domain.center.y + 0.1,
+                        domain.center.z - radius, 1, 0.0, 0.0, 0.0, 0.0);
+                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + offset, domain.center.y + 0.1,
+                        domain.center.z + radius, 1, 0.0, 0.0, 0.0, 0.0);
+                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x - radius, domain.center.y + 0.1,
+                        domain.center.z + offset, 1, 0.0, 0.0, 0.0, 0.0);
+                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + radius, domain.center.y + 0.1,
+                        domain.center.z + offset, 1, 0.0, 0.0, 0.0, 0.0);
                }
 
-               level.sendParticles(ParticleTypes.CRIMSON_SPORE, domain.center.x, domain.center.y + 0.15, domain.center.z, visualCount(18, visualScale), radius * 0.65, 0.05 * visualScale, radius * 0.65, 0.015);
+               level.sendParticles(ParticleTypes.CRIMSON_SPORE, domain.center.x, domain.center.y + 0.15,
+                     domain.center.z, visualCount(18, visualScale), radius * 0.65, 0.05 * visualScale, radius * 0.65,
+                     0.015);
             }
 
             if (level.getGameTime() % config.playerAuraIntervalTicks.get() == 0L) {
-               level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY() + 1.0, player.getZ(), visualCount(8, visualScale), 1.2 * visualScale, 0.5 * visualScale, 1.2 * visualScale, 0.05);
+               level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY() + 1.0, player.getZ(),
+                     visualCount(8, visualScale), 1.2 * visualScale, 0.5 * visualScale, 1.2 * visualScale, 0.05);
             }
 
             if (level.getGameTime() % config.pulseIntervalTicks.get() == 0L) {
@@ -308,20 +323,23 @@ public final class BloodPrisonLogic {
       if (domain != null && player.level() instanceof ServerLevel level) {
          double radius = ModConfig.COMMON.bloodPrison.domain.radius.get();
          List<LivingEntity> targets = new ArrayList<>(
-            level.getEntitiesOfClass(
-               LivingEntity.class, new AABB(domain.center, domain.center).inflate(radius), targetx -> SlashBladeTargeting.canAttack(player, targetx)
-            )
-         );
+               level.getEntitiesOfClass(
+                     LivingEntity.class, new AABB(domain.center, domain.center).inflate(radius),
+                     targetx -> SlashBladeTargeting.canAttack(player, targetx)));
          if (!targets.isEmpty()) {
             LivingEntity target = targets.get(player.getRandom().nextInt(targets.size()));
             Vec3 from = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
             double angle = player.getRandom().nextDouble() * Math.PI * 2.0;
-            player.teleportTo(target.getX() + Math.cos(angle) * 1.5, target.getY(), target.getZ() + Math.sin(angle) * 1.5);
+            player.teleportTo(target.getX() + Math.cos(angle) * 1.5, target.getY(),
+                  target.getZ() + Math.sin(angle) * 1.5);
             target.hurt(level.damageSources().indirectMagic(player, player), 20.0F);
             domain.damageDealt += 20.0F;
-            level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 0.75F);
-            level.sendParticles(ParticleTypes.SWEEP_ATTACK, target.getX(), target.getY() + target.getBbHeight() * 0.55, target.getZ(), 3, 0.45, 0.45, 0.45, 0.0);
-            level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.55, target.getZ(), 24, 0.75, 0.75, 0.75, 0.12);
+            level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP,
+                  SoundSource.PLAYERS, 1.0F, 0.75F);
+            level.sendParticles(ParticleTypes.SWEEP_ATTACK, target.getX(), target.getY() + target.getBbHeight() * 0.55,
+                  target.getZ(), 3, 0.45, 0.45, 0.45, 0.0);
+            level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.55,
+                  target.getZ(), 24, 0.75, 0.75, 0.75, 0.12);
             Vec3 hit = target.position().add(0.0, target.getBbHeight() * 0.58, 0.0);
             AnnihilationVisuals.spawnBloodPrisonDash(level, from, hit, player.getRandom());
          }
@@ -336,14 +354,18 @@ public final class BloodPrisonLogic {
 
       for (int i = 0; i < swordCount; i++) {
          double angle = (Math.PI * 2) * i / swordCount;
-         Vec3 start = center.add(Math.cos(angle) * 4.0 * visualScale, (3.0 + i % 3) * visualScale, Math.sin(angle) * 4.0 * visualScale);
+         Vec3 start = center.add(Math.cos(angle) * 4.0 * visualScale, (3.0 + i % 3) * visualScale,
+               Math.sin(angle) * 4.0 * visualScale);
          AnnihilationVisuals.spawnSlashBridge(level, start, center, 0.55 * visualScale, player.getRandom());
          spawnPhantomSword(level, player, start, center, i);
       }
 
-      AnnihilationVisuals.spawnBloodPrisonBurst(level, center, Math.max(1.2, target.getBbWidth() * config.burstRadiusScale.get()) * visualScale, player.getRandom());
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 0.75F, 1.7F);
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.55F);
+      AnnihilationVisuals.spawnBloodPrisonBurst(level, center,
+            Math.max(1.2, target.getBbWidth() * config.burstRadiusScale.get()) * visualScale, player.getRandom());
+      level.playSound(null, center.x, center.y, center.z, SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 0.75F,
+            1.7F);
+      level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F,
+            0.55F);
    }
 
    private static void spawnPhantomSword(ServerLevel level, Player player, Vec3 start, Vec3 end, int index) {
@@ -353,7 +375,7 @@ public final class BloodPrisonLogic {
       sword.setColor(-57312);
       sword.setDamage(0.0);
       sword.setNoClip(true);
-      sword.setPierce((byte)0);
+      sword.setPierce((byte) 0);
       sword.setDelay(ModConfig.COMMON.bloodPrison.phantomBurst.swordDelayTicks.get() + index % 4);
       sword.setRoll(index * 36.0F);
       Vec3 direction = end.subtract(start).normalize();
@@ -390,16 +412,16 @@ public final class BloodPrisonLogic {
    }
 
    private static float yawToFace(Vec3 direction) {
-      return (float)(Mth.atan2(direction.x, direction.z) * 180.0F / (float)Math.PI);
+      return (float) (Mth.atan2(direction.x, direction.z) * 180.0F / (float) Math.PI);
    }
 
    private static float pitchToFace(Vec3 direction) {
       double horizontal = Math.sqrt(direction.x * direction.x + direction.z * direction.z);
-      return (float)(-Mth.atan2(direction.y, horizontal) * 180.0F / (float)Math.PI);
+      return (float) (-Mth.atan2(direction.y, horizontal) * 180.0F / (float) Math.PI);
    }
 
    private static int visualCount(int base, double visualScale) {
-      return Math.max(1, (int)Math.round(base * visualScale));
+      return Math.max(1, (int) Math.round(base * visualScale));
    }
 
    private static final class Domain {
@@ -422,3 +444,5 @@ public final class BloodPrisonLogic {
       }
    }
 }
+
+/*我最烦大写报错了，真的! */

@@ -244,8 +244,8 @@ public final class InfinityStellarisTooltipRenderer {
          new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.kills", formatNumber(stats.killCount()), 0x28F7FF),
          new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.souls", formatNumber(stats.proudSoul()), 0xFFE27A),
          new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.refine", formatNumber(stats.refine()), 0xFF4FD8),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.attack", "1,000,000", 0xF2FEFF),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.durability", "2147483647", 0x8D7CFF)
+         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.attack", "2147483647", 0xF2FEFF),
+         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.durability", "何意味", 0x8D7CFF)
       };
       int gap = 3;
       int cellWidth = (width - gap * (cells.length - 1)) / cells.length;

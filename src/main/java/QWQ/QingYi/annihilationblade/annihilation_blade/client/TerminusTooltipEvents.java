@@ -1,6 +1,7 @@
 package QWQ.QingYi.annihilationblade.annihilation_blade.client;
 
 import QWQ.QingYi.annihilationblade.Annihilationblade;
+import QWQ.QingYi.annihilationblade.config.ModConfig;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -22,6 +23,10 @@ public final class TerminusTooltipEvents {
    public static void onRenderTooltipPre(RenderTooltipEvent.Pre event) {
       ItemStack stack = event.getItemStack();
       if (!TerminusTooltipRenderer.shouldRender(stack)) {
+         return;
+      }
+
+      if (!ModConfig.COMMON.clientTooltips.enableAnnihilationBladeRenderer.get()) {
          return;
       }
 

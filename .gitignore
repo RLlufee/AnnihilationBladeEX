@@ -1,0 +1,31 @@
+# 构建产物与缓存
+.gradle/
+build/
+bin/
+out/
+target/
+
+# IDE / 本地工具状态
+.idea/
+.vscode/
+.VSCodeCounter/
+*.iml
+
+# 本地依赖与备份
+libs/
+.codex_backup/
+！废案/
+
+# 日志与临时文件
+*.log
+*.tmp
+*.bak
+*.swp
+Thumbs.db
+desktop.ini
+*.pyc
+__pycache__/
+
+# Java / Gradle 运行残留
+hs_err_pid*
+replay_pid*

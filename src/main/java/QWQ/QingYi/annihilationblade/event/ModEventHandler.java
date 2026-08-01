@@ -36,7 +36,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -293,13 +292,6 @@ public class ModEventHandler {
                player.onUpdateAbilities();
             }
          }
-      }
-   }
-
-   @SubscribeEvent(priority = EventPriority.HIGHEST)
-   public static void onItemToss(ItemTossEvent event) {
-      if (isGodBlade(event.getEntity().getItem()) && !event.getPlayer().isCreative()) {
-         event.setCanceled(true);
       }
    }
 
