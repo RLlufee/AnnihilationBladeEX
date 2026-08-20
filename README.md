@@ -551,3 +551,11 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 - 新增 `client_tooltips.enable_annihilation_blade_renderer` 与 `client_tooltips.enable_infinity_stellaris_renderer` 配置项，默认 `true`，用于分别控制湮灭之刃与无尽星空专属 tooltip 渲染器是否启用。
 - 当对应配置关闭时，该刀不再取消原版 tooltip 渲染事件，背包、创造栏、JEI 或其它 tooltip 增强模组会回到更兼容的原版渲染路径。
 - 检查血狱当前源码后确认其没有独立的专属 tooltip 重绘器，因此本次没有加入无实际效果的血狱开关。
+
+## 打赏
+
+![](./money.png)
+
+### 制作不易，有能力的可以给个小小的赞助，起码让作者不用去找垃圾吃......
+
+## 自身拮据请**绝对不要**给作者赞助，每个人都有一时的难处，祝君安好！！！
