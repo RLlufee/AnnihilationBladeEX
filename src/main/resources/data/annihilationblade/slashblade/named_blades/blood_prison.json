@@ -8,7 +8,7 @@
   ],
   "properties": {
     "attack_base": 16.0,
-    "max_damage": 2400,
+    "max_damage": 2000,
     "slash_art": "annihilationblade:infernal_slaughter",
     "special_effects": [
       "annihilationblade:blood_leech",

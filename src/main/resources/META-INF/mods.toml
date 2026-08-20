@@ -15,7 +15,7 @@ description='''
 Features:
 - Spatial Fracture / Infernal Slaughter / Absolute Annihilation Zone SA
 - Terminus, Blood Prison, and Infinity Stellaris SE chains
-- Absolute execution, final-weapon Infinity Stellaris, native-SE cosmic string cut, permanent curvature rupture, custom gamma thunderbolts, void flight, gamma fullbright
+- Absolute execution, final-weapon Infinity Stellaris, native-SE cosmic string cut, toggleable reversible curvature rupture, custom gamma thunderbolts, configurable tooltip renderers, void flight, gamma fullbright
 '''
 logoFile="icon.png"
 

@@ -5,18 +5,14 @@
     "key": {
         "C": {
             "type": "slashblade:blade",
-            "items": [
-                "slashblade:slashblade"
-            ],
+            "item": "slashblade:slashblade",
             "request": {
                 "name": "slashblade:ruby"
             }
         },
         "D": {
             "type": "slashblade:blade",
-            "items": [
-                "slashblade:slashblade"
-            ],
+            "item": "slashblade:slashblade",
             "request": {
                 "name": "slashblade:koseki",
                 "kill": 100,
@@ -25,7 +21,7 @@
             }
         },
         "E": {
-            "item": "redstone_block"
+            "item": "minecraft:redstone_block"
         }
     },
     "pattern": [
@@ -35,6 +31,7 @@
     ],
     "result": {
         "count": 1,
-        "id": "slashblade:slashblade"
-    }
+        "item": "slashblade:slashblade"
+    },
+    "show_notification": true
 }
