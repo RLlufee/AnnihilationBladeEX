@@ -100,29 +100,31 @@ public final class ClientBladeVision {
    private static void setGammaValue(OptionInstance<Double> gamma, double value) {
       Field valueField = getGammaValueField(gamma);
       if (valueField == null) {
-         gamma.set(Math.max(0.0D, Math.min(1.0D, value)));
+         gamma.set(clampGamma(value));
          return;
       }
 
       try {
          valueField.set(gamma, value);
-      } catch (IllegalAccessException exception) {
+      } catch (IllegalAccessException | IllegalArgumentException exception) {
+         gammaValueField = null;
          if (!gammaFieldWarningLogged) {
             Annihilationblade.LOGGER.warn("Failed to write gamma option value reflectively", exception);
             gammaFieldWarningLogged = true;
          }
+         gamma.set(clampGamma(value));
       }
    }
 
    private static Field getGammaValueField(OptionInstance<Double> gamma) {
-      if (gammaValueField != null) {
+      if (gammaValueField != null && isGammaValueField(gammaValueField, gamma)) {
          return gammaValueField;
       }
 
+      gammaValueField = null;
       for (Field field : gamma.getClass().getDeclaredFields()) {
          int modifiers = field.getModifiers();
-         if (!Modifier.isStatic(modifiers) && !Modifier.isFinal(modifiers)) {
-            field.setAccessible(true);
+         if (!Modifier.isStatic(modifiers) && canHoldGammaValue(field) && isGammaValueField(field, gamma)) {
             gammaValueField = field;
             return field;
          }
@@ -133,6 +135,37 @@ public final class ClientBladeVision {
          gammaFieldWarningLogged = true;
       }
       return null;
+   }
+
+   private static boolean canHoldGammaValue(Field field) {
+      Class<?> type = field.getType();
+      return type == double.class || type == Double.class || type == Object.class || Number.class.isAssignableFrom(type);
+   }
+
+   private static boolean isGammaValueField(Field field, OptionInstance<Double> gamma) {
+      try {
+         field.setAccessible(true);
+         Object originalValue = field.get(gamma);
+         if (!(originalValue instanceof Number number) || !sameGamma(number.doubleValue(), gamma.get())) {
+            return false;
+         }
+
+         double probeValue = sameGamma(gamma.get(), 0.25D) ? 0.75D : 0.25D;
+         field.set(gamma, probeValue);
+         boolean updatesGamma = sameGamma(gamma.get(), probeValue);
+         field.set(gamma, originalValue);
+         return updatesGamma && sameGamma(gamma.get(), number.doubleValue());
+      } catch (ReflectiveOperationException | RuntimeException exception) {
+         return false;
+      }
+   }
+
+   private static boolean sameGamma(double first, double second) {
+      return Math.abs(first - second) < 1.0E-9D;
+   }
+
+   private static double clampGamma(double value) {
+      return Math.max(0.0D, Math.min(1.0D, value));
    }
 
    private static void cache(Player player, boolean hasBlade) {

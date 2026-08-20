@@ -3,6 +3,8 @@ package QWQ.QingYi.annihilationblade.registry;
 import QWQ.QingYi.annihilationblade.annihilation_blade.logic.SpatialFractureExecutor;
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.VacuumDecayCollapseLogic;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.DragonHeadChargeLogic;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.NightfallDragonJudgementCutLogic;
 import mods.flammpfeil.slashblade.init.DefaultResources;
 import mods.flammpfeil.slashblade.registry.combo.ComboState;
 import mods.flammpfeil.slashblade.registry.combo.ComboState.Builder;
@@ -76,6 +78,54 @@ public class ModComboStates {
                .put(16, entity -> {
                   if (entity instanceof Player player && !player.level().isClientSide) {
                      VacuumDecayCollapseLogic.unleash(player);
+                  }
+               })
+               .build()
+         )
+         .build()
+   );
+   public static final RegistryObject<ComboState> NIGHTFALL_JUDGEMENT_CUT_STATE = REGISTRY.register(
+      "nightfall_judgement_cut_state",
+      () -> Builder.newInstance()
+         .priority(80)
+         .startAndEnd(640, 700)
+         .motionLoc(DefaultResources.ExMotionLocation)
+         .next(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .nextOfTimeout(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .addTickAction(
+            TimeLineTickAction.getBuilder()
+               .put(
+                  4,
+                  entity -> entity.level()
+                     .playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.65F)
+               )
+               .put(8, entity -> {
+                  if (entity instanceof Player player && !player.level().isClientSide) {
+                     NightfallDragonJudgementCutLogic.unleash(player);
+                  }
+               })
+               .build()
+         )
+         .build()
+   );
+   public static final RegistryObject<ComboState> DRAGON_HEAD_CHARGE_STATE = REGISTRY.register(
+      "dragon_head_charge_state",
+      () -> Builder.newInstance()
+         .priority(85)
+         .startAndEnd(720, 780)
+         .motionLoc(DefaultResources.ExMotionLocation)
+         .next(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .nextOfTimeout(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .addTickAction(
+            TimeLineTickAction.getBuilder()
+               .put(
+                  3,
+                  entity -> entity.level()
+                     .playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.4F, 0.7F)
+               )
+               .put(9, entity -> {
+                  if (entity instanceof Player player && !player.level().isClientSide) {
+                     DragonHeadChargeLogic.unleash(player);
                   }
                })
                .build()

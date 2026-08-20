@@ -31,22 +31,43 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix4f;
 
+/**
+ * <h1>无限星芒 - 炫彩星空自定义 Tooltip 渲染器</h1>
+ * <p>
+ * 本类展示了 1.20.1 Minecraft 客户端 GUI 自定义高阶渲染技巧：
+ * <ul>
+ *   <li><b>GuiGraphics & PoseStack 矩阵偏移 (graphics.pose())</b>：利用 {@code pushPose()} 和 {@code translate(0, 0, 760F)} 改变 Z 轴渲染层级，确保 Tooltip 在所有 UI 元素之上最顶层显示。</li>
+ *   <li><b>Tesselator & BufferBuilder 直接顶点绘制</b>：配置 {@link GameRenderer#getPositionTexShader()}，在 GL 上下文中绑定纹理材质并手工构建四边形 (Mode.QUADS) 顶点。</li>
+ *   <li><b>RGB 彩虹宇宙光谱渐变 (COSMIC_SPECTRUM)</b>：根据系统当前毫秒时间戳算出的浮点数时间参数 {@code time}，在六种星空亮色之间做 RGB 线性插值。</li>
+ *   <li><b>自适应屏幕边界重定位算法</b>：根据 {@code mouseX/mouseY} 和屏幕宽高动态矫正位置，防止 Tooltip 框超出屏幕边缘。</li>
+ * </ul>
+ */
 public final class InfinityStellarisTooltipRenderer {
+   /** 动态黑洞背景材质纹理 */
    private static final ResourceLocation BLACK_HOLE_BACKGROUND = ResourceLocation.fromNamespaceAndPath(
       "annihilationblade", "textures/gui/infinity_stellaris_black_hole.png"
    );
+   
+   /** 星图叠加背景材质纹理 */
    private static final ResourceLocation STAR_MAP_OVERLAY = ResourceLocation.fromNamespaceAndPath(
       "annihilationblade", "textures/gui/infinity_stellaris_star_map.png"
    );
+   
    private static final int BLACK_HOLE_TEXTURE_WIDTH = 1280;
    private static final int BLACK_HOLE_TEXTURE_HEIGHT = 853;
    private static final int STAR_MAP_TEXTURE_WIDTH = 1734;
    private static final int STAR_MAP_TEXTURE_HEIGHT = 907;
+   
+   /** Tooltip 框基准宽度与最小宽度 */
    private static final int WIDTH = 320;
    private static final int MIN_WIDTH = 238;
+   
+   /** 宇宙彩虹渐变色系数组（包含天蓝、亮白、星紫、霓虹粉、金色与深天蓝） */
    private static final int[] COSMIC_SPECTRUM = new int[]{0x28F7FF, 0xF2FEFF, 0x8D7CFF, 0xFF4FD8, 0xFFE27A, 0x58B7FF};
    private static final long TITLE_CYCLE_MILLIS = 4200L;
    private static final String FINAL_WEAPON_KEY = "item.annihilationblade.infinity_stellaris.tooltip.final_weapon";
+   
+   /** 特权芯片列表（飞行、无敌、强制斩杀、极光高亮等） */
    private static final AuthorityChip[] AUTHORITY_CHIPS = new AuthorityChip[]{
       new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.flight", 0x58B7FF),
       new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.invulnerable", 0xF2FEFF),
@@ -54,6 +75,8 @@ public final class InfinityStellarisTooltipRenderer {
       new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.no_recipe", 0xFFE27A),
       new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.fullbright", 0x28F7FF)
    };
+   
+   /** 特殊SA技能芯片列表 */
    private static final EffectChip[] EFFECT_CHIPS = new EffectChip[]{
       new EffectChip("se.annihilationblade.entropy_dissolution", 0x28F7FF),
       new EffectChip("se.annihilationblade.cosmic_string_cut", 0xF2FEFF),
@@ -65,39 +88,62 @@ public final class InfinityStellarisTooltipRenderer {
    private InfinityStellarisTooltipRenderer() {
    }
 
+   /**
+    * 自定义 Tooltip 渲染入口主函数。
+    *
+    * @param graphics 1.20.1 Forge GUI 绘图上下文
+    * @param font 字体渲染器
+    * @param stack 当前悬停查看的 ItemStack
+    * @param vanillaLines 原版 Tooltip 文本行列表
+    * @param mouseX 鼠标当前 X 坐标
+    * @param mouseY 鼠标当前 Y 坐标
+    */
    public static void render(GuiGraphics graphics, Font font, ItemStack stack, List<Component> vanillaLines, int mouseX, int mouseY) {
       int screenWidth = graphics.guiWidth();
       int screenHeight = graphics.guiHeight();
+      
+      // 1. 自动根据屏幕宽度分配 Tooltip 框尺寸
       int width = Math.min(WIDTH, Math.max(MIN_WIDTH, screenWidth - 18));
       int contentWidth = width - 24;
+      
+      // 2. 计算附魔条目数与排版网格高度
       List<EnchantmentLine> enchantments = getEnchantments(stack);
       int enchantRows = (enchantments.size() + 1) / 2;
       int enchantRowHeight = screenHeight < 300 ? 9 : 10;
       int height = 208 + Math.max(1, enchantRows) * enchantRowHeight;
       height = Math.min(height, Math.max(210, screenHeight - 12));
+      
+      // 3. 边界检测：自动校正坐标，防止超出屏幕左右或上下边缘
       int x = mouseX + 12;
       int y = mouseY - 14;
       if (x + width > screenWidth - 6) {
          x = mouseX - width - 18;
       }
-
       x = Mth.clamp(x, 6, Math.max(6, screenWidth - width - 6));
       if (y + height > screenHeight - 6) {
          y = screenHeight - height - 6;
       }
-
       y = Mth.clamp(y, 6, Math.max(6, screenHeight - height - 6));
+
+      // 4. 动画时间步长（秒）
       float time = (float)(System.currentTimeMillis() % 120000L) / 1000.0F;
+
+      // 5. 推入矩阵，将 Z 轴平移 760 单位以居于顶层，渲染完毕后 popPose 恢复
       graphics.pose().pushPose();
       graphics.pose().translate(0.0F, 0.0F, 760.0F);
+
+      // 渲染框体背景纹理与流彩边框
       renderFrame(graphics, x, y, width, height, time);
+      // 渲染文本、面板属性与图标芯片
       renderContent(graphics, font, stack, vanillaLines, enchantments, x, y, width, height, contentWidth, enchantRowHeight, time);
+
       graphics.pose().popPose();
    }
 
    private static void renderFrame(GuiGraphics graphics, int x, int y, int width, int height, float time) {
       RenderSystem.enableBlend();
       RenderSystem.defaultBlendFunc();
+
       Matrix4f matrix = graphics.pose().last().pose();
       int outerPadX = 28;
       int outerPadY = 26;
@@ -244,8 +290,8 @@ public final class InfinityStellarisTooltipRenderer {
          new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.kills", formatNumber(stats.killCount()), 0x28F7FF),
          new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.souls", formatNumber(stats.proudSoul()), 0xFFE27A),
          new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.refine", formatNumber(stats.refine()), 0xFF4FD8),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.attack", "1,000,000", 0xF2FEFF),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.durability", "2147483647", 0x8D7CFF)
+         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.attack", "2147483647", 0xF2FEFF),
+         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.durability", "何意味", 0x8D7CFF)
       };
       int gap = 3;
       int cellWidth = (width - gap * (cells.length - 1)) / cells.length;

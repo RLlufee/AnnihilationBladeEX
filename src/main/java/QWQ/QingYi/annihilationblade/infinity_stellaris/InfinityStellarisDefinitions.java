@@ -96,7 +96,6 @@ public final class InfinityStellarisDefinitions {
          state.setTranslationKey(DESCRIPTION_ID);
          state.setSlashArtsKey(VACUUM_DECAY_COLLAPSE);
          state.setBaseAttackModifier(1000000.0F);
-         state.setMaxDamage(Integer.MAX_VALUE);
          state.setDefaultBewitched(true);
          state.setModel(BLADE_MODEL);
          state.setTexture(BLADE_TEXTURE);

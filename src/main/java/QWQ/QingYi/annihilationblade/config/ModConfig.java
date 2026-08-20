@@ -16,11 +16,15 @@ public final class ModConfig {
    }
 
    public static final class Common {
+      public final ClientTooltips clientTooltips;
       public final AnnihilationBlade annihilationBlade;
       public final BloodPrison bloodPrison;
       public final InfinityStellaris infinityStellaris;
 
       private Common(ForgeConfigSpec.Builder builder) {
+         builder.push("client_tooltips");
+         this.clientTooltips = new ClientTooltips(builder);
+         builder.pop();
          builder.push("annihilation_blade");
          this.annihilationBlade = new AnnihilationBlade(builder);
          builder.pop();
@@ -30,6 +34,28 @@ public final class ModConfig {
          builder.push("infinity_stellaris");
          this.infinityStellaris = new InfinityStellaris(builder);
          builder.pop();
+      }
+   }
+
+   public static final class ClientTooltips {
+      public final ForgeConfigSpec.BooleanValue enableAnnihilationBladeRenderer;
+      public final ForgeConfigSpec.BooleanValue enableInfinityStellarisRenderer;
+
+      private ClientTooltips(ForgeConfigSpec.Builder builder) {
+         this.enableAnnihilationBladeRenderer = boolValue(
+            builder,
+            "enable_annihilation_blade_renderer",
+            true,
+            "是否启用湮灭之刃专属 Tooltip 渲染器。关闭后回退为原版物品 Tooltip，用于规避背包界面、Tooltip 增强或其它客户端渲染模组的兼容问题。",
+            "Whether to enable the custom Annihilation Blade tooltip renderer. Disable to fall back to vanilla item tooltips for compatibility with inventory UI, tooltip enhancement, or other client rendering mods."
+         );
+         this.enableInfinityStellarisRenderer = boolValue(
+            builder,
+            "enable_infinity_stellaris_renderer",
+            true,
+            "是否启用无尽星空专属 Tooltip 渲染器。关闭后回退为原版物品 Tooltip，用于规避背包界面、Tooltip 增强或其它客户端渲染模组的兼容问题。",
+            "Whether to enable the custom Infinity Stellaris tooltip renderer. Disable to fall back to vanilla item tooltips for compatibility with inventory UI, tooltip enhancement, or other client rendering mods."
+         );
       }
    }
 
@@ -294,12 +320,18 @@ public final class ModConfig {
       public final ForgeConfigSpec.IntValue entropyMarks;
       public final ForgeConfigSpec.IntValue entropyBlacklistTicks;
       public final ForgeConfigSpec.DoubleValue curvatureRadius;
+      public final ForgeConfigSpec.IntValue curvatureTickInterval;
+      public final ForgeConfigSpec.IntValue curvatureMaxTargets;
+      public final ForgeConfigSpec.IntValue curvatureBurstMarks;
 
       private InfinityStellaris(ForgeConfigSpec.Builder builder) {
          this.entropyPercent = doubleValue(builder, "entropy_percent", 0.10, 0.0, 1.0, "熵增蚀解每次追加的最大生命百分比。", "Max-health percentage added by Entropy Dissolution.");
          this.entropyMarks = intValue(builder, "entropy_marks", 10, 1, 100, "触发热寂归零所需累计次数。", "Marks required before heat-death zeroing.");
          this.entropyBlacklistTicks = intValue(builder, "entropy_blacklist_ticks", 40, 0, 400, "非玩家目标最终阶段后的短期黑名单 tick。", "Temporary blacklist ticks after final non-player execution.");
-         this.curvatureRadius = doubleValue(builder, "curvature_radius", 25.0, 1.0, 128.0, "曲率撕裂冻结半径。", "Curvature rupture freeze radius.");
+         this.curvatureRadius = doubleValue(builder, "curvature_radius", 32.0, 1.0, 128.0, "曲率撕裂冻结半径。", "Curvature rupture freeze radius.");
+         this.curvatureTickInterval = intValue(builder, "curvature_tick_interval", 20, 1, 100, "曲率压缩伤害间隔 tick。", "Curvature strain mark interval in ticks.");
+         this.curvatureMaxTargets = intValue(builder, "curvature_max_targets", 64, 1, 256, "曲率撕裂每次最多压制目标数。", "Maximum targets suppressed by Curvature Rupture.");
+         this.curvatureBurstMarks = intValue(builder, "curvature_burst_marks", 5, 1, 100, "触发曲率爆裂所需层数。", "Marks required to trigger curvature burst.");
       }
    }
 
@@ -319,5 +351,11 @@ public final class ModConfig {
    ) {
       return builder.comment(chineseComment + " 推荐最小/最大值: " + min + "-" + max + ".", englishComment + " Suggested min/max: " + min + "-" + max + ".")
          .defineInRange(name, defaultValue, min, max);
+   }
+
+   private static ForgeConfigSpec.BooleanValue boolValue(
+      ForgeConfigSpec.Builder builder, String name, boolean defaultValue, String chineseComment, String englishComment
+   ) {
+      return builder.comment(chineseComment, englishComment).define(name, defaultValue);
    }
 }

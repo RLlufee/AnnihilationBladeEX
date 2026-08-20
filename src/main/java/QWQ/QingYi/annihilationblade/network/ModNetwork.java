@@ -37,6 +37,30 @@ public final class ModNetwork {
          DankongBlinkModePacket::handle,
          Optional.of(NetworkDirection.PLAY_TO_SERVER)
       );
+      CHANNEL.registerMessage(
+         messageId++,
+         InfinityStellarisAiErasurePacket.class,
+         InfinityStellarisAiErasurePacket::encode,
+         InfinityStellarisAiErasurePacket::decode,
+         InfinityStellarisAiErasurePacket::handle,
+         Optional.of(NetworkDirection.PLAY_TO_SERVER)
+      );
+      CHANNEL.registerMessage(
+         messageId++,
+         InfinityStellarisAiRestorePacket.class,
+         InfinityStellarisAiRestorePacket::encode,
+         InfinityStellarisAiRestorePacket::decode,
+         InfinityStellarisAiRestorePacket::handle,
+         Optional.of(NetworkDirection.PLAY_TO_SERVER)
+      );
+      CHANNEL.registerMessage(
+         messageId++,
+         NightfallDragonModeSwitchPacket.class,
+         NightfallDragonModeSwitchPacket::encode,
+         NightfallDragonModeSwitchPacket::decode,
+         NightfallDragonModeSwitchPacket::handle,
+         Optional.of(NetworkDirection.PLAY_TO_SERVER)
+      );
    }
 
    public static void sendBloodPrisonDomain(ServerPlayer player, int durationTicks) {

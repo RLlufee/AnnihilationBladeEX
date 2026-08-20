@@ -2,6 +2,8 @@ package QWQ.QingYi.annihilationblade.registry;
 
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.VacuumDecayCollapseLogic;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.DragonHeadChargeLogic;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.NightfallDragonJudgementCutLogic;
 import mods.flammpfeil.slashblade.slasharts.SlashArts;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -26,6 +28,20 @@ public class ModSlashArts {
       }
 
       return ModComboStates.VACUUM_DECAY_COLLAPSE_STATE.getId();
+   }));
+   public static final RegistryObject<SlashArts> NIGHTFALL_JUDGEMENT_CUT = ARTS.register("nightfall_judgement_cut", () -> new SlashArts(entity -> {
+      if (entity instanceof Player player && !player.level().isClientSide) {
+         NightfallDragonJudgementCutLogic.prepareCast(player);
+      }
+
+      return ModComboStates.NIGHTFALL_JUDGEMENT_CUT_STATE.getId();
+   }));
+   public static final RegistryObject<SlashArts> DRAGON_HEAD_CHARGE = ARTS.register("dragon_head_charge", () -> new SlashArts(entity -> {
+      if (entity instanceof Player player && !player.level().isClientSide) {
+         DragonHeadChargeLogic.prepareCast(player);
+      }
+
+      return ModComboStates.DRAGON_HEAD_CHARGE_STATE.getId();
    }));
 
    public static void register(IEventBus eventBus) {
