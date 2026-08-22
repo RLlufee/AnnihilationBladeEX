@@ -19,6 +19,9 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 public class DragonPressureDomain extends SpecialEffect {
    private static final int BUFF_TICKS = 60;
    private static final int AMPLIFIER_III = 2;
+   private static final int AURA_INTERVAL_TICKS = 20;
+   private static final int AURA_DRAGON_BREATH_PARTICLES = 10;
+   private static final int AURA_ENCHANT_PARTICLES = 15;
 
    public DragonPressureDomain() {
       super(0, false, false);
@@ -39,10 +42,13 @@ public class DragonPressureDomain extends SpecialEffect {
       player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, BUFF_TICKS, AMPLIFIER_III, false, true, true));
       player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, BUFF_TICKS, AMPLIFIER_III, false, true, true));
       player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 260, AMPLIFIER_III, false, true, true));
-      player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, BUFF_TICKS, AMPLIFIER_III, false, true, true));
-      if (player.tickCount % 10 == 0 && player.level() instanceof ServerLevel level) {
-         level.sendParticles(ParticleTypes.DRAGON_BREATH, player.getX(), player.getY() + player.getBbHeight() * 0.55, player.getZ(), 5, 0.7, 0.45, 0.7, 0.02);
-         level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + player.getBbHeight() * 0.48, player.getZ(), 10, 0.9, 0.55, 0.9, 0.08);
+      if (!hasFinalGodBody(stack)) {
+         player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, BUFF_TICKS, AMPLIFIER_III, false, true, true));
+      }
+
+      if (player.tickCount % AURA_INTERVAL_TICKS == 0 && player.level() instanceof ServerLevel level) {
+         level.sendParticles(ParticleTypes.DRAGON_BREATH, player.getX(), player.getY() + player.getBbHeight() * 0.55, player.getZ(), AURA_DRAGON_BREATH_PARTICLES, 0.85, 0.5, 0.85, 0.025);
+         level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + player.getBbHeight() * 0.48, player.getZ(), AURA_ENCHANT_PARTICLES, 1.05, 0.65, 1.05, 0.08);
       }
    }
 
@@ -50,6 +56,13 @@ public class DragonPressureDomain extends SpecialEffect {
       return stack.getItem() instanceof ItemSlashBlade
          && stack.getCapability(ItemSlashBlade.BLADESTATE)
             .map(state -> state.hasSpecialEffect(ModSpecialEffects.DRAGON_PRESSURE_DOMAIN.getId()))
+            .orElse(false);
+   }
+
+   private static boolean hasFinalGodBody(ItemStack stack) {
+      return stack.getItem() instanceof ItemSlashBlade
+         && stack.getCapability(ItemSlashBlade.BLADESTATE)
+            .map(state -> state.hasSpecialEffect(ModSpecialEffects.DRAGON_GOD_BODY.getId()))
             .orElse(false);
    }
 }

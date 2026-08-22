@@ -26,7 +26,7 @@ public final class TerminusTooltipEvents {
          return;
       }
 
-      if (!ModConfig.COMMON.clientTooltips.enableAnnihilationBladeRenderer.get()) {
+      if (!ModConfig.CLIENT.clientTooltips.enableAnnihilationBladeRenderer.getValue()) {
          return;
       }
 

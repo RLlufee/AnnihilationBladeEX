@@ -49,15 +49,15 @@ public class AbyssalDecree extends SpecialEffect {
                if (!ACTIVE.containsKey(player.getUUID())) {
                   ModConfig.AbyssalDecree config = ModConfig.COMMON.annihilationBlade.abyssalDecree;
                   long gameTime = player.level().getGameTime();
-                  long last = LAST_TRIGGER.getOrDefault(player.getUUID(), -config.cooldownTicks.get() * 2L);
-                  if (gameTime - last >= config.cooldownTicks.get()) {
+                  long last = LAST_TRIGGER.getOrDefault(player.getUUID(), -config.cooldownTicks.getValue() * 2L);
+                  if (gameTime - last >= config.cooldownTicks.getValue()) {
                      List<UUID> targets = collectTargets(player);
                      if (!targets.isEmpty()) {
                         LAST_TRIGGER.put(player.getUUID(), gameTime);
                         ACTIVE.put(player.getUUID(), new AbyssalDecree.Sequence(targets));
                         Vec3 crown = player.position().add(0.0, player.getBbHeight() + 3.2, 0.0);
                         ServerLevel level = player.serverLevel();
-                        spawnCrown(level, crown, 3.6 * config.visualScale.get(), 0);
+                        spawnCrown(level, crown, 3.6 * config.visualScale.getValue(), 0);
                         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2F, 0.55F);
                         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.PLAYERS, 1.1F, 1.45F);
                      }
@@ -77,9 +77,9 @@ public class AbyssalDecree extends SpecialEffect {
                sequence.age++;
                ServerLevel level = player.serverLevel();
                Vec3 crown = player.position().add(0.0, player.getBbHeight() + 3.2, 0.0);
-               double visualScale = ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.get();
+               double visualScale = ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.getValue();
                spawnCrown(level, crown, (3.6 + Math.sin(sequence.age * 0.25) * 0.35) * visualScale, sequence.age);
-               if (sequence.age % ModConfig.COMMON.annihilationBlade.abyssalDecree.strikeInterval.get() == 0) {
+               if (sequence.age % ModConfig.COMMON.annihilationBlade.abyssalDecree.strikeInterval.getValue() == 0) {
                   while (sequence.index < sequence.targets.size()) {
                      LivingEntity target = findTarget(level, sequence.targets.get(sequence.index++));
                      if (target != null && SpecialEffectSupport.canTarget(player, target)) {
@@ -99,7 +99,7 @@ public class AbyssalDecree extends SpecialEffect {
 
    private static List<UUID> collectTargets(ServerPlayer player) {
       ModConfig.AbyssalDecree config = ModConfig.COMMON.annihilationBlade.abyssalDecree;
-      List<LivingEntity> entities = SpecialEffectSupport.radialTargets(player.serverLevel(), player, player.position(), config.range.get());
+      List<LivingEntity> entities = SpecialEffectSupport.radialTargets(player.serverLevel(), player, player.position(), config.range.getValue());
       entities.sort(
          Comparator.<LivingEntity>comparingDouble(entityx -> entityx.getHealth() + entityx.getArmorValue() * 2.0)
             .reversed()
@@ -109,7 +109,7 @@ public class AbyssalDecree extends SpecialEffect {
 
       for (LivingEntity entity : entities) {
          result.add(entity.getUUID());
-         if (result.size() >= config.maxTargets.get()) {
+         if (result.size() >= config.maxTargets.getValue()) {
             break;
          }
       }
@@ -120,7 +120,7 @@ public class AbyssalDecree extends SpecialEffect {
    private static void strike(ServerLevel level, ServerPlayer player, LivingEntity target, Vec3 crown, int index) {
       Vec3 head = target.position().add(0.0, target.getBbHeight() + 0.35, 0.0);
       Vec3 sky = head.add(0.0, 8.0, 0.0);
-      double visualScale = ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.get();
+      double visualScale = ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.getValue();
       double radius = (3.4 + index % 4 * 0.35) * visualScale;
       double angle = (Math.PI * 2) * index / 7.0;
       Vec3 seal = crown.add(Math.cos(angle) * radius, Math.sin(index * 0.7) * 0.45, Math.sin(angle) * radius);
@@ -136,7 +136,7 @@ public class AbyssalDecree extends SpecialEffect {
    }
 
    private static void spawnCrown(ServerLevel level, Vec3 center, double radius, int tick) {
-      double visualScale = ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.get();
+      double visualScale = ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.getValue();
       int crownPoints = visualCount(14, visualScale);
       for (int i = 0; i < crownPoints; i++) {
          double angle = (Math.PI * 2) * i / crownPoints + tick * 0.045;
@@ -151,7 +151,7 @@ public class AbyssalDecree extends SpecialEffect {
    }
 
    private static void spawnVerticalSentence(ServerLevel level, Vec3 start, Vec3 end) {
-      int points = visualCount(24, ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.get());
+      int points = visualCount(24, ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.getValue());
       for (int i = 0; i <= points; i++) {
          Vec3 pos = start.lerp(end, (double)i / points);
          level.sendParticles(ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 1, 0.015, 0.015, 0.015, 0.0);

@@ -3,6 +3,9 @@ package QWQ.QingYi.annihilationblade.infinity_stellaris.entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -11,6 +14,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.network.NetworkHooks;
 
 public class GammaThunderboltEntity extends Entity {
+   private static final EntityDataAccessor<Integer> FIXED_COLOR = SynchedEntityData.defineId(GammaThunderboltEntity.class, EntityDataSerializers.INT);
+
    public long seed;
    private int life;
    private int flashes;
@@ -80,14 +85,27 @@ public class GammaThunderboltEntity extends Entity {
 
    @Override
    protected void defineSynchedData() {
+      this.entityData.define(FIXED_COLOR, -1);
    }
 
    @Override
    protected void readAdditionalSaveData(CompoundTag tag) {
+      if (tag.contains("FixedColor")) {
+         this.setFixedColor(tag.getInt("FixedColor"));
+      }
    }
 
    @Override
    protected void addAdditionalSaveData(CompoundTag tag) {
+      tag.putInt("FixedColor", this.getFixedColor());
+   }
+
+   public void setFixedColor(int color) {
+      this.entityData.set(FIXED_COLOR, color);
+   }
+
+   public int getFixedColor() {
+      return this.entityData.get(FIXED_COLOR);
    }
 
    @Override

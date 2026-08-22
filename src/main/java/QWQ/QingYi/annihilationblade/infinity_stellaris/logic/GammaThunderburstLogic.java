@@ -80,8 +80,13 @@ public final class GammaThunderburstLogic {
    }
 
    public static void spawnBolt(ServerLevel level, Vec3 position) {
+      spawnBolt(level, position, -1);
+   }
+
+   public static void spawnBolt(ServerLevel level, Vec3 position, int fixedColor) {
       GammaThunderboltEntity bolt = ModEntities.GAMMA_THUNDERBOLT.get().create(level);
       if (bolt != null) {
+         bolt.setFixedColor(fixedColor);
          bolt.moveTo(position.x, position.y, position.z);
          level.addFreshEntity(bolt);
       }

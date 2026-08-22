@@ -2,7 +2,10 @@ package QWQ.QingYi.annihilationblade.nightfall_dragon.specialeffect;
 
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
 import QWQ.QingYi.annihilationblade.registry.ModSpecialEffects;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import mods.flammpfeil.slashblade.SlashBlade.RegistryEvents;
 import mods.flammpfeil.slashblade.capability.slashblade.ISlashBladeState;
 import mods.flammpfeil.slashblade.entity.EntityAbstractSummonedSword;
@@ -16,6 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -27,6 +31,7 @@ public class ReverseScaleHunt extends SpecialEffect {
    private static final double RANGE = 32.0;
    private static final int GOLD = 0xF4D66A;
    private static final int PURPLE_FLAME = 0xDA43FF;
+   private static final Map<UUID, Long> REVERSE_SCALE_SWORDS = new HashMap<>();
 
    public ReverseScaleHunt() {
       super(0, false, false);
@@ -53,7 +58,6 @@ public class ReverseScaleHunt extends SpecialEffect {
          spawnReverseScale(level, player, center, direction, target, i);
       }
 
-      spawnDragonBurst(level, center);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 0.85F, 1.35F);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, 0.75F);
    }
@@ -80,16 +84,22 @@ public class ReverseScaleHunt extends SpecialEffect {
       sword.moveTo(orbit.x, orbit.y, orbit.z, yawToFace(forward), pitchToFace(forward));
       sword.shoot(forward.x, forward.y, forward.z, 3.15F, 0.0F);
       level.addFreshEntity(sword);
-      level.sendParticles(index % 2 == 0 ? ParticleTypes.END_ROD : ParticleTypes.DRAGON_BREATH, orbit.x, orbit.y, orbit.z, 10, 0.15, 0.15, 0.15, 0.03);
+      REVERSE_SCALE_SWORDS.put(sword.getUUID(), level.getGameTime() + 200L);
+      level.sendParticles(index % 2 == 0 ? ParticleTypes.END_ROD : ParticleTypes.DRAGON_BREATH, orbit.x, orbit.y, orbit.z, 5, 0.15, 0.15, 0.15, 0.03);
    }
 
-   private static void spawnDragonBurst(ServerLevel level, Vec3 center) {
-      for (int i = 0; i < 48; i++) {
-         double angle = (Math.PI * 2.0) * i / 48.0;
-         double radius = 2.2 + Math.sin(i * 0.7) * 0.45;
-         Vec3 pos = center.add(Math.cos(angle) * radius, Math.sin(i * 0.4) * 0.5, Math.sin(angle) * radius);
-         level.sendParticles(i % 2 == 0 ? ParticleTypes.END_ROD : ParticleTypes.DRAGON_BREATH, pos.x, pos.y, pos.z, 1, 0.02, 0.02, 0.02, 0.0);
+   public static boolean isReverseScaleSword(Entity entity, long gameTime) {
+      purgeExpiredReverseScaleSwords(gameTime);
+      return entity instanceof EntityAbstractSummonedSword sword
+         && REVERSE_SCALE_SWORDS.getOrDefault(sword.getUUID(), Long.MIN_VALUE) > gameTime;
+   }
+
+   private static void purgeExpiredReverseScaleSwords(long gameTime) {
+      if (gameTime % 200 != 0) {
+         return;
       }
+
+      REVERSE_SCALE_SWORDS.entrySet().removeIf(entry -> entry.getValue() <= gameTime);
    }
 
    private static float yawToFace(Vec3 direction) {

@@ -66,10 +66,10 @@ public class PhantomJudgement extends SpecialEffect {
             if (state.hasSpecialEffect(ModSpecialEffects.PHANTOM_JUDGEMENT.getId())) {
                if (!ACTIVE.containsKey(player.getUUID())) {
                   ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
-                  double visualScale = config.visualScale.get();
+                  double visualScale = config.visualScale.getValue();
                   long gameTime = player.level().getGameTime();
-                  long last = LAST_TRIGGER.getOrDefault(player.getUUID(), -config.cooldownTicks.get() * 2L);
-                  if (gameTime - last >= config.cooldownTicks.get()) {
+                  long last = LAST_TRIGGER.getOrDefault(player.getUUID(), -config.cooldownTicks.getValue() * 2L);
+                  if (gameTime - last >= config.cooldownTicks.getValue()) {
                      ServerLevel level = player.serverLevel();
                      List<PhantomJudgement.TargetLock> locks = collectTargets(level, player);
                      if (!locks.isEmpty()) {
@@ -97,7 +97,7 @@ public class PhantomJudgement extends SpecialEffect {
             if (sequence != null) {
                sequence.age++;
                spawnSearchingBlades(level, player, sequence);
-               if (sequence.age >= ModConfig.COMMON.annihilationBlade.phantomJudgement.searchTicks.get()) {
+               if (sequence.age >= ModConfig.COMMON.annihilationBlade.phantomJudgement.searchTicks.getValue()) {
                   discardSearchSwords(level, sequence);
                   executeJudgement(level, player, sequence);
                   ACTIVE.remove(player.getUUID());
@@ -109,8 +109,8 @@ public class PhantomJudgement extends SpecialEffect {
 
    private static void spawnSearchingBlades(ServerLevel level, ServerPlayer player, PhantomJudgement.Sequence sequence) {
       ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
-      int swordCount = config.swordCount.get();
-      double visualScale = config.visualScale.get();
+      int swordCount = config.swordCount.getValue();
+      double visualScale = config.visualScale.getValue();
       Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.58, 0.0);
       int age = sequence.age;
       double radius = (2.1 + Math.sin(age * 0.45) * 0.22) * visualScale;
@@ -132,13 +132,13 @@ public class PhantomJudgement extends SpecialEffect {
 
    private static void executeJudgement(ServerLevel level, ServerPlayer player, PhantomJudgement.Sequence sequence) {
       ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
-      int swordCount = config.swordCount.get();
-      double visualScale = config.visualScale.get();
+      int swordCount = config.swordCount.getValue();
+      double visualScale = config.visualScale.getValue();
       Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
       int count = 0;
 
       for (PhantomJudgement.TargetLock lock : sequence.targets) {
-         if (count >= config.maxTargets.get()) {
+         if (count >= config.maxTargets.getValue()) {
             break;
          }
 
@@ -161,12 +161,12 @@ public class PhantomJudgement extends SpecialEffect {
 
    private static List<PhantomJudgement.TargetLock> collectTargets(ServerLevel level, ServerPlayer player) {
       ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
-      List<LivingEntity> entities = SpecialEffectSupport.radialTargets(level, player, player.position(), config.range.get());
+      List<LivingEntity> entities = SpecialEffectSupport.radialTargets(level, player, player.position(), config.range.getValue());
       List<PhantomJudgement.TargetLock> locks = new ArrayList<>();
 
       for (LivingEntity entity : entities) {
          locks.add(new PhantomJudgement.TargetLock(entity.getUUID(), SpecialEffectSupport.centerOf(entity)));
-         if (locks.size() >= config.maxTargets.get()) {
+         if (locks.size() >= config.maxTargets.getValue()) {
             break;
          }
       }
@@ -219,8 +219,8 @@ public class PhantomJudgement extends SpecialEffect {
 
    private static void spawnSwordRain(ServerLevel level, ServerPlayer player, LivingEntity target, Vec3 split, int color, int targetIndex) {
       ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
-      int rainSwords = config.rainSwordsPerTarget.get();
-      double visualScale = config.visualScale.get();
+      int rainSwords = config.rainSwordsPerTarget.getValue();
+      double visualScale = config.visualScale.getValue();
       Vec3 center = SpecialEffectSupport.centerOf(target);
       double radius = Math.max(1.35, target.getBbWidth() * 1.95) * visualScale;
       level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.2F, 0.55F);
@@ -247,7 +247,7 @@ public class PhantomJudgement extends SpecialEffect {
       sword.setDamage(0.0);
       sword.setNoClip(true);
       sword.setPierce((byte)0);
-      sword.setDelay(ModConfig.COMMON.annihilationBlade.phantomJudgement.fallingSwordDelayTicks.get());
+      sword.setDelay(ModConfig.COMMON.annihilationBlade.phantomJudgement.fallingSwordDelayTicks.getValue());
       sword.setRoll(index * 27.0F);
       Vec3 direction = end.subtract(start).normalize();
       sword.setPos(start.x, start.y, start.z);
@@ -257,7 +257,7 @@ public class PhantomJudgement extends SpecialEffect {
    }
 
    private static void spawnFallingTrail(ServerLevel level, Vec3 start, Vec3 end, int index) {
-      double visualScale = ModConfig.COMMON.annihilationBlade.phantomJudgement.visualScale.get();
+      double visualScale = ModConfig.COMMON.annihilationBlade.phantomJudgement.visualScale.getValue();
       spawnLine(level, start, end, visualCount(18, visualScale));
       level.sendParticles(ParticleTypes.FLASH, end.x, end.y, end.z, 1, 0.0, 0.0, 0.0, 0.0);
       level.sendParticles(ParticleTypes.ENCHANT, end.x, end.y + 0.18, end.z, visualCount(30, visualScale), 0.34 * visualScale, 0.25 * visualScale, 0.34 * visualScale, 0.04);
@@ -280,7 +280,7 @@ public class PhantomJudgement extends SpecialEffect {
    private static void addLingeringSword(ServerPlayer player, Vec3 ground, Vec3 fallDirection, int color, int index) {
       Vec3 direction = fallDirection.lengthSqr() < 1.0E-6 ? new Vec3(0.0, -1.0, 0.0) : fallDirection.normalize();
       List<PhantomJudgement.LingeringSword> swords = LINGERING.computeIfAbsent(player.getUUID(), ignored -> new ArrayList<>());
-      if (swords.size() < ModConfig.COMMON.annihilationBlade.phantomJudgement.maxLingeringSwords.get()) {
+      if (swords.size() < ModConfig.COMMON.annihilationBlade.phantomJudgement.maxLingeringSwords.getValue()) {
          swords.add(new PhantomJudgement.LingeringSword(ground, direction, color, index * 27.0F));
       }
    }
@@ -292,7 +292,7 @@ public class PhantomJudgement extends SpecialEffect {
 
          while (iterator.hasNext()) {
             PhantomJudgement.LingeringSword lingering = iterator.next();
-            if (lingering.age++ >= ModConfig.COMMON.annihilationBlade.phantomJudgement.lingerTicks.get()) {
+            if (lingering.age++ >= ModConfig.COMMON.annihilationBlade.phantomJudgement.lingerTicks.getValue()) {
                discardLingering(level, lingering);
                iterator.remove();
             } else {
@@ -302,7 +302,7 @@ public class PhantomJudgement extends SpecialEffect {
                sword.setNoClip(true);
                sword.setDamage(0.0);
                sword.setPierce((byte)0);
-               sword.setDelay(ModConfig.COMMON.annihilationBlade.phantomJudgement.lingerTicks.get());
+               sword.setDelay(ModConfig.COMMON.annihilationBlade.phantomJudgement.lingerTicks.getValue());
                sword.setDeltaMovement(Vec3.ZERO);
                sword.moveTo(lingering.position.x, lingering.position.y, lingering.position.z, yawToFace(direction), pitchToFace(direction));
                sword.setRoll(lingering.roll);
@@ -331,7 +331,7 @@ public class PhantomJudgement extends SpecialEffect {
       sword.setNoClip(true);
       sword.setDamage(0.0);
       sword.setPierce((byte)0);
-      sword.setDelay(ModConfig.COMMON.annihilationBlade.phantomJudgement.lingerTicks.get());
+      sword.setDelay(ModConfig.COMMON.annihilationBlade.phantomJudgement.lingerTicks.getValue());
       sword.setRoll(lingering.roll);
       sword.setPos(lingering.position.x, lingering.position.y, lingering.position.z);
       level.addFreshEntity(sword);

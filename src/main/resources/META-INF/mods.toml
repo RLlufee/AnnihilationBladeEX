@@ -41,6 +41,13 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies.annihilationblade]]
+modId="jupiter"
+mandatory=true
+versionRange="[2,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.annihilationblade]]
 modId="jei_slashblade"
 mandatory=false
 versionRange="[0.0.1,)"

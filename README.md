@@ -1,6 +1,6 @@
 # Annihilation Blade · Terminus 2.7.2-1.20.1-forge
 
-> 基于 SlashBlade / SlashBlade Resharped 的 Forge 1.20.1 拔刀剑扩展模组。模组围绕“终焉、裂界、坍缩、审判、血狱、宇宙法则、混沌魔龙”主题，提供四把命名刀、三套 SA、完整 SE 链路、可配置低风险参数，以及面向实战可读性的视觉与按键控制。
+> 基于 SlashBlade / SlashBlade Resharped 的 Forge 1.20.1 拔刀剑扩展模组。模组围绕“终焉、裂界、坍缩、审判、血狱、宇宙法则、混沌魔龙”主题，提供四把命名刀、五个 SA、完整 SE 链路、可配置低风险参数，以及面向实战可读性的视觉与按键控制。
 
 作者：青衣_璃
 
@@ -12,10 +12,10 @@
 - 血狱刀 `annihilationblade:blood_prison`
 - 无尽星空 `annihilationblade:infinity_stellaris`
 - 魔龙夜陨 `annihilationblade:nightfall_dragon`
-- 3 个 SA：`spatial_fracture`、`infernal_slaughter`、`vacuum_decay_collapse`
-- 19 个 SE 注册项，其中湮灭之刃使用 8 个终焉系 SE，血狱使用 3 个血狱系 SE，无尽星空使用 4 个宇宙法则系 SE，魔龙夜陨前两形态使用 4 个魔龙系 SE
+- 5 个 SA：`spatial_fracture`、`infernal_slaughter`、`vacuum_decay_collapse`、`nightfall_judgement_cut`、`scale_guard`
+- 23 个 SE 注册项，其中湮灭之刃使用 8 个终焉系 SE，血狱使用 3 个血狱系 SE，无尽星空使用 4 个宇宙法则系 SE，魔龙夜陨三形态使用 8 个魔龙系 SE
 - 命名刀 datapack 定义
-- Forge common 配置文件
+- Jupiter common/server 与 client JSON 配置文件
 - 中英语言资源 #感觉繁中没必要，遂删掉
 - JEI SlashBlade 联动描述资源
 - 断空闪现模式热键与动作栏提示
@@ -32,6 +32,7 @@
 | Forge | `47.4.21` |
 | Java | `17` |
 | 前置 | SlashBlade / SlashBlade Resharped |
+| 必需前置 | Jupiter `2.3.3-bugfix`（Modrinth 构件 `2YdOW2Dk`） |
 
 ## 武器
 
@@ -96,11 +97,16 @@
 | --- | --- |
 | 基础攻击力 | `22.0` |
 | 耐久 | `2400` |
-| SA | `slashblade:none` |
+| 第一形态 SA | `annihilationblade:nightfall_judgement_cut` |
+| 第二形态 SA | `annihilationblade:scale_guard` |
+| 第三形态 SA | `slashblade:none` |
 | 第一形态 SE | `demonic_blood_parasite`、`outer_god_scar` |
-| 第二形态 SE | `dragon_pressure_domain`、`reverse_scale_hunt` |
+| 第二形态 SE | 继承 `demonic_blood_parasite`、`outer_god_scar`，追加 `dragon_pressure_domain`、`reverse_scale_hunt` |
+| 第三形态 SE | 继承 `demonic_blood_parasite`、`dragon_pressure_domain`，追加 `dragon_god_body`、`absolute_annihilation_domain`、`myriad_dragon_blade_storm`、`world_cleaving_slash` |
 
-默认形态为【封印·淬血】，合法攻击与幻影剑命中会叠加无上限魔血印记，施加最高凋零 V、失明和 5% 最大生命值额外魔法伤害；已被黯焰标记的目标会让后续合法魔龙刀攻击走真实伤害路径。按 `Z` 可在【封印·淬血】与【觉醒·龙魂复苏】之间切换，第二形态直接开放。觉醒形态持有时获得速度 III、力量 III、夜视 III、伤害吸收 III，挥刀会释放金紫逆鳞剑阵并短暂获得抗性提升 III。
+默认形态为【封印·淬血】，合法攻击与非外神伤痕、非逆鳞剑阵、非灭世龙刃的魔龙幻影剑命中会叠加无上限魔血印记，施加最高凋零 V、失明和 5% 最大生命值额外魔法伤害；已被黯焰标记的目标会让后续合法魔龙刀攻击走真实伤害路径。封印形态拥有专属 SA【夜陨次元斩】：以玩家为中心扫描 20 格内合法目标，在目标脚下或随机补位点每 5 tick 生成 1 个原版次元斩实体，总计 20 个。按 `Z` 可在【封印·淬血】、【觉醒·龙魂复苏】与【终焉·神陨夜陨】之间三态循环，第三形态直接开放。觉醒形态继承封印形态的魔血寄生与外神伤痕，持有时额外获得速度 III、力量 III、夜视 III、伤害吸收 III，挥刀会释放金紫逆鳞剑阵并短暂获得抗性提升 III；觉醒形态 SA【鳞之卫】会释放 16 柄直立魔龙幻影剑围绕玩家加速旋转，2 秒后急停并外展 5 格，停留 10 tick 后升空重砸。幻影剑飞行触碰合法目标时每 5 tick 造成 12 点伤害，落砸造成 500% 刀面板伤害加目标最大生命 10% 的魔法伤害，并生成参考灾变模组 ScreenShake 逻辑的视角震动。
+
+第三形态定位为湮灭之刃与无尽星空之下的魔龙系终局形态，仍保留 `slashblade:none`，不注册未设计的 SA【神陨·宇宙夜陨降临】。终焉态继承前两态中不重复的核心特点：保留魔血/黯焰标记与龙威速度、力量、夜视，但低阶 `outer_god_scar` 与 `reverse_scale_hunt` 两套挥刀召剑不再重复挂载，由终焉态的灭世龙刃和贯穿刀波上位替代；觉醒态原本的伤害吸收也由创世龙盾统一承接。背包内存在第三形态魔龙夜陨时即可获得创世神体兜底：拦截可捕获伤害与死亡、刷新生命/饥饿、清除负面效果、提供虚空坠落保护与飞行，并把受到的合法伤害反弹给攻击者；第三态造成的合法伤害会治疗玩家，溢出部分转为最高 200 点生命值的创世龙盾，避免吸收生命条过量渲染。手持第三形态时每秒展开 64 格终焉龙域，最多处理 128 个合法目标，剥离增益与吸收盾、冻结行动、造成当前生命百分比伤害并处决半血以下目标；挥刀会同时释放 20 柄灭世龙刃和 72 格撕裂苍穹剑气，撕裂苍穹最多落下 16 道紫色伽马同源实体闪电。所有广域效果均遵循 SlashBlade 原生 PVP / 友伤目标判定，冻结 Mob 记录原始 NoAI 并在停止手持终焉形态、退出或换维度时恢复；第三态视觉粒子每维度每 tick 上限为 500 个。
 
 ## SA
 
@@ -124,6 +130,12 @@
 
 领域为 `128×128` 水平正方形，高度约 `64` 格，持续 `100 tick`。领域内每 tick 扫描 SlashBlade 合法目标，进入者直接热寂处决并压制掉落物和经验；方块不再被替换为空气。视觉上使用正方形边界、角柱、中心坍缩粒子与每 tick 12 道自定义彩色闪电模拟真空衰变的剧烈幻化感。
 
+### `夜陨次元斩` / `Nightfall Judgement Cut`
+
+魔龙夜陨第一形态绑定的 SA，注册 ID 为 `annihilationblade:nightfall_judgement_cut`。释放时以玩家为中心扫描 20 格内的 SlashBlade 合法目标，优先记录目标脚下位置；若合法目标不足 20 个，则在半径内随机位置补位。
+
+实际演出按序列节流执行：每 5 tick 生成 1 个原版 `EntityJudgementCut` 次元斩实体，总计 20 个后停止。视觉上会表现为敌人脚下和周围随机点位一个接一个浮现次元斩，避免瞬间刷满 20 个实体造成视觉和性能压力。
+
 ## SE
 
 | 名称 | 类型 | 表现 |
@@ -143,10 +155,14 @@
 | `曲率撕裂` / `Curvature Rupture` | 无尽星空控场 | 默认关闭，按 `I` 切换；开启且手持时冻结 25 格内符合 SlashBlade 友伤/PVP 配置的合法目标，并在停止手持或关闭后恢复 AI |
 | `伽马霆暴` / `Gamma Thunderburst` | 无尽星空爆发 | 无尽星空伤害触发，玩家周围 128 格随机 12 道自定义彩色闪电，每 tick 一轮，持续 3 tick |
 | `宇宙弦切` / `Cosmic String Cut` | 无尽星空斩击 SE | 通过 SlashBlade 原生斩击事件触发，只在玩家周围生成 5×5×5 局部星线，并处决 128 格立方内合法目标 |
-| `魔血寄生` / `Demonic Blood Parasite` | 魔龙封印被动 | 合法命中与幻影剑叠加魔血/黯焰，施加凋零、失明、5% 最大生命魔法伤害和后续真实伤害 |
+| `魔血寄生` / `Demonic Blood Parasite` | 魔龙封印被动 | 合法命中与非外神伤痕、非逆鳞剑阵、非灭世龙刃的魔龙幻影剑叠加魔血/黯焰，施加凋零、失明、5% 最大生命魔法伤害和后续真实伤害 |
 | `外神伤痕` / `Outer God Scar` | 魔龙封印召剑 | 挥刀生成暗紫裂隙和伴生幻影剑，短暂环绕后追猎合法目标 |
 | `龙威重域` / `Dragon Pressure Domain` | 魔龙觉醒被动 | 手持觉醒形态获得速度 III、力量 III、夜视 III、伤害吸收 III |
 | `逆鳞剑阵` / `Reverse Scale Hunt` | 魔龙觉醒召剑 | 挥刀释放金紫逆鳞剑阵，拥有更高速度与贯穿，并授予短时抗性提升 III |
+| `终焉神像` / `Dragon God Body` | 魔龙终焉神体 | 背包内存在终焉形态即可获得死锁兜底、飞行、负面清除、虚空坠落保护、反弹、吸血与最高 200 点创世龙盾 |
+| `终焉结界` / `Domain of Absolute Annihilation` | 魔龙终焉领域 | 每秒扫描 64 格内最多 128 个合法目标，剥离增益与吸收盾、冻结行动并处决半血以下目标 |
+| `万刃龙魂` / `Myriad Dragon Blade Storm` | 魔龙终焉召剑 | 挥刀释放 20 柄暗金/星空紫灭世龙刃追猎合法目标 |
+| `灭界龙威` / `World-Cleaving Slash` | 魔龙终焉剑气 | 普通挥刀追加 72 格撕裂型虚空剑气，拉扯并压制路径内合法目标，最多落下 16 道紫色伽马同源实体闪电 |
 
 ## 断空控制
 
@@ -164,16 +180,22 @@
 
 `魔龙夜陨` 默认使用【封印·淬血】形态。按 `Z` 会发送服务端校验包，只在玩家主手或副手持有魔龙夜陨时切换形态。
 
-- 【封印·淬血】：挂载 `demonic_blood_parasite` 与 `outer_god_scar`。
-- 【觉醒·龙魂复苏】：挂载 `dragon_pressure_domain` 与 `reverse_scale_hunt`。
-- 两个形态的 SE 互斥，不会同时保留另一形态的 SE。
-- 切换成功后会在动作栏显示当前形态。
+- 【封印·淬血】：挂载 `demonic_blood_parasite` 与 `outer_god_scar`，SA 为 `nightfall_judgement_cut`。
+- 【觉醒·龙魂复苏】：继承 `demonic_blood_parasite` 与 `outer_god_scar`，追加 `dragon_pressure_domain` 与 `reverse_scale_hunt`，SA 为 `scale_guard`。
+- 【终焉·神陨夜陨】：挂载 `dragon_god_body`、`absolute_annihilation_domain`、`myriad_dragon_blade_storm` 与 `world_cleaving_slash`。
+- 【终焉·神陨夜陨】当前保持 `slashblade:none`，避免与后续上位 SA 设计冲突。
+- 第三形态按上位替代规则继承不重复核心 SE，低阶召剑由终焉态技能覆盖。
+- 切换成功后仅更新形态，不再显示动作栏提示。
 
 ## 配置文件
 
-首次启动后，Forge 会生成：
+首次启动并打开 Jupiter 配置入口后，会生成两个配置文件：
 
-`config/annihilationblade-common.toml`
+`config/annihilationblade/common.json`（common/server，服务端权威）
+
+`config/annihilationblade/client.json`（client，仅影响本地 Tooltip）
+
+旧的 `config/annihilationblade-common.toml` 不会自动迁移或删除，仅作为历史备份保留；当前代码不再读取它。
 
 配置文件只开放低风险参数：
 
@@ -192,26 +214,29 @@
 - 无敌、庇护、飞行等安全相关逻辑
 - SlashBlade 真实击杀路径
 
-每个配置项都带有中文 and 英文注释，并写明建议最小 / 最大值。Forge 也会通过 `defineInRange` 对配置值做硬范围限制，避免新玩家填入极端数值导致卡顿或逻辑异常。
+每个配置项都带有中文和英文 Tooltip，并写明建议最小 / 最大值。Jupiter 控件会在编辑时执行硬范围限制，避免新玩家填入极端数值导致卡顿或逻辑异常。common/server 配置由服务端同步，联机时只有拥有权限的玩家可以编辑；client Tooltip 开关始终只影响当前客户端。
 
 ### 配置分组
 
 主要分组如下：
 
-```toml
-[client_tooltips]
-[annihilation_blade.spatial_fracture]
-[annihilation_blade.dankong]
-[annihilation_blade.world_rift]
-[annihilation_blade.terminus_echo]
-[annihilation_blade.void_dominion]
-[annihilation_blade.causality_collapse]
-[annihilation_blade.starless_judgement]
-[annihilation_blade.phantom_judgement]
-[annihilation_blade.abyssal_decree]
-[blood_prison.domain]
-[blood_prison.phantom_burst]
-[infinity_stellaris]
+```text
+common.json:
+annihilation_blade.spatial_fracture
+annihilation_blade.dankong
+annihilation_blade.world_rift
+annihilation_blade.terminus_echo
+annihilation_blade.void_dominion
+annihilation_blade.causality_collapse
+annihilation_blade.starless_judgement
+annihilation_blade.phantom_judgement
+annihilation_blade.abyssal_decree
+blood_prison.domain
+blood_prison.phantom_burst
+infinity_stellaris
+
+client.json:
+client_tooltips
 ```
 
 ## 本地化
@@ -239,7 +264,7 @@
 - SA 描述键：`slashblade.slash_art.annihilationblade.*.desc`
 - SE 描述键：`se.annihilationblade.*.desc`
 
-安装 JEI SlashBlade 后，可以在 JEI 中查看三把命名刀的简介，并在 SA / SE 分类里阅读湮灭之刃、血狱和无尽星空相关效果说明。
+安装 JEI SlashBlade 后，可以在 JEI 中查看四把命名刀的简介，并在 SA / SE 分类里阅读湮灭之刃、血狱、无尽星空和魔龙夜陨相关效果说明。
 
 ## 注册与源码路径
 
@@ -411,17 +436,42 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 
 ### 未发布
 
+- 将原 Forge `ForgeConfigSpec` 配置树改为 Jupiter 原生 `AutoInitConfigContainer`、`BooleanEntry`、`IntegerEntry`、`DoubleEntry` 与分类标签，保留 76 个配置项的分组、字段名、默认值和范围；玩法代码统一使用 `getValue()`。
+- common/server 配置现在写入 `config/annihilationblade/common.json`，由服务端作为权威配置并通过 Jupiter 同步；客户端 Tooltip 开关独立写入 `config/annihilationblade/client.json`，只影响本地渲染。
+- Jupiter 2.3.3-bugfix（Modrinth 构件 `maven.modrinth:XbiLGMMU:2YdOW2Dk`）声明为必需前置，源码和 jar 不内置到湮灭之刃；Forge 配置入口接入 Jupiter 原生配置选择页、分类滚动、数值范围校验、重置与 Tooltip。
+- 不自动迁移或删除旧的 `annihilationblade-common.toml`；旧文件保留为历史备份，代码不再读取它，新安装或首次启动生成 Jupiter JSON 默认配置。
+- 已在 `gradle.properties` 固化 Java 17 路径，项目 Wrapper 的 `clean build` 已通过；配置界面、联机权限同步和实际战斗效果仍需在 Forge 1.20.1 游戏内实测。
+
+- 重做“魔龙夜陨”第二形态 SA：移除旧【龙魂冲撞】的逻辑、实体与 `dragon_head.obj/png` 渲染依赖，觉醒形态改为绑定 `annihilationblade:scale_guard`。
+- 新增第二形态 SA【鳞之卫】：释放 16 柄直立魔龙幻影剑，围绕玩家加速旋转 40 tick 后急停，外展 5 格并停留 10 tick，随后升空重砸。
+- 【鳞之卫】飞行阶段触碰合法目标每 5 tick 造成 12 点魔法伤害；落砸阶段造成 500% 魔龙夜陨刀面板伤害加目标最大生命 10% 的魔法伤害，并对命中点附近客户端生成视角震动。
+- 新增 `scale_guard_sword` 与 `nightfall_screen_shake` 两个自定义实体；`scale_guard_sword` 只做不可见轨迹控制，可见剑体使用重锋原生 `EntityAbstractSummonedSword`，震屏实现参考灾变模组 `ScreenShake_Entity` 的半径衰减与相机角度扰动方式。
+- 修正【鳞之卫】幻影剑表现：可见部分改为重锋原生 `EntityAbstractSummonedSword`（`entity.slashblade.abstract_summoned_sword`），`scale_guard_sword` 仅作为不可见轨迹控制器，不再渲染魔龙刀 OBJ。
+- 在 `ScaleGuardSwordEntity` 顶部新增【鳞之卫】调参区，集中暴露持续 tick、轨道半径、外展距离、上升高度、碰撞尺度、触碰伤害、落砸倍率、最大生命比例伤害、旋转加速度与幻影剑 roll 速度等常量。
+- 修正【鳞之卫】高速环绕阶段幻影剑首尾相接的问题：旋转、外展、停留与升空阶段强制保持竖直朝向，仅最终砸落阶段改为向下；幻影剑颜色从默认白色改为亮紫色 `0xDA43FF`。
 **新增功能 (Features)**
-- 完成“魔龙夜陨”前两形态 SE 实装：第一形态【封印·淬血】挂载 `demonic_blood_parasite` 与 `outer_god_scar`，第二形态【觉醒·龙魂复苏】挂载 `dragon_pressure_domain` 与 `reverse_scale_hunt`。
-- 新增默认 `Z` 键形态切换，客户端只在主手或副手持有魔龙夜陨时发送切换请求，服务端校验后更新 `bladeState`、颜色、翻译键与 SE 列表，并用动作栏提示当前形态。
-- 第一形态命中逻辑支持玩家直砍与 SlashBlade/幻影剑实体：叠加无上限魔血层数，施加最高凋零 V、失明、5% 最大生命值额外魔法伤害，并让已标记目标后续承受真实伤害路径。
-- 第二形态持有时刷新速度 III、力量 III、夜视 III、伤害吸收 III；挥刀释放金紫逆鳞剑阵并获得短时抗性提升 III。
+- 完成“魔龙夜陨”前两形态 SE 实装：第一形态【封印·淬血】挂载 `demonic_blood_parasite` 与 `outer_god_scar`，第二形态【觉醒·龙魂复苏】继承第一形态 SE，并追加 `dragon_pressure_domain` 与 `reverse_scale_hunt`。
+- 新增默认 `Z` 键形态切换，客户端只在主手或副手持有魔龙夜陨时发送切换请求，服务端校验后更新 `bladeState`、颜色、翻译键与 SE 列表；当前切换不再显示动作栏提示。
+- 第一形态命中逻辑支持玩家直砍与合法魔龙幻影剑实体：叠加无上限魔血层数，施加最高凋零 V、失明、5% 最大生命值额外魔法伤害，并让已标记目标后续承受真实伤害路径；`outer_god_scar` 的快速前刺伴生剑、`reverse_scale_hunt` 的逆鳞剑阵与第三态 `myriad_dragon_blade_storm` 的灭世龙刃不再叠加黯焰印记，避免召剑数量直接触发爆发连锁。
+- 第二形态持有时刷新速度 III、力量 III、夜视 III、伤害吸收 III；挥刀释放金紫逆鳞剑阵并获得短时抗性提升 III，已移除攻击时围绕玩家生成的一圈白色/紫色粒子环。
+- 完成“魔龙夜陨”第三形态【终焉·神陨夜陨】v1 落地：`Z` 键改为封印、觉醒、终焉三态循环，第三态继承 `demonic_blood_parasite` 与 `dragon_pressure_domain`，并追加 `dragon_god_body`、`absolute_annihilation_domain`、`myriad_dragon_blade_storm` 与 `world_cleaving_slash`。
+- 第三态继承按“同类上位替代”去重：低阶 `outer_god_scar` 与 `reverse_scale_hunt` 不重复触发，由终焉灭世龙刃和贯穿刀波覆盖；觉醒态伤害吸收由创世龙盾统一承接。
+- 第三形态按“终局但节流”实现：背包内存在终焉形态即可获得创世神体的可捕获伤害/死亡兜底、飞行、负面清除、虚空坠落保护、法则反弹、吸血与最高 200 点创世龙盾；终焉龙域仍要求手持，每秒扫描 64 格内最多 128 个合法目标，冻结并恢复 Mob AI，半血以下调用最终处决路径。
+- 第三形态挥刀会释放 20 柄灭世龙刃与 72 格撕裂苍穹剑气，撕裂苍穹新增与无尽星空同源的紫色 GammaThunderbolt 实体闪电，单次最多 16 道，并锁定合法目标中心生成，避免近身时视觉落在持刀者身上；本次删除灭世龙刃命中后的微型黑洞与虚空残痕，降低敌群场景粒子压力；本次未注册或绑定尚未设计的 SA【神陨·宇宙夜陨降临】。
+- 重构第三形态视觉性能边界：创世龙盾现在在生成、第三态刷新和退出第三态时都会钳制到 200 点生命值；第三态所有视觉粒子统一走每维度每 tick 500 个预算，敌人扎堆时后续粒子爆发会自动跳过。
+- 优化“魔龙夜陨”粒子频率：龙威重域手持光效改为每 20 tick 迸发约 25 个粒子；魔血寄生命中魂火/黑曜粒子加入每目标冷却、每维度每 tick 爆发次数与粒子总量预算，当前预算进一步压到每维度每 tick 90 个粒子，避免敌群扎堆时无限制刷屏。
+- 调整“魔龙夜陨”战斗细节：手持魔龙夜陨时实体攻击距离额外增加 3 格；黯焰印记每累计 20 层会复用血狱幻影印记的从天而降幻影剑爆发。
+- 新增“魔龙夜陨”第一形态 SA【夜陨次元斩】：启动后以玩家为中心扫描 20 格内合法目标，优先在目标脚下每 5 tick 生成 1 个原版次元斩实体，目标不足时用半径内随机位置补足，总计 20 个后停止；第二、第三形态仍保持 `slashblade:none` 等待后续上位 SA 设计。
+- 修复“魔龙夜陨”第一形态 SA 未挂载：补上无破坏 X 附魔，使其满足 SlashBlade 的 `BEWITCHED` 前置；手持旧存档中的魔龙刀时每秒自动补齐该状态，因此不需要重新获取物品。
+- 修复“夜陨次元斩”随机补位埋入地面：随机点现在只会选取可站立地面上方连续三格无碰撞、无液体的空间；抽取失败时重试并回退至玩家附近的安全落点。
+- 修复“魔龙夜陨”第三形态递归触发：灭世龙刃、终焉龙域、撕裂苍穹与反弹伤害不再反向叠加黯焰印记，避免第三态召剑和二段伤害无限连锁。
+- 修复“魔刀·血狱”幻影印记来源判定：只有玩家主手直接使用血刀造成的伤害才叠加印记，排除魔龙刀、其它 SlashBlade 幻影剑或斩击实体误触发血刀印记爆发。
 
 **开发环境 (Development)**
 - 配置 Forge 1.20.1 子项目 Git 仓库 remote：`origin=https://github.com/RLlufee/AnnihilationBladeEX.git`，并新增 `.gitignore` 排除 Gradle 缓存、构建产物、本地依赖、IDE 状态与临时文件。
 
 **资源与视觉 (Assets & Visuals)**
-- 注册命名刀“魔龙夜陨” (`annihilationblade:nightfall_dragon`)，接入创造栏、本地化、命名刀数据与 `nightfall_dragon.obj/png` 模型贴图，用于进游戏预览黯夜魔龙主题美术效果；当前不附带自定义 SA 或合成配方。
+- 注册命名刀“魔龙夜陨” (`annihilationblade:nightfall_dragon`)，接入创造栏、本地化、命名刀数据与 `nightfall_dragon.obj/png` 模型贴图，用于进游戏预览黯夜魔龙主题美术效果；当前第一形态已接入自定义 SA，仍未添加合成配方。
 - 重制“魔龙夜陨”模型路线：删除先前过度外放的程序化黯夜魔龙 OBJ 生成脚本，改为以 `infinity_stellaris.obj` 的稳定拔刀剑比例、分组和全三角面拓扑为基准，避免进游戏后显示成电锯、狼牙棒或不可正常拔出的异形轮廓。
 - 在无尽星空基准模型上为“魔龙夜陨”追加专属 OBJ 修饰：近刀镡和柄尾区域增加短龙角护手、柄尾龙晶与贴刃薄魔焰翼片，并沿剑脊向剑尖延展低面数发光龙骨暗纹；新增面全部保持三角面，并挂入 `blade` / `blade_luminous` 分组，不改动主刀身与刀鞘的大比例结构。
 - 依照无尽星空模型的原 UV 布局重绘 `assets/annihilationblade/model/nightfall_dragon.png`，输出 `1024x1024` 紫黑魔龙专属材质，保留透明度与明暗结构，替换为黯紫金属、亮紫裂纹与冷白魔焰高光，并为发光龙骨线追加专用高亮 UV 采样带。
@@ -437,6 +487,8 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 - 重塑为黑曜紫终焉风格，加入裂界纹章背板、蓝白能量刃纹、紫青符文线、核心圆环高光与黑金属护柄阴影，减少与低阶新手武器的换色相似感。
 - 修正大背板 `item_back` 实际 UV 采样区域，将深空破碎行星素材精准融合到右上贴图区，并叠加星环、碎片、星点与冷蓝边框，强化终焉级命名刀的视觉识别度。
 - 回退先前过度外放的程序化 OBJ 重置，恢复 `annihilation_blade.obj` 的稳定基准结构，保留重锋标准分组、显示尺度和全三角面拓扑，避免第一人称遮挡、物品栏背板空框和模型错位。
+- 移除“魔龙夜陨”第三形态常驻龙虚影粒子，保留克制的神体光环、64 格终焉龙域环与黑曜波纹；挥刀视觉改为贯穿式暗金/星空紫刀波，不新增 OBJ 实体渲染。
+- 第三形态神体光环刷新频率由每 4 tick 再调整为每 8 tick，持刀/背包常驻光环粒子在上一轮基础上再次削弱约 50%；第三态全局视觉粒子预算同步由每维度每 tick 1000 降至 500。
 
 **文档 (Documentation)**
 - 根据 MC 百科 SlashBlade: Resharped OBJ 模型制作教程，新增拔刀剑 OBJ 模型制作参考，整理工具准备、基准模型原则、标准分组命名、变体制作、贴图 UV 注意事项与 Blender 基础快捷键。
@@ -515,3 +567,11 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 - 新增 `client_tooltips.enable_annihilation_blade_renderer` 与 `client_tooltips.enable_infinity_stellaris_renderer` 配置项，默认 `true`，用于分别控制湮灭之刃与无尽星空专属 tooltip 渲染器是否启用。
 - 当对应配置关闭时，该刀不再取消原版 tooltip 渲染事件，背包、创造栏、JEI 或其它 tooltip 增强模组会回到更兼容的原版渲染路径。
 - 检查血狱当前源码后确认其没有独立的专属 tooltip 重绘器，因此本次没有加入无实际效果的血狱开关。
+
+## 打赏
+
+![](./money.png)
+
+### 制作不易，有能力的可以给个小小的赞助，起码让作者不用去找垃圾吃......
+
+## 自身拮据请**绝对不要**给作者赞助，每个人都有一时的难处，祝君安好！！！

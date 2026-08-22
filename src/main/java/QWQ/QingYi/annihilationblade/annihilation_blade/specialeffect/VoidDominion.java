@@ -38,12 +38,12 @@ public class VoidDominion extends SpecialEffect {
             if (state.hasSpecialEffect(ModSpecialEffects.VOID_DOMINION.getId())) {
                ModConfig.VoidDominion config = ModConfig.COMMON.annihilationBlade.voidDominion;
                long gameTime = player.level().getGameTime();
-               long last = LAST_TRIGGER.getOrDefault(player.getUUID(), -config.cooldownTicks.get() * 2L);
-               if (gameTime - last >= config.cooldownTicks.get()) {
+               long last = LAST_TRIGGER.getOrDefault(player.getUUID(), -config.cooldownTicks.getValue() * 2L);
+               if (gameTime - last >= config.cooldownTicks.getValue()) {
                   LAST_TRIGGER.put(player.getUUID(), gameTime);
                   ServerLevel level = player.serverLevel();
-                  double range = config.range.get();
-                  double visualScale = config.visualScale.get();
+                  double range = config.range.getValue();
+                  double visualScale = config.visualScale.getValue();
                   Vec3 direction = player.getLookAngle().normalize();
                   Vec3 center = player.getEyePosition().add(direction.scale(10.0));
                   AnnihilationVisuals.spawnOpeningHalo(level, center, range * 0.62 * visualScale);
@@ -52,7 +52,7 @@ public class VoidDominion extends SpecialEffect {
                   int count = 0;
 
                   for (LivingEntity target : SpecialEffectSupport.radialTargets(level, player, center, range)) {
-                     if (count >= config.maxTargets.get()) {
+                     if (count >= config.maxTargets.getValue()) {
                         break;
                      }
 

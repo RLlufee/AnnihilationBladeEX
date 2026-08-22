@@ -18,11 +18,34 @@ public final class NightfallDragonItemSupport {
          && (NightfallDragonDefinitions.isNightfallDragon(stack)
             || NightfallDragonDefinitions.DESCRIPTION_ID.equals(stack.getDescriptionId())
             || NightfallDragonDefinitions.AWAKENED_DESCRIPTION_ID.equals(stack.getDescriptionId())
+            || NightfallDragonDefinitions.FINAL_DESCRIPTION_ID.equals(stack.getDescriptionId())
             || stack.hasTag() && stack.getTag().getBoolean(NightfallDragonDefinitions.IDENTITY_TAG));
    }
 
    public static boolean isHoldingNightfallDragon(LivingEntity entity) {
       return isNightfallDragon(entity.getMainHandItem()) || isNightfallDragon(entity.getOffhandItem());
+   }
+
+   public static boolean hasFinalNightfallDragonInInventory(Player player) {
+      for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+         ItemStack stack = player.getInventory().getItem(i);
+         if (isNightfallDragon(stack) && NightfallDragonDefinitions.isFinal(stack)) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public static ItemStack finalNightfallDragonInInventory(Player player) {
+      for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+         ItemStack stack = player.getInventory().getItem(i);
+         if (isNightfallDragon(stack) && NightfallDragonDefinitions.isFinal(stack)) {
+            return stack;
+         }
+      }
+
+      return ItemStack.EMPTY;
    }
 
    public static ItemStack heldNightfallDragon(LivingEntity entity) {
