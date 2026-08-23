@@ -77,16 +77,31 @@ public class GammaThunderboltEntity extends Entity {
       return distance < viewDistance * viewDistance;
    }
 
+   private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> FIXED_COLOR = net.minecraft.network.syncher.SynchedEntityData.defineId(GammaThunderboltEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
+   public int getFixedColor() {
+      return this.entityData.get(FIXED_COLOR);
+   }
+
+   public void setFixedColor(int color) {
+      this.entityData.set(FIXED_COLOR, color);
+   }
+
    @Override
    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+      builder.define(FIXED_COLOR, -1);
    }
 
    @Override
    protected void readAdditionalSaveData(CompoundTag tag) {
+      if (tag.contains("FixedColor")) {
+         this.setFixedColor(tag.getInt("FixedColor"));
+      }
    }
 
    @Override
    protected void addAdditionalSaveData(CompoundTag tag) {
+      tag.putInt("FixedColor", this.getFixedColor());
    }
 
    @Override

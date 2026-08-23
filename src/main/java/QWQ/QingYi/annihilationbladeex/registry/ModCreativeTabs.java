@@ -2,6 +2,7 @@ package QWQ.QingYi.annihilationbladeex.registry;
 
 import QWQ.QingYi.annihilationbladeex.annihilation_blade.AnnihilationBladeDefinitions;
 import QWQ.QingYi.annihilationbladeex.blood_prison.BloodPrisonDefinitions;
+import QWQ.QingYi.annihilationbladeex.nightfall_dragon.NightfallDragonDefinitions;
 import QWQ.QingYi.annihilationbladeex.AnnihilationBladeEX;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -20,6 +21,7 @@ public final class ModCreativeTabs {
          .icon(ModCreativeTabs::createIcon)
          .displayItems((parameters, output) -> {
             output.accept(AnnihilationBladeDefinitions.createFromLookup(parameters.holders()));
+            output.accept(NightfallDragonDefinitions.createFromLookup(parameters.holders()));
             output.accept(BloodPrisonDefinitions.createStack(parameters.holders()));
             output.accept(new ItemStack((ItemLike)ModItems.ANNIHILATION_FRAGMENT.get()));
             output.accept(new ItemStack((ItemLike)ModItems.ANNIHILATION_CORE.get()));
@@ -33,5 +35,4 @@ public final class ModCreativeTabs {
    private static ItemStack createIcon() {
       return AnnihilationBladeDefinitions.createStack();
    }
-
 }

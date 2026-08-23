@@ -75,13 +75,13 @@ public class Dankong extends SpecialEffect {
                if (!player.isShiftKeyDown() && isBlinkEnabled(player)) {
                   if (!ACTIVE.containsKey(player.getUUID())) {
                      long gameTime = player.level().getGameTime();
-                     if (SpecialEffectSupport.tryStartCooldown(LAST_TRIGGER, player, gameTime, ModConfig.COMMON.annihilationBlade.dankong.cooldownTicks.get())) {
+                     if (SpecialEffectSupport.tryStartCooldown(LAST_TRIGGER, player, gameTime, ModConfig.COMMON.annihilationBlade.dankong.cooldownTicks.getValue())) {
                         Vec3 origin = player.position();
                         List<UUID> targets = collectTargets(player, origin);
                         if (!targets.isEmpty()) {
                            ACTIVE.put(player.getUUID(), new Dankong.Sequence(origin, player.getYRot(), player.getXRot(), targets));
                            AnnihilationVisuals.spawnBlinkGate(
-                              player.serverLevel(), origin.add(0.0, 1.0, 0.0), 2.0 * ModConfig.COMMON.annihilationBlade.dankong.visualScale.get()
+                              player.serverLevel(), origin.add(0.0, 1.0, 0.0), 2.0 * ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue()
                            );
                            player.level()
                               .playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.2F, 1.8F);
@@ -105,7 +105,7 @@ public class Dankong extends SpecialEffect {
             }
 
             sequence.age++;
-            if (sequence.age % ModConfig.COMMON.annihilationBlade.dankong.stepInterval.get() == 0) {
+            if (sequence.age % ModConfig.COMMON.annihilationBlade.dankong.stepInterval.getValue() == 0) {
                ServerLevel level = player.serverLevel();
 
                while (sequence.index < sequence.targets.size()) {
@@ -131,7 +131,7 @@ public class Dankong extends SpecialEffect {
       player.teleportTo(level, sequence.origin.x, sequence.origin.y, sequence.origin.z, sequence.yRot, sequence.xRot);
       player.setDeltaMovement(Vec3.ZERO);
       level.playSound(null, sequence.origin.x, sequence.origin.y, sequence.origin.z, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.PLAYERS, 1.4F, 0.6F);
-      double visualScale = ModConfig.COMMON.annihilationBlade.dankong.visualScale.get();
+      double visualScale = ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue();
       level.sendParticles(
          ParticleTypes.REVERSE_PORTAL,
          sequence.origin.x,
@@ -148,8 +148,8 @@ public class Dankong extends SpecialEffect {
    }
 
    private static List<UUID> collectTargets(ServerPlayer player, Vec3 origin) {
-      double range = ModConfig.COMMON.annihilationBlade.dankong.range.get();
-      int maxTargets = ModConfig.COMMON.annihilationBlade.dankong.maxTargets.get();
+      double range = ModConfig.COMMON.annihilationBlade.dankong.range.getValue();
+      int maxTargets = ModConfig.COMMON.annihilationBlade.dankong.maxTargets.getValue();
       AABB area = new AABB(origin, origin).inflate(range);
       List<LivingEntity> entities = player.serverLevel()
          .getEntitiesOfClass(
@@ -192,7 +192,7 @@ public class Dankong extends SpecialEffect {
       player.teleportTo(level, attackPos.x, attackPos.y, attackPos.z, yaw, pitch);
       player.setDeltaMovement(Vec3.ZERO);
       AnnihilationVisuals.spawnBlinkTrail(level, travelStart, targetCenter, player.getRandom());
-      double visualScale = ModConfig.COMMON.annihilationBlade.dankong.visualScale.get();
+      double visualScale = ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue();
       level.sendParticles(ParticleTypes.FLASH, targetCenter.x, targetCenter.y, targetCenter.z, 1, 0.0, 0.0, 0.0, 0.0);
       level.sendParticles(ParticleTypes.END_ROD, targetCenter.x, targetCenter.y, targetCenter.z, visualCount(55, visualScale), 0.8 * visualScale, 0.8 * visualScale, 0.8 * visualScale, 0.12);
       level.sendParticles(

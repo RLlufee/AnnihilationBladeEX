@@ -31,8 +31,8 @@ public final class SpatialFractureExecutor {
          if (!entity.level().isClientSide) {
             ServerLevel level = (ServerLevel)entity.level();
             ModConfig.SpatialFracture config = ModConfig.COMMON.annihilationBlade.spatialFracture;
-            double radius = config.fractureRadius.get();
-            double visualScale = config.visualScale.get();
+            double radius = config.fractureRadius.getValue();
+            double visualScale = config.visualScale.getValue();
             Vec3 center = getFractureCenter(level, player, config);
             Set<LivingEntity> targets = gatherTargets(level, player, center, config);
             playOpeningRupture(level, player, center);
@@ -42,7 +42,7 @@ public final class SpatialFractureExecutor {
             int visualized = 0;
 
             for (LivingEntity target : targets) {
-               if (visualized < config.maxVisualizedTargets.get()) {
+               if (visualized < config.maxVisualizedTargets.getValue()) {
                   spawnSlash(level, player, target);
                }
 
@@ -56,13 +56,13 @@ public final class SpatialFractureExecutor {
    }
 
    private static Vec3 getFractureCenter(ServerLevel level, Player player, ModConfig.SpatialFracture config) {
-      double maxDistance = config.maxDistance.get();
+      double maxDistance = config.maxDistance.getValue();
       Vec3 eye = player.getEyePosition();
       Vec3 look = player.getLookAngle().normalize();
       Vec3 end = eye.add(look.scale(maxDistance));
       HitResult hit = level.clip(new ClipContext(eye, end, Block.COLLIDER, Fluid.NONE, player));
       Vec3 blockOrAir = hit.getType() == Type.MISS ? end : hit.getLocation();
-      Vec3 aimedTarget = findAimedTargetCenter(level, player, eye, look, eye.distanceTo(blockOrAir), config.entityLockRadius.get());
+      Vec3 aimedTarget = findAimedTargetCenter(level, player, eye, look, eye.distanceTo(blockOrAir), config.entityLockRadius.getValue());
       return aimedTarget == null ? blockOrAir : aimedTarget;
    }
 
@@ -89,8 +89,8 @@ public final class SpatialFractureExecutor {
    }
 
    private static Set<LivingEntity> gatherTargets(ServerLevel level, Player player, Vec3 center, ModConfig.SpatialFracture config) {
-      double radius = config.fractureRadius.get();
-      int maxTargets = config.maxTargets.get();
+      double radius = config.fractureRadius.getValue();
+      int maxTargets = config.maxTargets.getValue();
       Vec3 eye = player.getEyePosition();
       Vec3 look = player.getLookAngle().normalize();
       Set<LivingEntity> targets = new LinkedHashSet<>();
@@ -105,11 +105,11 @@ public final class SpatialFractureExecutor {
          }
       }
 
-      double pathLength = Math.min(config.maxDistance.get(), eye.distanceTo(center));
+      double pathLength = Math.min(config.maxDistance.getValue(), eye.distanceTo(center));
 
-      for (double distance = 2.0; distance <= pathLength && targets.size() < maxTargets; distance += config.rayStep.get()) {
+      for (double distance = 2.0; distance <= pathLength && targets.size() < maxTargets; distance += config.rayStep.getValue()) {
          Vec3 sampleCenter = eye.add(look.scale(distance));
-         AABB sample = new AABB(sampleCenter, sampleCenter).inflate(config.raySampleRadius.get());
+         AABB sample = new AABB(sampleCenter, sampleCenter).inflate(config.raySampleRadius.getValue());
 
          for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, sample, entity -> canTarget(player, entity))) {
             targets.add(candidate);
@@ -120,7 +120,7 @@ public final class SpatialFractureExecutor {
       }
 
       if (targets.isEmpty()) {
-         AABB fallback = player.getBoundingBox().inflate(config.backupRadius.get());
+         AABB fallback = player.getBoundingBox().inflate(config.backupRadius.getValue());
          targets.addAll(level.getEntitiesOfClass(LivingEntity.class, fallback, entity -> canTarget(player, entity)));
       }
 
@@ -138,8 +138,8 @@ public final class SpatialFractureExecutor {
    }
 
    private static void spawnFractureField(ServerLevel level, Player player, Vec3 center, ModConfig.SpatialFracture config) {
-      double radius = config.fractureRadius.get();
-      double visualScale = config.visualScale.get();
+      double radius = config.fractureRadius.getValue();
+      double visualScale = config.visualScale.getValue();
       double visualRadius = radius * visualScale;
       level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 1.0, center.z, 5, 0.2, 0.2, 0.2, 0.0);
       level.sendParticles(ParticleTypes.END_ROD, center.x, center.y + 1.0, center.z, visualCount(140, visualScale), visualRadius * 0.4, 4.0 * visualScale, visualRadius * 0.4, 0.25);
@@ -163,15 +163,15 @@ public final class SpatialFractureExecutor {
 
    private static void spawnBladeStorm(ServerLevel level, Player player, Vec3 center, ModConfig.SpatialFracture config) {
       RandomSource random = player.getRandom();
-      double radius = config.fractureRadius.get();
-      double visualScale = config.visualScale.get();
+      double radius = config.fractureRadius.getValue();
+      double visualScale = config.visualScale.getValue();
 
-      int centerSlashes = config.centerSlashes.get();
+      int centerSlashes = config.centerSlashes.getValue();
       for (int i = 0; i < centerSlashes; i++) {
          AttackManager.doSlash(player, 360.0F * i / Math.max(1, centerSlashes), Vec3.ZERO, true, true, 9999.0);
       }
 
-      for (int i = 0; i < config.fractureSlashes.get(); i++) {
+      for (int i = 0; i < config.fractureSlashes.getValue(); i++) {
          Vec3 direction = randomUnit(random);
          Vec3 offset = randomUnit(random).scale(random.nextDouble() * radius * 0.65 * visualScale);
          double length = (12.0 + random.nextDouble() * 32.0) * visualScale;

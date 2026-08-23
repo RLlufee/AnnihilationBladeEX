@@ -44,7 +44,7 @@ public class TerminusEcho extends SpecialEffect {
             if (state.hasSpecialEffect(ModSpecialEffects.TERMINUS_ECHO.getId())) {
                ModConfig.TerminusEcho config = ModConfig.COMMON.annihilationBlade.terminusEcho;
                List<TerminusEcho.EchoSequence> sequences = ACTIVE.get(player.getUUID());
-               if (sequences == null || sequences.size() < config.maxActiveSequences.get()) {
+               if (sequences == null || sequences.size() < config.maxActiveSequences.getValue()) {
                   Vec3 start = player.getEyePosition().add(player.getLookAngle().normalize().scale(1.0));
                   Vec3 direction = player.getLookAngle().normalize();
                   Vec3 right = SpecialEffectSupport.rightOf(direction);
@@ -68,8 +68,8 @@ public class TerminusEcho extends SpecialEffect {
             while (iterator.hasNext()) {
                TerminusEcho.EchoSequence sequence = iterator.next();
                sequence.age++;
-               if (sequence.age % ModConfig.COMMON.annihilationBlade.terminusEcho.echoInterval.get() == 0) {
-                  if (sequence.nextWave >= ModConfig.COMMON.annihilationBlade.terminusEcho.echoCount.get()) {
+               if (sequence.age % ModConfig.COMMON.annihilationBlade.terminusEcho.echoInterval.getValue() == 0) {
+                  if (sequence.nextWave >= ModConfig.COMMON.annihilationBlade.terminusEcho.echoCount.getValue()) {
                      iterator.remove();
                   } else {
                      releaseEcho(player.serverLevel(), player, sequence, sequence.nextWave);
@@ -87,11 +87,11 @@ public class TerminusEcho extends SpecialEffect {
 
    private static void releaseEcho(ServerLevel level, ServerPlayer player, TerminusEcho.EchoSequence sequence, int wave) {
       ModConfig.TerminusEcho config = ModConfig.COMMON.annihilationBlade.terminusEcho;
-      double visualScale = config.visualScale.get();
+      double visualScale = config.visualScale.getValue();
       double side = wave == 0 ? 0.0 : (wave % 2 == 0 ? 1.0 : -1.0) * (1.8 + wave * 0.85);
       double lift = wave * 0.28;
-      double range = config.range.get() + wave * 2.5;
-      double width = config.width.get() + wave * 0.35;
+      double range = config.range.getValue() + wave * 2.5;
+      double width = config.width.getValue() + wave * 0.35;
       Vec3 offset = sequence.right.scale(side).add(0.0, lift, 0.0);
       Vec3 start = sequence.start.add(offset);
       Vec3 end = start.add(sequence.direction.scale(range));
@@ -131,8 +131,8 @@ public class TerminusEcho extends SpecialEffect {
    }
 
    private static void strikeAlong(ServerLevel level, ServerPlayer player, Vec3 start, Vec3 direction, double range, double width, int wave) {
-      double visualScale = ModConfig.COMMON.annihilationBlade.terminusEcho.visualScale.get();
-      for (LivingEntity target : SpecialEffectSupport.beamTargets(level, player, start, direction, range, width, ModConfig.COMMON.annihilationBlade.terminusEcho.maxTargetsPerWave.get())) {
+      double visualScale = ModConfig.COMMON.annihilationBlade.terminusEcho.visualScale.getValue();
+      for (LivingEntity target : SpecialEffectSupport.beamTargets(level, player, start, direction, range, width, ModConfig.COMMON.annihilationBlade.terminusEcho.maxTargetsPerWave.getValue())) {
          Vec3 targetCenter = SpecialEffectSupport.centerOf(target);
          double projection = targetCenter.subtract(start).dot(direction);
          Vec3 nearest = start.add(direction.scale(projection));

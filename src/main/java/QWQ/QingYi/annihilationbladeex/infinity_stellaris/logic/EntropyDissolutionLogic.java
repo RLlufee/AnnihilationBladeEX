@@ -54,12 +54,12 @@ public final class EntropyDissolutionLogic {
          return;
       }
 
-      double percent = ModConfig.COMMON.infinityStellaris.entropyPercent.get();
+      double percent = ModConfig.COMMON.infinityStellaris.entropyPercent.getValue();
       float entropyDamage = (float)(target.getMaxHealth() * percent);
       float newHealth = Math.max(1.0F, target.getHealth() - entropyDamage);
       target.setHealth(newHealth);
       int marks = addMark(player, target);
-      if (marks >= ModConfig.COMMON.infinityStellaris.entropyMarks.get()) {
+      if (marks >= ModConfig.COMMON.infinityStellaris.entropyMarks.getValue()) {
          clearMark(player, target);
          executeFinal(target, player);
       } else if (target.level() instanceof ServerLevel level) {
@@ -160,7 +160,7 @@ public final class EntropyDissolutionLogic {
    }
 
    private static void blacklist(LivingEntity target) {
-      long expiry = target.level().getGameTime() + ModConfig.COMMON.infinityStellaris.entropyBlacklistTicks.get();
+      long expiry = target.level().getGameTime() + ModConfig.COMMON.infinityStellaris.entropyBlacklistTicks.getValue();
       BLACKLISTED_UNTIL.put(target.getUUID(), expiry);
    }
 

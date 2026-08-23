@@ -8,11 +8,12 @@ import QWQ.QingYi.annihilationbladeex.registry.ModCreativeTabs;
 import QWQ.QingYi.annihilationbladeex.registry.ModItems;
 import QWQ.QingYi.annihilationbladeex.registry.ModSlashArts;
 import QWQ.QingYi.annihilationbladeex.registry.ModSpecialEffects;
+import com.iafenvoy.jupiter.ConfigManager;
+import com.iafenvoy.jupiter.ServerConfigManager;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig.Type;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import java.util.List;
@@ -51,7 +52,7 @@ public class AnnihilationBladeEX {
       ModSpecialEffects.register(modEventBus);
       ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
       modEventBus.addListener(ModNetwork::registerPayloads);
-      modContainer.registerConfig(Type.COMMON, ModConfig.COMMON_SPEC);
+      ConfigManager.getInstance().registerServerConfigHandler(ModConfig.COMMON, ServerConfigManager.PermissionChecker.IS_OPERATOR);
    }
 
    public static ResourceLocation prefix(String path) {

@@ -33,7 +33,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -275,13 +274,6 @@ public class ModEventHandler {
                PLAYERS_WITH_FLIGHT.remove(key);
                player.onUpdateAbilities();
             }
-      }
-   }
-
-   @SubscribeEvent(priority = EventPriority.HIGHEST)
-   public static void onItemToss(ItemTossEvent event) {
-      if (isGodBlade(event.getEntity().getItem()) && !event.getPlayer().isCreative()) {
-         event.setCanceled(true);
       }
    }
 

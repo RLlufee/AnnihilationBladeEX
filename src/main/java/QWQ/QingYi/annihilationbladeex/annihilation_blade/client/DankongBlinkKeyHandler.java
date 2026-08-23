@@ -44,7 +44,7 @@ public final class DankongBlinkKeyHandler {
          return;
       }
 
-      while (TOGGLE_DANKONG_BLINK.consumeClick()) {
+      while (consumeToggleClick()) {
          if (!AnnihilationBladeItemSupport.isHoldingAnnihilationBlade(player)) {
             continue;
          }
@@ -53,6 +53,10 @@ public final class DankongBlinkKeyHandler {
          PacketDistributor.sendToServer(new DankongBlinkModePacket(blinkEnabled));
          player.displayClientMessage(Component.translatable(MESSAGE_TOGGLE, Component.translatable(blinkEnabled ? MESSAGE_STATE_ON : MESSAGE_STATE_OFF)), true);
       }
+   }
+
+   public static boolean consumeToggleClick() {
+      return TOGGLE_DANKONG_BLINK.consumeClick();
    }
 
    public static void resetBlinkMode() {

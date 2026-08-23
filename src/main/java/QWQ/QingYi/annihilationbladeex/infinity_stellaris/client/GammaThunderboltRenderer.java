@@ -35,6 +35,7 @@ public class GammaThunderboltRenderer extends EntityRenderer<GammaThunderboltEnt
       VertexConsumer buffer = bufferSource.getBuffer(RenderType.lightning());
       Matrix4f matrix = poseStack.last().pose();
       RandomSource colorRandom = RandomSource.create(bolt.seed ^ 0x6D9F_2B31_5A77L);
+      int fixedColor = bolt.getFixedColor();
       for (int layer = 0; layer < 4; ++layer) {
          RandomSource branchRandom = RandomSource.create(bolt.seed);
          for (int branch = 0; branch < 3; ++branch) {
@@ -68,9 +69,9 @@ public class GammaThunderboltRenderer extends EntityRenderer<GammaThunderboltEnt
                   outer *= ((float)segment - 1.0F) * 0.1F + 1.0F;
                }
 
-               float red = colorRandom.nextFloat();
-               float green = colorRandom.nextFloat();
-               float blue = colorRandom.nextFloat();
+               float red = fixedColor >= 0 ? (float)(fixedColor >> 16 & 0xFF) / 255.0F : colorRandom.nextFloat();
+               float green = fixedColor >= 0 ? (float)(fixedColor >> 8 & 0xFF) / 255.0F : colorRandom.nextFloat();
+               float blue = fixedColor >= 0 ? (float)(fixedColor & 0xFF) / 255.0F : colorRandom.nextFloat();
                float alpha = 0.48F;
                quad(matrix, buffer, currentX, currentZ, segment, previousX, previousZ, red, green, blue, alpha, inner, outer, false, false, true, false);
                quad(matrix, buffer, currentX, currentZ, segment, previousX, previousZ, red, green, blue, alpha, inner, outer, true, false, true, true);

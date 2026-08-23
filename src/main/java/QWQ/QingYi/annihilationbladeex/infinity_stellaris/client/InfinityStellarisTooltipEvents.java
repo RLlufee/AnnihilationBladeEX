@@ -1,6 +1,7 @@
 package QWQ.QingYi.annihilationbladeex.infinity_stellaris.client;
 
 import QWQ.QingYi.annihilationbladeex.AnnihilationBladeEX;
+import QWQ.QingYi.annihilationbladeex.config.ModConfig;
 import QWQ.QingYi.annihilationbladeex.infinity_stellaris.item.InfinityStellarisItemSupport;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -22,6 +23,10 @@ public final class InfinityStellarisTooltipEvents {
 
    @SubscribeEvent
    public static void onRenderTooltipPre(RenderTooltipEvent.Pre event) {
+      if (!ModConfig.CLIENT.clientTooltips.enableInfinityStellarisRenderer.getValue()) {
+         return;
+      }
+
       ItemStack stack = event.getItemStack();
       if (!InfinityStellarisItemSupport.isInfinityStellaris(stack)) {
          return;
