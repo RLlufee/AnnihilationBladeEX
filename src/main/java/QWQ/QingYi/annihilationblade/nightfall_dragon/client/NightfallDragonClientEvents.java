@@ -15,6 +15,7 @@ public final class NightfallDragonClientEvents {
 
    @SubscribeEvent
    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-      event.registerEntityRenderer(ModEntities.DRAGON_HEAD_CHARGE.get(), DragonHeadChargeRenderer::new);
+      event.registerEntityRenderer(ModEntities.SCALE_GUARD_SWORD.get(), ScaleGuardControllerRenderer::new);
+      event.registerEntityRenderer(ModEntities.NIGHTFALL_SCREEN_SHAKE.get(), NightfallDragonScreenShakeRenderer::new);
    }
 }

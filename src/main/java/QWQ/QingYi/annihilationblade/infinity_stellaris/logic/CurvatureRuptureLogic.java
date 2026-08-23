@@ -139,14 +139,14 @@ public final class CurvatureRuptureLogic {
       // 以玩家坐标为中心，在半径 curvatureRadius 范围内寻找可攻击目标，并限制最大目标数量
       List<LivingEntity> targets = SpecialEffectSupport.limit(
          SpecialEffectSupport.radialTargets(
-            level, player, player.position(), config.curvatureRadius.get(), entity -> SlashBladeTargeting.canAttack(player, entity)
+            level, player, player.position(), config.curvatureRadius.getValue(), entity -> SlashBladeTargeting.canAttack(player, entity)
          ),
-         config.curvatureMaxTargets.get()
+         config.curvatureMaxTargets.getValue()
       );
 
       long gameTime = level.getGameTime();
       // 判断当前 Tick 是否需要更新应力印记
-      boolean strainTick = gameTime % Math.max(1, config.curvatureTickInterval.get()) == 0L;
+      boolean strainTick = gameTime % Math.max(1, config.curvatureTickInterval.getValue()) == 0L;
       Set<UUID> strainedTargets = new HashSet<>();
 
       for (LivingEntity target : targets) {
@@ -294,7 +294,7 @@ public final class CurvatureRuptureLogic {
       spawnStrainParticles(level, target, marks);
 
       // 印记达到爆发上限
-      if (marks >= config.curvatureBurstMarks.get()) {
+      if (marks >= config.curvatureBurstMarks.getValue()) {
          clearStrainMark(player, target);
          triggerCurvatureBurst(level, player, target);
       }

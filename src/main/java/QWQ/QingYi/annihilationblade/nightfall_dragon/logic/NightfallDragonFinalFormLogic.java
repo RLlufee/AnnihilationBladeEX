@@ -47,6 +47,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimension
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import QWQ.QingYi.annihilationblade.config.ModConfig;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 /**
@@ -64,29 +65,39 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 @EventBusSubscriber(modid = "annihilationblade")
 public final class NightfallDragonFinalFormLogic {
    /** 结界 Tick 运行间隔（20 Ticks = 1 秒） */
-   private static final int DOMAIN_INTERVAL_TICKS = 20;
+   private static final int DOMAIN_INTERVAL_TICKS = 20;               // 绝对湮灭结界的触发循环间隔（单位：Tick，20 Ticks = 1 秒）。
    
-   /** 结界半径 (64 格) */
-   private static final double DOMAIN_RADIUS = 64.0;
-   private static final int DOMAIN_MAX_TARGETS = 128;
-   
-   /** 万龙剑阵索敌半径与生成数量 */
-   private static final double BLADE_STORM_RADIUS = 96.0;
-   private static final int BLADE_STORM_TARGETS = 96;
-   private static final int BLADE_STORM_SWORDS = 20;
+   /** 万龙剑阵索敌半径 */
+   private static final double BLADE_STORM_RADIUS = 96.0;              // 万龙剑阵挥刀召唤幻影剑时的索敌检测半径（单位：格）。
+   private static final int BLADE_STORM_TARGETS = 96;                  // 万龙剑阵一次索敌能够锁定的最大目标数量。
    
    /** 斩裂世界 (World Cleaving) 范围与宽带 */
-   private static final double WORLD_CLEAVING_RANGE = 72.0;
-   private static final double WORLD_CLEAVING_WIDTH = 5.0;
-   private static final int WORLD_CLEAVING_TARGETS = 96;
-   private static final float DOMAIN_FIXED_DAMAGE = 24.0F;
-   private static final float WORLD_CLEAVING_DAMAGE = 44.0F;
-   private static final int WORLD_CLEAVING_LIGHTNING_MAX = 16;
-   private static final int WORLD_CLEAVING_LIGHTNING_COLOR = 0xB026FF;
-   private static final double WORLD_CLEAVING_LIGHTNING_MIN_DISTANCE = 2.5;
+   private static final double WORLD_CLEAVING_WIDTH = 5.0;             // 斩裂世界剑气波束的横向判定宽度（单位：格）。
+   private static final int WORLD_CLEAVING_TARGETS = 96;               // 斩裂世界一次贯穿能够影响的最大目标数量上限。
+   private static final float DOMAIN_FIXED_DAMAGE = 24.0F;             // 绝对湮灭结界每秒对结界内目标造成的固定基础伤害。
+   private static final float WORLD_CLEAVING_DAMAGE = 44.0F;           // 斩裂世界剑气直接命中目标时造成的固定基础伤害。
+   private static final int WORLD_CLEAVING_LIGHTNING_MAX = 96;         // 斩裂世界挥刀时沿剑气轴线轰击的最大落雷数量。
+   private static final int WORLD_CLEAVING_LIGHTNING_COLOR = 0xB026FF;  // 斩裂世界落雷的渲染颜色（RGB十六进制色值，此处为亮紫罗兰色）。
+   private static final double WORLD_CLEAVING_LIGHTNING_MIN_DISTANCE = 2.5; // 落雷生成点距离持刀者的最小安全距离（防止闪电在自己身上轰击遮挡视线）。
    
    /** 创世护盾额外生命上限 (200.0F) */
-   private static final float MAX_CREATION_SHIELD_HEALTH = 200.0F;
+   private static final float MAX_CREATION_SHIELD_HEALTH = 200.0F;     // 创世护盾（吸收生命值/黄血）能通过溢出伤害转换达到的上限值（最高 200 点 HP）。
+
+   private static double getDomainRadius() {
+      return ModConfig.COMMON.nightfallDragon.absoluteDomainRadius.getValue();
+   }
+
+   private static int getDomainMaxTargets() {
+      return ModConfig.COMMON.nightfallDragon.absoluteDomainMaxTargets.getValue();
+   }
+
+   private static int getBladeStormSwords() {
+      return ModConfig.COMMON.nightfallDragon.bladeStormSwords.getValue();
+   }
+
+   private static double getWorldCleavingRange() {
+      return ModConfig.COMMON.nightfallDragon.worldCleavingRange.getValue();
+   }
    
    private static final Set<UUID> PLAYERS_WITH_FLIGHT = new HashSet<>();
    private static final Set<UUID> INTERNAL_FINAL_DAMAGE = new HashSet<>();
@@ -392,7 +403,7 @@ public final class NightfallDragonFinalFormLogic {
    private static void activateDomain(ServerLevel level, Player player) {
       Vec3 center = player.position();
       NightfallDragonFinalVisuals.spawnDomainFrame(level, center, player.tickCount);
-      List<LivingEntity> targets = SpecialEffectSupport.limit(SpecialEffectSupport.radialTargets(level, player, center, DOMAIN_RADIUS), DOMAIN_MAX_TARGETS);
+      List<LivingEntity> targets = SpecialEffectSupport.limit(SpecialEffectSupport.radialTargets(level, player, center, getDomainRadius()), getDomainMaxTargets());
       Set<UUID> activeMobs = new HashSet<>();
       for (LivingEntity target : targets) {
          stripAndFreeze(level, player, target, activeMobs);
@@ -424,7 +435,7 @@ public final class NightfallDragonFinalFormLogic {
    }
 
    /**
-    * 万龙剑阵：在玩家周身圆环轨道上生成 20 炳幻影剑 (EntityAbstractSummonedSword)，并自动面向/射向敌人。
+    * 万龙剑阵：在玩家周身圆环轨道上生成幻影剑 (EntityAbstractSummonedSword)，并自动面向/射向敌人。
     */
    private static void unleashBladeStorm(ServerPlayer player, ISlashBladeState state) {
       ServerLevel level = player.serverLevel();
@@ -432,7 +443,8 @@ public final class NightfallDragonFinalFormLogic {
       Vec3 direction = safe(player.getLookAngle(), new Vec3(0.0, 0.0, 1.0));
       List<LivingEntity> targets = SpecialEffectSupport.limit(SpecialEffectSupport.radialTargets(level, player, center, BLADE_STORM_RADIUS), BLADE_STORM_TARGETS);
       
-      for (int i = 0; i < BLADE_STORM_SWORDS; i++) {
+      int swordCount = getBladeStormSwords();
+      for (int i = 0; i < swordCount; i++) {
          LivingEntity target = targets.isEmpty() ? null : targets.get(i % targets.size());
          spawnDragonBlade(level, player, center, direction, target, i, state.getColorCode());
       }
@@ -447,7 +459,7 @@ public final class NightfallDragonFinalFormLogic {
     */
    private static void spawnDragonBlade(ServerLevel level, ServerPlayer player, Vec3 center, Vec3 direction, LivingEntity target, int index, int color) {
       // 三角函数计算圆环轨道坐标 (orbit)
-      double angle = (Math.PI * 2.0) * index / BLADE_STORM_SWORDS + player.tickCount * 0.4;
+      double angle = (Math.PI * 2.0) * index / Math.max(1, getBladeStormSwords()) + player.tickCount * 0.4;
       double radius = 2.8 + index % 4 * 0.28;
       Vec3 orbit = center.add(Math.cos(angle) * radius, 0.5 + Math.sin(angle * 2.0) * 0.85, Math.sin(angle) * radius);
       
@@ -461,11 +473,11 @@ public final class NightfallDragonFinalFormLogic {
       EntityAbstractSummonedSword sword = new EntityAbstractSummonedSword(RegistryEvents.SummonedSword, level);
       sword.setOwner(player);
       sword.setShooter(player);
-      sword.setColor(index % 2 == 0 ? NightfallDragonDefinitions.FINAL_SUMMONED_SWORD_COLOR : NightfallDragonDefinitions.FINAL_VOID_PURPLE);
-      sword.setDamage(32.0);
-      sword.setPierce((byte)6);
-      sword.setDelay(2 + index % 4);
-      sword.setRoll(index * 37.0F);
+      sword.setColor(color != 0 ? color : NightfallDragonDefinitions.FINAL_SUMMONED_SWORD_COLOR);
+      sword.setDamage(0.0);
+      sword.setNoClip(true);
+      sword.setPierce((byte)0);
+      sword.setDelay(index % 12);
       sword.setPos(orbit.x, orbit.y, orbit.z);
       
       // 使用 yawToFace / pitchToFace 将方向向量转为欧拉角 angles，传给 moveTo 设置旋转
@@ -483,16 +495,17 @@ public final class NightfallDragonFinalFormLogic {
       ServerLevel level = player.serverLevel();
       Vec3 start = player.getEyePosition().add(0.0, -0.25, 0.0);
       Vec3 forward = safe(player.getLookAngle(), new Vec3(0.0, 0.0, 1.0));
-      Vec3 end = start.add(forward.scale(WORLD_CLEAVING_RANGE));
+      double worldCleavingRange = getWorldCleavingRange();
+      Vec3 end = start.add(forward.scale(worldCleavingRange));
       NightfallDragonFinalVisuals.spawnPiercingBladeWave(level, player, start, end);
       
       // 射线扫描宽束内的所有目标 (beamTargets)
-      List<LivingEntity> targets = SpecialEffectSupport.beamTargets(level, player, start, forward, WORLD_CLEAVING_RANGE, WORLD_CLEAVING_WIDTH, WORLD_CLEAVING_TARGETS);
+      List<LivingEntity> targets = SpecialEffectSupport.beamTargets(level, player, start, forward, worldCleavingRange, WORLD_CLEAVING_WIDTH, WORLD_CLEAVING_TARGETS);
       int lightningCount = 0;
       for (LivingEntity target : targets) {
          Vec3 targetCenter = SpecialEffectSupport.centerOf(target);
          // 点积投影运算：计算目标点在射线线段上的最近投影点
-         double projection = Math.max(0.0, Math.min(WORLD_CLEAVING_RANGE, targetCenter.subtract(start).dot(forward)));
+         double projection = Math.max(0.0, Math.min(worldCleavingRange, targetCenter.subtract(start).dot(forward)));
          Vec3 slashCenter = start.add(forward.scale(projection));
          
          // 空间吸引：强行将目标拉向斩击轴线中心

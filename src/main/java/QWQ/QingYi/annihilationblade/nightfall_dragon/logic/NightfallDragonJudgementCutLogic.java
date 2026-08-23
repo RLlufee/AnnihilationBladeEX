@@ -5,6 +5,7 @@ import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.GammaThunderburstLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.NightfallDragonDefinitions;
+import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.item.NightfallDragonItemSupport;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,27 +38,29 @@ import net.minecraft.world.phys.Vec3;
  * </ul>
  */
 public final class NightfallDragonJudgementCutLogic {
-   /** 次元斩寻找目标与随机落点的最大半径（50 格） */
-   private static final double RADIUS = 50.0;
-   
-   /** 技能一次释放产生的次元斩总数量（100 连斩） */
-   private static final int TOTAL_CUTS = 100;
-   
-   /** 每次次元斩生成的时间间隔（每 2 Ticks = 0.1 秒生成一次） */
-   private static final int INTERVAL_TICKS = 2;
-   
-   /** 单个次元斩实体的存活持续时间（20 Ticks = 1 秒） */
-   private static final int JUDGEMENT_CUT_LIFETIME = 20;
-   
-   /** 单个次元斩的基础伤害数值 */
-   private static final double JUDGEMENT_CUT_DAMAGE = 20.0;
-   
-   /** 单个次元斩的尺寸缩放比例（8.0 倍巨型切割模型与判定框） */
-   private static final float JUDGEMENT_CUT_SCALE = 8.0F;
-   
    /** 随机尝试寻找有效平面的次数上限 */
    private static final int RANDOM_POSITION_ATTEMPTS = 16;
    private static final int TOTAL_RANDOM_POSITION_ATTEMPTS = 320;   
+
+   private static double getRadius() {
+      return ModConfig.COMMON.nightfallDragon.judgementCutRange.getValue();
+   }
+
+   private static int getTotalCuts() {
+      return ModConfig.COMMON.nightfallDragon.judgementCutTotalCuts.getValue();
+   }
+
+   private static int getIntervalTicks() {
+      return ModConfig.COMMON.nightfallDragon.judgementCutIntervalTicks.getValue();
+   }
+
+   private static double getDamage() {
+      return ModConfig.COMMON.nightfallDragon.judgementCutDamage.getValue();
+   }
+
+   private static float getScale() {
+      return ModConfig.COMMON.nightfallDragon.judgementCutScale.getValue().floatValue();
+   }   
 
    private NightfallDragonJudgementCutLogic() {
    }
@@ -88,10 +91,10 @@ public final class NightfallDragonJudgementCutLogic {
       Vec3 center = serverPlayer.position().add(0.0, serverPlayer.getBbHeight() * 0.5, 0.0);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.PLAYERS, 1.3F, 0.55F);
 
-      // 2. 将 100 次次元斩以 index * INTERVAL_TICKS 的时间差注册到定时任务队列中
+      // 2. 将 100 次次元斩以 index * getIntervalTicks() 的时间差注册到定时任务队列中
       for (int i = 0; i < anchors.size(); i++) {
          int index = i;
-         ServerTickScheduler.schedule(index * INTERVAL_TICKS, () -> spawnScheduledCut(serverPlayer, anchors.get(index), index));
+         ServerTickScheduler.schedule(index * getIntervalTicks(), () -> spawnScheduledCut(serverPlayer, anchors.get(index), index));
       }
    }
 
@@ -107,22 +110,24 @@ public final class NightfallDragonJudgementCutLogic {
     * 收集所有次元斩的生成坐标锚点。优先锁定活体敌人，不足时在周身圆盘范围内随机采样。
     */
    private static List<CutAnchor> collectAnchors(ServerLevel level, ServerPlayer player) {
-      List<CutAnchor> anchors = new ArrayList<>(TOTAL_CUTS);
+      int totalCuts = getTotalCuts();
+      double radius = getRadius();
+      List<CutAnchor> anchors = new ArrayList<>(totalCuts);
       Vec3 center = player.position();
       
       // 第一阶段：搜索 50 格半径内的敌人，在敌人身体处放置锚点
-      List<LivingEntity> targets = SpecialEffectSupport.radialTargets(level, player, center, RADIUS);
+      List<LivingEntity> targets = SpecialEffectSupport.radialTargets(level, player, center, radius);
       for (LivingEntity target : targets) {
          anchors.add(CutAnchor.target(target.getId(), target.position()));
-         if (anchors.size() >= TOTAL_CUTS) {
+         if (anchors.size() >= totalCuts) {
             return anchors;
          }
       }
 
-      // 第二阶段：如果敌人不足 100 个，使用极坐标随机产生地面有效坐标点补齐
+      // 第二阶段：如果敌人不足，使用极坐标随机产生地面有效坐标点补齐
       RandomSource random = player.getRandom();
       int attempts = 0;
-      while (anchors.size() < TOTAL_CUTS && attempts++ < TOTAL_RANDOM_POSITION_ATTEMPTS) {
+      while (anchors.size() < totalCuts && attempts++ < TOTAL_RANDOM_POSITION_ATTEMPTS) {
          Vec3 position = randomPosition(level, player, random);
          if (position != null) {
             anchors.add(CutAnchor.fixed(position));
@@ -131,7 +136,7 @@ public final class NightfallDragonJudgementCutLogic {
 
       // 第三阶段：后备保底落点
       Vec3 fallback = findNearbyFloor(level, player.getX(), player.getY(), player.getZ());
-      while (anchors.size() < TOTAL_CUTS && fallback != null) {
+      while (anchors.size() < totalCuts && fallback != null) {
          anchors.add(CutAnchor.fixed(fallback));
       }
 
@@ -140,11 +145,12 @@ public final class NightfallDragonJudgementCutLogic {
 
    /**
     * 极坐标圆盘均匀分布采样算法：
-    * 极坐标中，径向距离必须使用 r = RADIUS * sqrt(random) 才能保证点在二维圆盘内分布密度均匀。
+    * 极坐标中，径向距离必须使用 r = getRadius() * sqrt(random) 才能保证点在二维圆盘内分布密度均匀。
     */
    private static Vec3 randomPosition(ServerLevel level, ServerPlayer player, RandomSource random) {
+      double radius = getRadius();
       for (int attempt = 0; attempt < RANDOM_POSITION_ATTEMPTS; attempt++) {
-         double distance = RADIUS * Math.sqrt(random.nextDouble()); // 开平方保证均匀密度
+         double distance = radius * Math.sqrt(random.nextDouble()); // 开平方保证均匀密度
          double angle = random.nextDouble() * Math.PI * 2.0;         // 0 ~ 2π 随机角度
          double x = player.getX() + Math.cos(angle) * distance;
          double z = player.getZ() + Math.sin(angle) * distance;
@@ -238,9 +244,9 @@ public final class NightfallDragonJudgementCutLogic {
       cut.setOwner(player);
       cut.setShooter(player);
       cut.setColor(NightfallDragonDefinitions.SEALED_SUMMONED_SWORD_COLOR);
-      cut.setDamage(JUDGEMENT_CUT_DAMAGE);
-      cut.setLifetime(JUDGEMENT_CUT_LIFETIME);
-      cut.setRank(JUDGEMENT_CUT_SCALE); // 放大尺寸
+      cut.setDamage(getDamage());
+      cut.setLifetime(20);
+      cut.setRank(getScale()); // 放大尺寸
       cut.setIsCritical(index % 3 == 0); // 每 3 次连斩触发一次强力暴击音效与震屏
       cut.setNoGravity(true);
       cut.setPos(position.x, position.y + 0.15, position.z);
@@ -255,7 +261,7 @@ public final class NightfallDragonJudgementCutLogic {
       GammaThunderburstLogic.spawnBolt(level, position, 0xB026FF);
 
       // 粒子与声效支持
-      double pScale = Math.max(0.5, JUDGEMENT_CUT_SCALE);
+      double pScale = Math.max(0.5, getScale());
       int pCount1 = (int) Math.round(5 * pScale);
       int pCount2 = (int) Math.round(8 * pScale);
       level.sendParticles(ParticleTypes.REVERSE_PORTAL, position.x, position.y + 0.2, position.z, pCount1, 0.45 * pScale, 0.08 * pScale, 0.45 * pScale, 0.05);

@@ -38,17 +38,17 @@ public class StarlessJudgement extends SpecialEffect {
             ISlashBladeState state = event.getSlashBladeState();
             if (state.hasSpecialEffect(ModSpecialEffects.STARLESS_JUDGEMENT.getId())) {
                ModConfig.StarlessJudgement config = ModConfig.COMMON.annihilationBlade.starlessJudgement;
-               if (SpecialEffectSupport.tryStartCooldown(LAST_TRIGGER, player, player.level().getGameTime(), config.cooldownTicks.get())) {
+               if (SpecialEffectSupport.tryStartCooldown(LAST_TRIGGER, player, player.level().getGameTime(), config.cooldownTicks.getValue())) {
                   ServerLevel level = player.serverLevel();
-                  double range = config.range.get();
-                  double width = config.width.get();
-                  double visualScale = config.visualScale.get();
+                  double range = config.range.getValue();
+                  double width = config.width.getValue();
+                  double visualScale = config.visualScale.getValue();
                   Vec3 direction = player.getLookAngle().normalize();
                   Vec3 right = SpecialEffectSupport.rightOf(direction);
                   Vec3 start = player.getEyePosition().add(direction.scale(1.4));
                   Vec3 end = start.add(direction.scale(range));
                   AnnihilationVisuals.spawnStarlessJudgementCast(level, start, direction, right, range * visualScale, width * visualScale);
-                  List<LivingEntity> targets = SpecialEffectSupport.beamTargets(level, player, start, direction, range, width, config.maxTargets.get());
+                  List<LivingEntity> targets = SpecialEffectSupport.beamTargets(level, player, start, direction, range, width, config.maxTargets.getValue());
 
                   for (int index = 0; index < targets.size(); index++) {
                      LivingEntity target = targets.get(index);

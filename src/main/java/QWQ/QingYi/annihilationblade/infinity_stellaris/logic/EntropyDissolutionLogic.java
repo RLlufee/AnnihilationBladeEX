@@ -86,14 +86,14 @@ public final class EntropyDissolutionLogic {
       }
 
       // 按配置的百分比（如 20%）直接削减目标当前 HP
-      double percent = ModConfig.COMMON.infinityStellaris.entropyPercent.get();
+      double percent = ModConfig.COMMON.infinityStellaris.entropyPercent.getValue();
       float entropyDamage = (float)(target.getMaxHealth() * percent);
       float newHealth = Math.max(1.0F, target.getHealth() - entropyDamage);
       target.setHealth(newHealth); // 强行写入目标 HP
 
       // 增加印记层数
       int marks = addMark(player, target);
-      if (marks >= ModConfig.COMMON.infinityStellaris.entropyMarks.get()) {
+      if (marks >= ModConfig.COMMON.infinityStellaris.entropyMarks.getValue()) {
          clearMark(player, target);
          executeFinal(target, player); // 印记叠满，触发终极绝对抹杀！
       } else if (target.level() instanceof ServerLevel level) {
@@ -217,7 +217,7 @@ public final class EntropyDissolutionLogic {
    }
 
    private static void blacklist(LivingEntity target) {
-      long expiry = target.level().getGameTime() + ModConfig.COMMON.infinityStellaris.entropyBlacklistTicks.get();
+      long expiry = target.level().getGameTime() + ModConfig.COMMON.infinityStellaris.entropyBlacklistTicks.getValue();
       BLACKLISTED_UNTIL.put(target.getUUID(), expiry);
    }
 

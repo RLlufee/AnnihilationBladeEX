@@ -27,7 +27,7 @@ public final class InfinityStellarisTooltipEvents {
          return;
       }
 
-      if (!ModConfig.COMMON.clientTooltips.enableInfinityStellarisRenderer.get()) {
+      if (!ModConfig.CLIENT.clientTooltips.enableInfinityStellarisRenderer.getValue()) {
          return;
       }
 

@@ -32,7 +32,9 @@ public final class NightfallDragonDefinitions {
    public static final ResourceLocation HALO_TEXTURE = ResourceLocation.fromNamespaceAndPath("annihilationblade", "model/nightfall_dragon_halo.png");
    private static final ResourceLocation EMPTY_SLASH_ART = ResourceLocation.fromNamespaceAndPath("slashblade", "none");
    private static final ResourceLocation SEALED_SLASH_ART = ResourceLocation.fromNamespaceAndPath("annihilationblade", "nightfall_judgement_cut");
-   private static final ResourceLocation AWAKENED_SLASH_ART = ResourceLocation.fromNamespaceAndPath("annihilationblade", "dragon_head_charge");
+   private static final ResourceLocation AWAKENED_SLASH_ART = ResourceLocation.fromNamespaceAndPath("annihilationblade", "scale_guard");
+   private static final ResourceLocation FINAL_SLASH_ART = ResourceLocation.fromNamespaceAndPath("annihilationblade", "cosmic_nightfall_descent");
+   public static final float BASE_ATTACK_DAMAGE = 22.0F;
    public static final int SEALED_SUMMONED_SWORD_COLOR = 11158783;
    public static final int AWAKENED_SUMMONED_SWORD_COLOR = 16443135;
    public static final int FINAL_SUMMONED_SWORD_COLOR = 13938487;
@@ -166,7 +168,7 @@ public final class NightfallDragonDefinitions {
       String normalizedForm = normalizeForm(form);
       boolean awakened = FORM_AWAKENED.equals(normalizedForm);
       boolean finalForm = FORM_FINAL.equals(normalizedForm);
-      ResourceLocation slashArt = finalForm ? EMPTY_SLASH_ART : awakened ? AWAKENED_SLASH_ART : SEALED_SLASH_ART;
+      ResourceLocation slashArt = finalForm ? FINAL_SLASH_ART : awakened ? AWAKENED_SLASH_ART : SEALED_SLASH_ART;
       tag.putString("ModelName", BLADE_MODEL.toString());
       tag.putString("TextureName", BLADE_TEXTURE.toString());
       tag.putString("SlashArts", slashArt.toString());
@@ -178,7 +180,7 @@ public final class NightfallDragonDefinitions {
       stack.getCapability(ItemSlashBlade.BLADESTATE).ifPresent(state -> {
          state.setTranslationKey(finalForm ? FINAL_DESCRIPTION_ID : awakened ? AWAKENED_DESCRIPTION_ID : DESCRIPTION_ID);
          state.setSlashArtsKey(slashArt);
-         state.setBaseAttackModifier(22.0F);
+         state.setBaseAttackModifier(BASE_ATTACK_DAMAGE);
          state.setMaxDamage(2400);
          state.setDefaultBewitched(true);
          state.setModel(BLADE_MODEL);
@@ -192,8 +194,20 @@ public final class NightfallDragonDefinitions {
 
    private static void ensureNightfallEnchantments(ItemStack stack) {
       Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
-      enchantments.put(Enchantments.UNBREAKING, Math.max(10, enchantments.getOrDefault(Enchantments.UNBREAKING, 0)));
+      putMaxEnchant(enchantments, Enchantments.SHARPNESS, 10);
+      putMaxEnchant(enchantments, Enchantments.POWER_ARROWS, 10);
+      putMaxEnchant(enchantments, Enchantments.INFINITY_ARROWS, 10);
+      putMaxEnchant(enchantments, Enchantments.MENDING, 10);
+      putMaxEnchant(enchantments, Enchantments.UNBREAKING, 10);
+      putMaxEnchant(enchantments, Enchantments.MOB_LOOTING, 10);
+      putMaxEnchant(enchantments, Enchantments.MULTISHOT, 10);
+      putMaxEnchant(enchantments, Enchantments.FALL_PROTECTION, 10);
+      putMaxEnchant(enchantments, Enchantments.SWEEPING_EDGE, 10);
       EnchantmentHelper.setEnchantments(enchantments, stack);
+   }
+
+   private static void putMaxEnchant(Map<Enchantment, Integer> enchantments, Enchantment enchantment, int level) {
+      enchantments.put(enchantment, Math.max(level, enchantments.getOrDefault(enchantment, 0)));
    }
 
    private static String normalizeForm(String form) {

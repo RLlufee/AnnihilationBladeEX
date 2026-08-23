@@ -3,8 +3,9 @@ package QWQ.QingYi.annihilationblade.registry;
 import QWQ.QingYi.annihilationblade.annihilation_blade.logic.SpatialFractureExecutor;
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.VacuumDecayCollapseLogic;
-import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.DragonHeadChargeLogic;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.CosmicNightfallDescentLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.NightfallDragonJudgementCutLogic;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.ScaleGuardLogic;
 import mods.flammpfeil.slashblade.init.DefaultResources;
 import mods.flammpfeil.slashblade.registry.combo.ComboState;
 import mods.flammpfeil.slashblade.registry.combo.ComboState.Builder;
@@ -108,8 +109,8 @@ public class ModComboStates {
          )
          .build()
    );
-   public static final RegistryObject<ComboState> DRAGON_HEAD_CHARGE_STATE = REGISTRY.register(
-      "dragon_head_charge_state",
+   public static final RegistryObject<ComboState> SCALE_GUARD_STATE = REGISTRY.register(
+      "scale_guard_state",
       () -> Builder.newInstance()
          .priority(85)
          .startAndEnd(720, 780)
@@ -121,11 +122,35 @@ public class ModComboStates {
                .put(
                   3,
                   entity -> entity.level()
-                     .playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.4F, 0.7F)
+                     .playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.4F, 0.55F)
                )
                .put(9, entity -> {
                   if (entity instanceof Player player && !player.level().isClientSide) {
-                     DragonHeadChargeLogic.unleash(player);
+                     ScaleGuardLogic.unleash(player);
+                  }
+               })
+               .build()
+         )
+         .build()
+   );
+   public static final RegistryObject<ComboState> COSMIC_NIGHTFALL_DESCENT_STATE = REGISTRY.register(
+      "cosmic_nightfall_descent_state",
+      () -> Builder.newInstance()
+         .priority(110)
+         .startAndEnd(800, 860)
+         .motionLoc(DefaultResources.ExMotionLocation)
+         .next(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .nextOfTimeout(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .addTickAction(
+            TimeLineTickAction.getBuilder()
+               .put(
+                  3,
+                  entity -> entity.level()
+                     .playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.4F, 0.55F)
+               )
+               .put(10, entity -> {
+                  if (entity instanceof Player player && !player.level().isClientSide) {
+                     CosmicNightfallDescentLogic.unleash(player);
                   }
                })
                .build()

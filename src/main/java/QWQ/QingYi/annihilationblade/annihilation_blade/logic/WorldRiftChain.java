@@ -30,7 +30,7 @@ public final class WorldRiftChain {
    }
 
    private static void schedule(ServerLevel level, UUID attackerId, Vec3 attackerOrigin, Vec3 center, int depth) {
-      int maxDepth = ModConfig.COMMON.annihilationBlade.worldRift.chainCount.get();
+      int maxDepth = ModConfig.COMMON.annihilationBlade.worldRift.chainCount.getValue();
       if (depth > maxDepth) {
          return;
       }
@@ -45,14 +45,14 @@ public final class WorldRiftChain {
       }
 
       ModConfig.WorldRift config = ModConfig.COMMON.annihilationBlade.worldRift;
-      double chainRange = config.chainRange.get();
+      double chainRange = config.chainRange.getValue();
       double chainRangeSqr = chainRange * chainRange;
       if (center.distanceToSqr(attackerOrigin) > chainRangeSqr) {
          return;
       }
 
-      double radius = config.radius.get();
-      double visualScale = config.visualScale.get();
+      double radius = config.radius.getValue();
+      double visualScale = config.visualScale.getValue();
       List<LivingEntity> targets = SpecialEffectSupport.radialTargets(
          level,
          attacker,
@@ -78,7 +78,7 @@ public final class WorldRiftChain {
             executingChain = false;
          }
 
-         if (depth < config.chainCount.get()) {
+         if (depth < config.chainCount.getValue()) {
             schedule(level, attackerId, attackerOrigin, targetCenter, depth + 1);
          }
          count++;

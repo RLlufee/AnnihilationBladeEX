@@ -43,10 +43,16 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = "annihilationblade")
 public class DemonicBloodParasite extends SpecialEffect {
-   private static final double EXTRA_DAMAGE_PERCENT = 0.05;
    private static final int EFFECT_TICKS = 120;
-   private static final int PHANTOM_BURST_MARKS = 20; //从10修改为20。不然太离谱了
    private static final float PHANTOM_BURST_DAMAGE_PERCENT = 0.05F;
+
+   private static double getExtraDamagePercent() {
+      return ModConfig.COMMON.nightfallDragon.demonicBloodExtraDamagePercent.getValue();
+   }
+
+   private static int getPhantomBurstMarks() {
+      return ModConfig.COMMON.nightfallDragon.demonicBloodPhantomBurstMarks.getValue();
+   }
    private static final int VISUAL_COOLDOWN_TICKS = 10;
    private static final int MAX_VISUAL_BURSTS_PER_LEVEL_TICK = 3;
    private static final int MAX_VISUAL_PARTICLES_PER_LEVEL_TICK = 90;
@@ -84,7 +90,7 @@ public class DemonicBloodParasite extends SpecialEffect {
          triggerPhantomBurstIfReady(level, player, target, marks);
       }
 
-      hurtInternally(target, player, (float)(target.getMaxHealth() * EXTRA_DAMAGE_PERCENT));
+      hurtInternally(target, player, (float)(target.getMaxHealth() * getExtraDamagePercent()));
    }
 
    public static void applySummonedSwordMark(Player player, LivingEntity target) {
@@ -100,7 +106,7 @@ public class DemonicBloodParasite extends SpecialEffect {
          triggerPhantomBurstIfReady(level, player, target, marks);
       }
 
-      hurtInternally(target, player, (float)(target.getMaxHealth() * EXTRA_DAMAGE_PERCENT));
+      hurtInternally(target, player, (float)(target.getMaxHealth() * getExtraDamagePercent()));
    }
 
    public static boolean isInternalDamage(LivingEntity target) {
@@ -206,7 +212,8 @@ public class DemonicBloodParasite extends SpecialEffect {
    }
 
    private static void triggerPhantomBurstIfReady(ServerLevel level, Player player, LivingEntity target, int marks) {
-      if (marks % PHANTOM_BURST_MARKS != 0) {
+      int burstMarks = getPhantomBurstMarks();
+      if (burstMarks <= 0 || marks % burstMarks != 0) {
          return;
       }
 
@@ -216,8 +223,8 @@ public class DemonicBloodParasite extends SpecialEffect {
 
    private static void spawnPhantomSwordBurst(ServerLevel level, Player player, LivingEntity target) {
       ModConfig.PhantomBurst config = ModConfig.COMMON.bloodPrison.phantomBurst;
-      int swordCount = config.swordCount.get();
-      double visualScale = config.visualScale.get();
+      int swordCount = config.swordCount.getValue();
+      double visualScale = config.visualScale.getValue();
       Vec3 center = target.position().add(0.0, target.getBbHeight() * 0.55, 0.0);
 
       for (int i = 0; i < swordCount; i++) {
@@ -227,7 +234,7 @@ public class DemonicBloodParasite extends SpecialEffect {
          spawnPhantomSword(level, player, start, center, i);
       }
 
-      AnnihilationVisuals.spawnBloodPrisonBurst(level, center, Math.max(1.2, target.getBbWidth() * config.burstRadiusScale.get()) * visualScale, player.getRandom());
+      AnnihilationVisuals.spawnBloodPrisonBurst(level, center, Math.max(1.2, target.getBbWidth() * config.burstRadiusScale.getValue()) * visualScale, player.getRandom());
       level.playSound(null, center.x, center.y, center.z, SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 0.75F, 1.7F);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F, 0.55F);
    }
@@ -240,7 +247,7 @@ public class DemonicBloodParasite extends SpecialEffect {
       sword.setDamage(0.0);
       sword.setNoClip(true);
       sword.setPierce((byte)0);
-      sword.setDelay(ModConfig.COMMON.bloodPrison.phantomBurst.swordDelayTicks.get() + index % 4);
+      sword.setDelay(ModConfig.COMMON.bloodPrison.phantomBurst.swordDelayTicks.getValue() + index % 4);
       sword.setRoll(index * 36.0F);
       Vec3 direction = end.subtract(start).normalize();
       sword.setPos(start.x, start.y, start.z);
