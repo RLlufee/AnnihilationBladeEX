@@ -1,0 +1,35 @@
+{
+  "name": "annihilationblade:nightfall_dragon",
+  "enchantments": [
+    { "id": "minecraft:sharpness", "lvl": 10 },
+    { "id": "minecraft:power", "lvl": 10 },
+    { "id": "minecraft:infinity", "lvl": 10 },
+    { "id": "minecraft:mending", "lvl": 10 },
+    { "id": "minecraft:unbreaking", "lvl": 10 },
+    { "id": "minecraft:looting", "lvl": 10 },
+    { "id": "minecraft:multishot", "lvl": 10 },
+    { "id": "minecraft:feather_falling", "lvl": 10 },
+    { "id": "minecraft:sweeping", "lvl": 10 }
+  ],
+  "properties": {
+    "attack_base": 22.0,
+    "max_damage": 2400,
+    "slash_art": "annihilationblade:nightfall_judgement_cut",
+    "special_effects": [
+      "yakumoblade:ghost_blade",
+      "yakumoblade:sharpness_blade",
+      "annihilationblade:demonic_blood_parasite",
+      "annihilationblade:outer_god_scar"
+    ],
+    "unbreakable": true,
+    "sword_type": [
+      "bewitched"
+    ]
+  },
+  "render": {
+    "carry_type": "ninja",
+    "model": "annihilationblade:model/nightfall_dragon.obj",
+    "texture": "annihilationblade:model/nightfall_dragon.png",
+    "summon_sword_color": 11158783
+  }
+}

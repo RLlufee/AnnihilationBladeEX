@@ -1,0 +1,59 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All rights reserved"
+issueTrackerURL="https://github.com/"
+
+[[mods]]
+modId="annihilationblade"
+version="${mod_version}"
+displayName="Annihilation Blade · Terminus"
+authors="青衣_璃"
+description='''
+§5Annihilation Blade · Terminus
+§7A forbidden SlashBlade forged from void, causality and the silence after all stars.
+§d
+Features:
+- Spatial Fracture / Infernal Slaughter / Absolute Annihilation Zone SA
+- Terminus, Blood Prison, and Infinity Stellaris SE chains
+- Absolute execution, final-weapon Infinity Stellaris, native-SE cosmic string cut, toggleable reversible curvature rupture, custom gamma thunderbolts, configurable tooltip renderers, void flight, gamma fullbright
+'''
+logoFile="icon.png"
+
+
+[[dependencies.annihilationblade]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.annihilationblade]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.annihilationblade]]
+modId="slashblade"
+mandatory=true
+versionRange="[0.0.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.annihilationblade]]
+modId="jupiter"
+mandatory=true
+versionRange="[2,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.annihilationblade]]
+modId="jei_slashblade"
+mandatory=false
+versionRange="[0.0.1,)"
+ordering="AFTER"
+side="CLIENT"
+
+[[mixins]]
+    type = "FML"
+    config = "annihilationblade.mixins.json"

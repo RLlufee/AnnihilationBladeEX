@@ -1,0 +1,40 @@
+{
+  "name": "annihilationblade:annihilation_blade",
+  "enchantments": [
+    { "id": "minecraft:sharpness", "lvl": 10 },
+    { "id": "minecraft:fire_aspect", "lvl": 10 },
+    { "id": "minecraft:smite", "lvl": 10 },
+    { "id": "minecraft:bane_of_arthropods", "lvl": 10 },
+    { "id": "minecraft:looting", "lvl": 10 },
+    { "id": "minecraft:sweeping", "lvl": 10 },
+    { "id": "minecraft:power", "lvl": 10 },
+    { "id": "minecraft:unbreaking", "lvl": 10 },
+    { "id": "minecraft:mending", "lvl": 10 },
+    { "id": "minecraft:thorns", "lvl": 10 }
+  ],
+  "properties": {
+    "attack_base": 50.0,
+    "max_damage": 2000,
+    "slash_art": "annihilationblade:spatial_fracture",
+    "special_effects": [
+      "annihilationblade:dankong",
+      "annihilationblade:world_rift",
+      "annihilationblade:terminus_echo",
+      "annihilationblade:void_dominion",
+      "annihilationblade:causality_collapse",
+      "annihilationblade:starless_judgement",
+      "annihilationblade:phantom_judgement",
+      "annihilationblade:abyssal_decree"
+    ],
+    "unbreakable": true,
+    "sword_type": [
+      "bewitched"
+    ]
+  },
+  "render": {
+    "carry_type": "ninja",
+    "model": "annihilationblade:model/annihilation_blade.obj",
+    "texture": "annihilationblade:model/annihilation_blade.png",
+    "summon_sword_color": 11141375
+  }
+}
