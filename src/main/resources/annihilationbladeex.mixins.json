@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "QWQ.QingYi.annihilationbladeex.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "EntityAbstractSummonedSwordMixin"
+  ],
+  "client": [
+    "LightTextureMixin"
+  ],
+  "server": []
+}
