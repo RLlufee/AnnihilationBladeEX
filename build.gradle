@@ -29,7 +29,19 @@ sourceSets.main.resources {
 
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
+    mavenCentral()
     maven { url = 'https://maven.neoforged.net/releases' }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter {
+            includeGroup 'maven.modrinth'
+        }
+    }
     flatDir {
         dir 'libs'
     }
@@ -140,6 +152,7 @@ dependencies {
 
     implementation files("libs/SlashBladeResharped-2.0.3-1.21.1.jar")
     localRuntime files("libs/SlashBladeResharped-2.0.3-1.21.1.jar")
+    implementation "maven.modrinth:XbiLGMMU:2.3.7-1.21.1-neoforge"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
