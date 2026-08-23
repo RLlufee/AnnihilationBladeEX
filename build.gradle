@@ -129,6 +129,17 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter {
+            includeGroup 'maven.modrinth'
+        }
+    }
 }
 
 dependencies {
@@ -142,6 +153,10 @@ dependencies {
     implementation(fg.deobf("curse.maven:slashblade-resharped-1022428:6164820")) {
         exclude group: 'org.apache.logging.log4j'
     }
+    // Jupiter 2.3.3-bugfix is compiled with the same 1.20.1 official names used here;
+    // keep it as a normal dependency so ForgeGradle does not look for a nonexistent
+    // Modrinth "mapped_official_1.20.1" classifier.
+    implementation("maven.modrinth:XbiLGMMU:2YdOW2Dk")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

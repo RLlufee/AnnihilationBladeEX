@@ -1,4 +1,4 @@
-# Annihilation Blade · Terminus 2.7.2-1.20.1-forge
+# Annihilation Blade · Terminus 2.8.0-1.20.1-forge
 
 > A Forge 1.20.1 SlashBlade expansion mod based on SlashBlade / SlashBlade Resharped. Revolving around themes of "Terminus, World Rift, Collapse, Judgement, Blood Prison, and Cosmic Laws", this mod provides three named blades, three sets of Slash Arts (SA), a complete Special Effect (SE) chain, configurable low-risk parameters, and visual/hotkey controls designed for real-combat readability.
 
@@ -239,7 +239,7 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 
 Build output will be generated at:
 
-`build/libs/annihilationblade-2.7.2-1.20.1-forge.jar`
+`build/libs/annihilationblade-2.8.0-1.20.1-forge.jar`
 
 ## Changelog
 

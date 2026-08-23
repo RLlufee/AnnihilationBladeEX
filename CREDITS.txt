@@ -33,7 +33,7 @@ pull requests, and just helping out the community in general. Thank you.
 
 --LexManos
 
-=========================================================================
+#=========================================================================
 
 This is Forge Mod Loader.
 
@@ -52,7 +52,7 @@ It also contains suggestions and hints and generous helpings of code from LexMan
 http://www.minecraftforge.net/
 
 Additionally, it contains an implementation of topological sort based on that 
-published at http://keithschwarz.com/interesting/code/?dir=topological-sort
+#published at http://keithschwarz.com/interesting/code/?dir=topological-sort
 
 It also contains code from the Maven project for performing versioned dependency
 resolution. http://maven.apache.org/

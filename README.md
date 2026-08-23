@@ -1,4 +1,4 @@
-# Annihilation Blade · Terminus 2.7.2-1.20.1-forge
+# Annihilation Blade · Terminus 2.8.0-1.20.1-forge
 
 > 基于 SlashBlade / SlashBlade Resharped 的 Forge 1.20.1 拔刀剑扩展模组。模组围绕“终焉、裂界、坍缩、审判、血狱、宇宙法则、混沌魔龙”主题，提供四把命名刀、五个 SA、完整 SE 链路、可配置低风险参数，以及面向实战可读性的视觉与按键控制。
 
@@ -12,10 +12,10 @@
 - 血狱刀 `annihilationblade:blood_prison`
 - 无尽星空 `annihilationblade:infinity_stellaris`
 - 魔龙夜陨 `annihilationblade:nightfall_dragon`
-- 5 个 SA：`spatial_fracture`、`infernal_slaughter`、`vacuum_decay_collapse`、`nightfall_judgement_cut`、`dragon_head_charge`
+- 5 个 SA：`spatial_fracture`、`infernal_slaughter`、`vacuum_decay_collapse`、`nightfall_judgement_cut`、`scale_guard`
 - 23 个 SE 注册项，其中湮灭之刃使用 8 个终焉系 SE，血狱使用 3 个血狱系 SE，无尽星空使用 4 个宇宙法则系 SE，魔龙夜陨三形态使用 8 个魔龙系 SE
 - 命名刀 datapack 定义
-- Forge common 配置文件
+- Jupiter common/server 与 client JSON 配置文件
 - 中英语言资源 #感觉繁中没必要，遂删掉
 - JEI SlashBlade 联动描述资源
 - 断空闪现模式热键与动作栏提示
@@ -32,6 +32,7 @@
 | Forge | `47.4.21` |
 | Java | `17` |
 | 前置 | SlashBlade / SlashBlade Resharped |
+| 必需前置 | Jupiter `2.3.3-bugfix`（Modrinth 构件 `2YdOW2Dk`） |
 
 ## 武器
 
@@ -97,15 +98,15 @@
 | 基础攻击力 | `22.0` |
 | 耐久 | `2400` |
 | 第一形态 SA | `annihilationblade:nightfall_judgement_cut` |
-| 第二形态 SA | `annihilationblade:dragon_head_charge` |
-| 第三形态 SA | `slashblade:none` |
+| 第二形态 SA | `annihilationblade:scale_guard` |
+| 第三形态 SA | `annihilationblade:cosmic_nightfall_descent` |
 | 第一形态 SE | `demonic_blood_parasite`、`outer_god_scar` |
 | 第二形态 SE | 继承 `demonic_blood_parasite`、`outer_god_scar`，追加 `dragon_pressure_domain`、`reverse_scale_hunt` |
 | 第三形态 SE | 继承 `demonic_blood_parasite`、`dragon_pressure_domain`，追加 `dragon_god_body`、`absolute_annihilation_domain`、`myriad_dragon_blade_storm`、`world_cleaving_slash` |
 
-默认形态为【封印·淬血】，合法攻击与非外神伤痕、非逆鳞剑阵、非灭世龙刃的魔龙幻影剑命中会叠加无上限魔血印记，施加最高凋零 V、失明和 5% 最大生命值额外魔法伤害；已被黯焰标记的目标会让后续合法魔龙刀攻击走真实伤害路径。封印形态拥有专属 SA【夜陨次元斩】：以玩家为中心扫描 20 格内合法目标，在目标脚下或随机补位点每 5 tick 生成 1 个原版次元斩实体，总计 20 个。按 `Z` 可在【封印·淬血】、【觉醒·龙魂复苏】与【终焉·神陨夜陨】之间三态循环，第三形态直接开放。觉醒形态继承封印形态的魔血寄生与外神伤痕，持有时额外获得速度 III、力量 III、夜视 III、伤害吸收 III，挥刀会释放金紫逆鳞剑阵并短暂获得抗性提升 III；觉醒形态 SA【龙魂冲撞】会发射放大的 `dragon_head.obj` 龙头，伴随龙吼沿玩家目视方向飞行 200 格，对路径合法目标造成 2000 点魔法伤害，并把命中的目标吸到龙头前方一路撞飞。
+默认形态为【封印·淬血】，合法攻击与非外神伤痕、非逆鳞剑阵、非灭世龙刃的魔龙幻影剑命中会叠加无上限魔血印记，施加最高凋零 V、失明和 5% 最大生命值额外魔法伤害；已被黯焰标记的目标会让后续合法魔龙刀攻击走真实伤害路径。封印形态拥有专属 SA【夜陨次元斩】：以玩家为中心扫描 20 格内合法目标，在目标脚下或随机补位点每 5 tick 生成 1 个原版次元斩实体，总计 20 个。按 `Z` 可在【封印·淬血】、【觉醒·龙魂复苏】与【终焉·神陨夜陨】之间三态循环，第三形态直接开放。觉醒形态继承封印形态的魔血寄生与外神伤痕，持有时额外获得速度 III、力量 III、夜视 III、伤害吸收 III，挥刀会释放金紫逆鳞剑阵并短暂获得抗性提升 III；觉醒形态 SA【鳞之卫】会释放 16 柄直立魔龙幻影剑围绕玩家加速旋转，2 秒后急停并外展 5 格，停留 10 tick 后升空重砸。幻影剑飞行触碰合法目标时每 5 tick 造成 12 点伤害，落砸造成 500% 刀面板伤害加目标最大生命 10% 的魔法伤害，并生成参考灾变模组 ScreenShake 逻辑的视角震动。第三形态专属 SA【神陨·宇宙夜陨降临】会锁定前方 40 格焦点并产生黑洞引力场拉扯 24 格内目标，高空密集轰炸 15 轮夜陨星雨，随后暗星内核剧烈坍缩引发广域冲击波，剥离黄血护盾并热寂处决半血以下目标。
 
-第三形态定位为湮灭之刃与无尽星空之下的魔龙系终局形态，仍保留 `slashblade:none`，不注册未设计的 SA【神陨·宇宙夜陨降临】。终焉态继承前两态中不重复的核心特点：保留魔血/黯焰标记与龙威速度、力量、夜视，但低阶 `outer_god_scar` 与 `reverse_scale_hunt` 两套挥刀召剑不再重复挂载，由终焉态的灭世龙刃和贯穿刀波上位替代；觉醒态原本的伤害吸收也由创世龙盾统一承接。背包内存在第三形态魔龙夜陨时即可获得创世神体兜底：拦截可捕获伤害与死亡、刷新生命/饥饿、清除负面效果、提供虚空坠落保护与飞行，并把受到的合法伤害反弹给攻击者；第三态造成的合法伤害会治疗玩家，溢出部分转为最高 200 点生命值的创世龙盾，避免吸收生命条过量渲染。手持第三形态时每秒展开 64 格终焉龙域，最多处理 128 个合法目标，剥离增益与吸收盾、冻结行动、造成当前生命百分比伤害并处决半血以下目标；挥刀会同时释放 20 柄灭世龙刃和 72 格撕裂苍穹剑气，撕裂苍穹最多落下 16 道紫色伽马同源实体闪电。所有广域效果均遵循 SlashBlade 原生 PVP / 友伤目标判定，冻结 Mob 记录原始 NoAI 并在停止手持终焉形态、退出或换维度时恢复；第三态视觉粒子每维度每 tick 上限为 500 个。
+第三形态定位为湮灭之刃与无尽星空之下的魔龙系终局形态，现已成功绑定 SA【神陨·宇宙夜陨降临】。终焉态继承前两态中不重复的核心特点：保留魔血/黯焰标记与龙威速度、力量、夜视，但低阶 `outer_god_scar` 与 `reverse_scale_hunt` 两套挥刀召剑不再重复挂载，由终焉态的灭世龙刃和贯穿刀波上位替代；觉醒态原本的伤害吸收也由创世龙盾统一承接。背包内存在第三形态魔龙夜陨时即可获得创世神体兜底：拦截可捕获伤害与死亡、刷新生命/饥饿、清除负面效果、提供虚空坠落保护与飞行，并把受到的合法伤害反弹给攻击者；第三态造成的合法伤害会治疗玩家，溢出部分转为最高 200 点生命值的创世龙盾，避免吸收生命条过量渲染。手持第三形态时每秒展开 64 格终焉龙域，最多处理 128 个合法目标，剥离增益与吸收盾、冻结行动、造成当前生命百分比伤害并处决半血以下目标；挥刀会同时释放 20 柄灭世龙刃和 72 格撕裂苍穹剑气，撕裂苍穹最多落下 16 道紫色伽马同源实体闪电。所有广域效果均遵循 SlashBlade 原生 PVP / 友伤目标判定，冻结 Mob 记录原始 NoAI 并在停止手持终焉形态、退出或换维度时恢复；第三态视觉粒子每维度每 tick 上限为 500 个。
 
 ## SA
 
@@ -180,17 +181,21 @@
 `魔龙夜陨` 默认使用【封印·淬血】形态。按 `Z` 会发送服务端校验包，只在玩家主手或副手持有魔龙夜陨时切换形态。
 
 - 【封印·淬血】：挂载 `demonic_blood_parasite` 与 `outer_god_scar`，SA 为 `nightfall_judgement_cut`。
-- 【觉醒·龙魂复苏】：继承 `demonic_blood_parasite` 与 `outer_god_scar`，并追加 `dragon_pressure_domain` 与 `reverse_scale_hunt`。
+- 【觉醒·龙魂复苏】：继承 `demonic_blood_parasite` 与 `outer_god_scar`，追加 `dragon_pressure_domain` 与 `reverse_scale_hunt`，SA 为 `scale_guard`。
 - 【终焉·神陨夜陨】：挂载 `dragon_god_body`、`absolute_annihilation_domain`、`myriad_dragon_blade_storm` 与 `world_cleaving_slash`。
-- 【觉醒·龙魂复苏】与【终焉·神陨夜陨】当前保持 `slashblade:none`，避免与后续上位 SA 设计冲突。
+- 【终焉·神陨夜陨】当前保持 `slashblade:none`，避免与后续上位 SA 设计冲突。
 - 第三形态按上位替代规则继承不重复核心 SE，低阶召剑由终焉态技能覆盖。
 - 切换成功后仅更新形态，不再显示动作栏提示。
 
 ## 配置文件
 
-首次启动后，Forge 会生成：
+首次启动并打开 Jupiter 配置入口后，会生成两个配置文件：
 
-`config/annihilationblade-common.toml`
+`config/annihilationblade/common.json`（common/server，服务端权威）
+
+`config/annihilationblade/client.json`（client，仅影响本地 Tooltip）
+
+旧的 `config/annihilationblade-common.toml` 不会自动迁移或删除，仅作为历史备份保留；当前代码不再读取它。
 
 配置文件只开放低风险参数：
 
@@ -209,26 +214,29 @@
 - 无敌、庇护、飞行等安全相关逻辑
 - SlashBlade 真实击杀路径
 
-每个配置项都带有中文 and 英文注释，并写明建议最小 / 最大值。Forge 也会通过 `defineInRange` 对配置值做硬范围限制，避免新玩家填入极端数值导致卡顿或逻辑异常。
+每个配置项都带有中文和英文 Tooltip，并写明建议最小 / 最大值。Jupiter 控件会在编辑时执行硬范围限制，避免新玩家填入极端数值导致卡顿或逻辑异常。common/server 配置由服务端同步，联机时只有拥有权限的玩家可以编辑；client Tooltip 开关始终只影响当前客户端。
 
 ### 配置分组
 
 主要分组如下：
 
-```toml
-[client_tooltips]
-[annihilation_blade.spatial_fracture]
-[annihilation_blade.dankong]
-[annihilation_blade.world_rift]
-[annihilation_blade.terminus_echo]
-[annihilation_blade.void_dominion]
-[annihilation_blade.causality_collapse]
-[annihilation_blade.starless_judgement]
-[annihilation_blade.phantom_judgement]
-[annihilation_blade.abyssal_decree]
-[blood_prison.domain]
-[blood_prison.phantom_burst]
-[infinity_stellaris]
+```text
+common.json:
+annihilation_blade.spatial_fracture
+annihilation_blade.dankong
+annihilation_blade.world_rift
+annihilation_blade.terminus_echo
+annihilation_blade.void_dominion
+annihilation_blade.causality_collapse
+annihilation_blade.starless_judgement
+annihilation_blade.phantom_judgement
+annihilation_blade.abyssal_decree
+blood_prison.domain
+blood_prison.phantom_burst
+infinity_stellaris
+
+client.json:
+client_tooltips
 ```
 
 ## 本地化
@@ -422,17 +430,25 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 
 构建产物位于：
 
-`build/libs/annihilationblade-2.7.2-1.20.1-forge.jar`
+`build/libs/annihilationblade-2.8.0-1.20.1-forge.jar`
 
 ## Changelog
 
 ### 未发布
 
-- 新增“魔龙夜陨”第二形态 SA【龙魂冲撞】：觉醒形态绑定 `annihilationblade:dragon_head_charge`，触发后使用 `dragon_head.obj` 与 `dragon_head.png` 渲染放大魔龙头颅，伴随末影龙咆哮沿玩家目视方向飞行 200 格；路径合法目标首次命中受到 2000 点魔法伤害，并被持续吸附到龙头前方随其撞飞。贴图文件名改为全小写以符合 Minecraft `ResourceLocation` 资源路径规则。
-- 参考“暴怒”龙形投射物的客户端链路，给 `dragon_head_charge` 补充 Forge 自定义实体客户端生成工厂，并将 `dragon_head.obj` 的渲染分组改为 SlashBlade OBJ renderer 常用的 `base`，避免服务端伤害生效但客户端模型不显示。
-- 补强“龙魂冲撞”客户端可见性排查：渲染器改为返回实际 `dragon_head.png` 贴图，并按“暴怒”参考的满亮 OBJ 渲染方式绘制 `base` 分组；同时在服务端生成、客户端实体创建和首次渲染处各输出一次诊断日志，用于区分网络同步问题与模型绘制问题。
-- 修正“龙魂冲撞”放大龙头从模型内部/背面观察时不可见的问题：`dragon_head.obj` 会同时绘制正向与反向满亮 pass，避免单面剔除导致释放瞬间或贴近目标时看不到模型外壳。
-- 排查“龙魂冲撞”OBJ 面结构：使用 Python 对 `dragon_head.obj` 全量扫描并执行三角面化重写，确认 19318 个 `f` 面本身已经全部为三角面，未发现需要拆分的四边面或多边面；原始备份移动到 `local_backups/`，不参与资源打包。
+- 将原 Forge `ForgeConfigSpec` 配置树改为 Jupiter 原生 `AutoInitConfigContainer`、`BooleanEntry`、`IntegerEntry`、`DoubleEntry` 与分类标签，保留 76 个配置项的分组、字段名、默认值和范围；玩法代码统一使用 `getValue()`。
+- common/server 配置现在写入 `config/annihilationblade/common.json`，由服务端作为权威配置并通过 Jupiter 同步；客户端 Tooltip 开关独立写入 `config/annihilationblade/client.json`，只影响本地渲染。
+- Jupiter 2.3.3-bugfix（Modrinth 构件 `maven.modrinth:XbiLGMMU:2YdOW2Dk`）声明为必需前置，源码和 jar 不内置到湮灭之刃；Forge 配置入口接入 Jupiter 原生配置选择页、分类滚动、数值范围校验、重置与 Tooltip。
+- 不自动迁移或删除旧的 `annihilationblade-common.toml`；旧文件保留为历史备份，代码不再读取它，新安装或首次启动生成 Jupiter JSON 默认配置。
+- 已在 `gradle.properties` 固化 Java 17 路径，项目 Wrapper 的 `clean build` 已通过；配置界面、联机权限同步和实际战斗效果仍需在 Forge 1.20.1 游戏内实测。
+
+- 重做“魔龙夜陨”第二形态 SA：移除旧【龙魂冲撞】的逻辑、实体与 `dragon_head.obj/png` 渲染依赖，觉醒形态改为绑定 `annihilationblade:scale_guard`。
+- 新增第二形态 SA【鳞之卫】：释放 16 柄直立魔龙幻影剑，围绕玩家加速旋转 40 tick 后急停，外展 5 格并停留 10 tick，随后升空重砸。
+- 【鳞之卫】飞行阶段触碰合法目标每 5 tick 造成 12 点魔法伤害；落砸阶段造成 500% 魔龙夜陨刀面板伤害加目标最大生命 10% 的魔法伤害，并对命中点附近客户端生成视角震动。
+- 新增 `scale_guard_sword` 与 `nightfall_screen_shake` 两个自定义实体；`scale_guard_sword` 只做不可见轨迹控制，可见剑体使用重锋原生 `EntityAbstractSummonedSword`，震屏实现参考灾变模组 `ScreenShake_Entity` 的半径衰减与相机角度扰动方式。
+- 修正【鳞之卫】幻影剑表现：可见部分改为重锋原生 `EntityAbstractSummonedSword`（`entity.slashblade.abstract_summoned_sword`），`scale_guard_sword` 仅作为不可见轨迹控制器，不再渲染魔龙刀 OBJ。
+- 在 `ScaleGuardSwordEntity` 顶部新增【鳞之卫】调参区，集中暴露持续 tick、轨道半径、外展距离、上升高度、碰撞尺度、触碰伤害、落砸倍率、最大生命比例伤害、旋转加速度与幻影剑 roll 速度等常量。
+- 修正【鳞之卫】高速环绕阶段幻影剑首尾相接的问题：旋转、外展、停留与升空阶段强制保持竖直朝向，仅最终砸落阶段改为向下；幻影剑颜色从默认白色改为亮紫色 `0xDA43FF`。
 **新增功能 (Features)**
 - 完成“魔龙夜陨”前两形态 SE 实装：第一形态【封印·淬血】挂载 `demonic_blood_parasite` 与 `outer_god_scar`，第二形态【觉醒·龙魂复苏】继承第一形态 SE，并追加 `dragon_pressure_domain` 与 `reverse_scale_hunt`。
 - 新增默认 `Z` 键形态切换，客户端只在主手或副手持有魔龙夜陨时发送切换请求，服务端校验后更新 `bladeState`、颜色、翻译键与 SE 列表；当前切换不再显示动作栏提示。
