@@ -75,10 +75,10 @@ public final class NightfallDragonRenderEvents {
             renderEnhancedBladeLuminous(event, time);
          }
 
-         // 3. 物品视角下的交错旋转光环
-         if (lowerTarget.startsWith("item_")) {
-            renderRotatingItemHalo(event, time);
-         }
+         // // 3. 物品视角下的交错旋转光环
+         // if (lowerTarget.startsWith("item_")) {
+         //    renderRotatingItemHalo(event, time);
+         // }
       } finally {
          // 解锁
          RENDERING_EXTRA_LAYER.set(false);
@@ -192,33 +192,33 @@ public final class NightfallDragonRenderEvents {
             BladeRenderState.MAX_LIGHT);
    }
 
-   /**
-    * 物品模式下交错旋转的光环矩阵渲染。
-    */
-   private static void renderRotatingItemHalo(RenderOverrideEvent event, long time) {
-      float rotation = (time % 12000L) * 0.035F;   // 顺时针持续旋转角度
-      float haloPulse = 1.0F + Mth.sin((float) (time * 0.006D)) * 0.05F; // 正弦脉冲
+   // /**
+   //  * 物品模式下交错旋转的光环矩阵渲染。           旋转光环太容易冲突，我ban掉了
+   //  */
+   // private static void renderRotatingItemHalo(RenderOverrideEvent event, long time) {
+   //    float rotation = (time % 12000L) * 0.035F;   // 顺时针持续旋转角度
+   //    float haloPulse = 1.0F + Mth.sin((float) (time * 0.006D)) * 0.05F; // 正弦脉冲
 
-      PoseStack poseStack = event.getPoseStack();
-      poseStack.pushPose();
+   //    PoseStack poseStack = event.getPoseStack();
+   //    poseStack.pushPose();
 
-      try {
-         // 沿 Z 轴旋转与脉冲缩放
-         poseStack.scale(haloPulse, haloPulse, haloPulse);
-         poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
+   //    try {
+   //       // 沿 Z 轴旋转与脉冲缩放
+   //       poseStack.scale(haloPulse, haloPulse, haloPulse);
+   //       poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
          
-         BladeRenderState.setCol(0xF4E84DFF, true);
-         BladeRenderState.renderOverridedLuminous(
-               event.getStack(),
-               event.getModel(),
-               ITEM_HALO_TARGET,
-               NightfallDragonDefinitions.HALO_TEXTURE,
-               poseStack,
-               event.getBuffer(),
-               BladeRenderState.MAX_LIGHT);
-      } finally {
-         poseStack.popPose();
-      }
-   }
+   //       BladeRenderState.setCol(0xF4E84DFF, true);
+   //       BladeRenderState.renderOverridedLuminous(
+   //             event.getStack(),
+   //             event.getModel(),
+   //             ITEM_HALO_TARGET,
+   //             NightfallDragonDefinitions.HALO_TEXTURE,
+   //             poseStack,
+   //             event.getBuffer(),
+   //             BladeRenderState.MAX_LIGHT);
+   //    } finally {
+   //       poseStack.popPose();
+   //    }
+   // }
 }
 
