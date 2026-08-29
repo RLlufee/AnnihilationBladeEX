@@ -3,6 +3,7 @@ package QWQ.QingYi.annihilationblade.registry;
 import QWQ.QingYi.annihilationblade.annihilation_blade.logic.SpatialFractureExecutor;
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.VacuumDecayCollapseLogic;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.CosmicNightfallDescentLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.NightfallDragonJudgementCutLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.ScaleGuardLogic;
 import mods.flammpfeil.slashblade.init.DefaultResources;
@@ -130,6 +131,40 @@ public class ModComboStates {
                })
                .build()
          )
+         .build()
+   );
+   public static final RegistryObject<ComboState> COSMIC_NIGHTFALL_DESCENT_STATE = REGISTRY.register(
+      "cosmic_nightfall_descent_state",
+      () -> Builder.newInstance()
+         .priority(110)
+         .startAndEnd(800, 860)
+         .motionLoc(DefaultResources.ExMotionLocation)
+         .next(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .nextOfTimeout(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .addTickAction(
+            TimeLineTickAction.getBuilder()
+               .put(
+                  3,
+                  entity -> entity.level()
+                     .playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.4F, 0.55F)
+               )
+               .put(10, entity -> {
+                  if (entity instanceof Player player && !player.level().isClientSide) {
+                     CosmicNightfallDescentLogic.unleash(player);
+                  }
+               })
+               .build()
+         )
+         .build()
+   );
+   public static final RegistryObject<ComboState> LOLI_AREA_EXECUTION_STATE = REGISTRY.register(
+      "loli_area_execution_state",
+      () -> Builder.newInstance()
+         .priority(88)
+         .startAndEnd(880, 920)
+         .motionLoc(DefaultResources.ExMotionLocation)
+         .next(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .nextOfTimeout(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
          .build()
    );
 

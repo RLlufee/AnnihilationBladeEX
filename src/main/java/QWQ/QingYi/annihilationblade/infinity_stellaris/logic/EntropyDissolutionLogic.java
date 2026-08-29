@@ -27,21 +27,24 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 /**
- * <h1>熵灭溶解抹杀 (Entropy Dissolution & Execution) 核心逻辑类</h1>
- * <p>
+ * 熵灭溶解抹杀 (Entropy Dissolution & Execution) 核心逻辑类
+ * 
  * 本类展示了 Minecraft Mod 开发中最为强大的“绝对抹杀/绕过防死机制”的实现方式：
- * <ul>
- *   <li><b>高优先级受击拦截 (LivingHurtEvent HIGH)</b>：直接按目标最大生命值百分比切割 HP，绕过护甲与普通减伤。</li>
- *   <li><b>重入保护锁 (INTERNAL_EXECUTION Set)</b>：在调用 {@code target.hurt()} 时将目标加入防重入集合，防止触发递归事件死循环。</li>
- *   <li><b>三重保底斩杀机制 (executeFinal)</b>：
- *     <ol>
- *       <li>第一重：造成 10 亿点数值伤害 (1.0E9F)。</li>
- *       <li>第二重：若目标仍存活（如带防死图腾、锁血 Boss），直接强行 {@code setHealth(0.0F)} 并调用 {@code die(source)}。</li>
- *       <li>第三重：对于非玩家实体，直接将其从世界移除 {@code target.remove(Entity.RemovalReason.KILLED)} 并 {@code discard()}。</li>
- *       <li>第四重：在 1 Tick 后调度延迟移除，彻底抹除复活/残存实体。</li>
- *     </ol>
- *   </li>
- * </ul>
+ * 
+ * 高优先级受击拦截 (LivingHurtEvent HIGH)：直接按目标最大生命值百分比切割 HP，绕过护甲与普通减伤。
+ * 重入保护锁 (INTERNAL_EXECUTION Set)：在调用 {@code target.hurt()}
+ * 时将目标加入防重入集合，防止触发递归事件死循环。
+ * 三重保底斩杀机制 (executeFinal)：
+ * <ol>
+ * 第一重：造成 10 亿点数值伤害 (1.0E9F)。
+ * 第二重：若目标仍存活（如带防死图腾、锁血 Boss），直接强行 {@code setHealth(0.0F)} 并调用
+ * {@code die(source)}。
+ * 第三重：对于非玩家实体，直接将其从世界移除 {@code target.remove(Entity.RemovalReason.KILLED)}
+ * 并 {@code discard()}。
+ * 第四重：在 1 Tick 后调度延迟移除，彻底抹除复活/残存实体。
+ * </ol>
+ * 
+ * 
  */
 @EventBusSubscriber(modid = "annihilationblade")
 public final class EntropyDissolutionLogic {
@@ -75,7 +78,7 @@ public final class EntropyDissolutionLogic {
       Entity source = event.getSource().getEntity();
       Entity directSource = event.getSource().getDirectEntity();
 
-      // 检查伤害来源是否为手持无限星芒刀的玩家
+      // 检查伤害来源是否为手持无尽星空刀的玩家
       if (!(source instanceof Player player) || !isInfinityDamage(player, event.getSource(), directSource)) {
          return;
       }
@@ -87,7 +90,7 @@ public final class EntropyDissolutionLogic {
 
       // 按配置的百分比（如 20%）直接削减目标当前 HP
       double percent = ModConfig.COMMON.infinityStellaris.entropyPercent.getValue();
-      float entropyDamage = (float)(target.getMaxHealth() * percent);
+      float entropyDamage = (float) (target.getMaxHealth() * percent);
       float newHealth = Math.max(1.0F, target.getHealth() - entropyDamage);
       target.setHealth(newHealth); // 强行写入目标 HP
 
@@ -103,11 +106,11 @@ public final class EntropyDissolutionLogic {
    }
 
    /**
-    * 判断伤害来源是否为无限星芒直接攻击或刀光攻击。
+    * 判断伤害来源是否为无尽星空直接攻击或刀光攻击。
     */
    public static boolean isInfinityDamage(Player player, DamageSource source, Entity directSource) {
       return InfinityStellarisItemSupport.isDirectInfinityAttack(player, source)
-         || InfinityStellarisItemSupport.isInfinitySlashEntityAttack(player, directSource);
+            || InfinityStellarisItemSupport.isInfinitySlashEntityAttack(player, directSource);
    }
 
    /**
@@ -118,10 +121,10 @@ public final class EntropyDissolutionLogic {
    }
 
    /**
-    * <b>终极绝对抹杀执行入口 (executeFinal)</b>。
+    * 终极绝对抹杀执行入口 (executeFinal)。
     * 结合了物理伤害、强制清零生命、触发死亡逻辑以及直接销毁实体（discard）。
     *
-    * @param target 被斩杀的目标
+    * @param target   被斩杀的目标
     * @param attacker 攻击玩家
     */
    public static void executeFinal(LivingEntity target, Player attacker) {
@@ -131,7 +134,7 @@ public final class EntropyDissolutionLogic {
 
       target.invulnerableTime = 0; // 重置无敌帧
       DamageSource source = target.level().damageSources().playerAttack(attacker);
-      
+
       if (target.level() instanceof ServerLevel level) {
          InfinityStellarisVisuals.spawnDamageChain(level, attacker, target);
          spawnHeatDeath(level, target); // 播放热寂/热寂灭粒子音效
@@ -233,8 +236,10 @@ public final class EntropyDissolutionLogic {
    private static void spawnEntropyTrace(ServerLevel level, LivingEntity target, int marks) {
       Vec3 center = target.position().add(0.0, target.getBbHeight() * 0.55, 0.0);
       double radius = Math.max(0.7, target.getBbWidth() * (1.0 + marks * 0.04));
-      level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z, 6 + marks, radius * 0.35, radius * 0.35, radius * 0.35, 0.01);
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 10 + marks, radius * 0.45, radius * 0.45, radius * 0.45, 0.08);
+      level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z, 6 + marks, radius * 0.35, radius * 0.35,
+            radius * 0.35, 0.01);
+      level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 10 + marks, radius * 0.45,
+            radius * 0.45, radius * 0.45, 0.08);
    }
 
    /**
@@ -243,14 +248,19 @@ public final class EntropyDissolutionLogic {
    private static void spawnHeatDeath(ServerLevel level, LivingEntity target) {
       Vec3 center = target.position().add(0.0, target.getBbHeight() * 0.55, 0.0);
       double radius = Math.max(1.0, target.getBbWidth() * 2.0);
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 2.0F, 0.45F);
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F, 0.8F);
+      level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 2.0F,
+            0.45F);
+      level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 1.5F,
+            0.8F);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.WITHER_DEATH, SoundSource.PLAYERS, 1.0F, 1.0F);
       level.sendParticles(ParticleTypes.FLASH, center.x, center.y, center.z, 2, 0.0, 0.0, 0.0, 0.0);
-      level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z, 80, radius * 0.5, radius * 0.8, radius * 0.5, 0.1);
-      level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y, center.z, 64, radius * 1.0, radius * 1.0, radius * 1.0, 0.2);
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 160, radius * 1.2, radius * 1.2, radius * 1.2, 0.5);
-      level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, center.x, center.y, center.z, 100, radius * 0.8, radius * 0.8, radius * 0.8, 0.05);
+      level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z, 80, radius * 0.5, radius * 0.8,
+            radius * 0.5, 0.1);
+      level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y, center.z, 64, radius * 1.0, radius * 1.0,
+            radius * 1.0, 0.2);
+      level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 160, radius * 1.2, radius * 1.2,
+            radius * 1.2, 0.5);
+      level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, center.x, center.y, center.z, 100, radius * 0.8, radius * 0.8,
+            radius * 0.8, 0.05);
    }
 }
-

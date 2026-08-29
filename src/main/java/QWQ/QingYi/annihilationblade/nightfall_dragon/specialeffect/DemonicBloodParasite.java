@@ -43,10 +43,16 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = "annihilationblade")
 public class DemonicBloodParasite extends SpecialEffect {
-   private static final double EXTRA_DAMAGE_PERCENT = 0.05;
    private static final int EFFECT_TICKS = 120;
-   private static final int PHANTOM_BURST_MARKS = 20; //从10修改为20。不然太离谱了
    private static final float PHANTOM_BURST_DAMAGE_PERCENT = 0.05F;
+
+   private static double getExtraDamagePercent() {
+      return ModConfig.COMMON.nightfallDragon.demonicBloodExtraDamagePercent.getValue();
+   }
+
+   private static int getPhantomBurstMarks() {
+      return ModConfig.COMMON.nightfallDragon.demonicBloodPhantomBurstMarks.getValue();
+   }
    private static final int VISUAL_COOLDOWN_TICKS = 10;
    private static final int MAX_VISUAL_BURSTS_PER_LEVEL_TICK = 3;
    private static final int MAX_VISUAL_PARTICLES_PER_LEVEL_TICK = 90;
@@ -84,7 +90,7 @@ public class DemonicBloodParasite extends SpecialEffect {
          triggerPhantomBurstIfReady(level, player, target, marks);
       }
 
-      hurtInternally(target, player, (float)(target.getMaxHealth() * EXTRA_DAMAGE_PERCENT));
+      hurtInternally(target, player, (float)(target.getMaxHealth() * getExtraDamagePercent()));
    }
 
    public static void applySummonedSwordMark(Player player, LivingEntity target) {
@@ -100,7 +106,7 @@ public class DemonicBloodParasite extends SpecialEffect {
          triggerPhantomBurstIfReady(level, player, target, marks);
       }
 
-      hurtInternally(target, player, (float)(target.getMaxHealth() * EXTRA_DAMAGE_PERCENT));
+      hurtInternally(target, player, (float)(target.getMaxHealth() * getExtraDamagePercent()));
    }
 
    public static boolean isInternalDamage(LivingEntity target) {
@@ -206,7 +212,8 @@ public class DemonicBloodParasite extends SpecialEffect {
    }
 
    private static void triggerPhantomBurstIfReady(ServerLevel level, Player player, LivingEntity target, int marks) {
-      if (marks % PHANTOM_BURST_MARKS != 0) {
+      int burstMarks = getPhantomBurstMarks();
+      if (burstMarks <= 0 || marks % burstMarks != 0) {
          return;
       }
 

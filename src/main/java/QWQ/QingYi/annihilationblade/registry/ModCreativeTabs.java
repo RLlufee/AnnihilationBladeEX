@@ -4,6 +4,7 @@ import QWQ.QingYi.annihilationblade.annihilation_blade.AnnihilationBladeDefiniti
 import QWQ.QingYi.annihilationblade.blood_prison.BloodPrisonDefinitions;
 import QWQ.QingYi.annihilationblade.client.ClientBladeLookup;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.InfinityStellarisDefinitions;
+import QWQ.QingYi.annihilationblade.loli_blade.LoliBladeDefinitions;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.NightfallDragonDefinitions;
 import mods.flammpfeil.slashblade.item.ItemSlashBlade;
 import net.minecraft.core.registries.Registries;
@@ -28,6 +29,7 @@ public final class ModCreativeTabs {
             output.accept(getNamedBladeStack("blood_prison"));
             output.accept(getNamedBladeStack("infinity_stellaris"));
             output.accept(getNamedBladeStack("nightfall_dragon"));
+            output.accept(getNamedBladeStack("loli_blade"));
             output.accept(new ItemStack((ItemLike)ModItems.ANNIHILATION_FRAGMENT.get()));
             output.accept(new ItemStack((ItemLike)ModItems.ANNIHILATION_CORE.get()));
          })
@@ -50,6 +52,8 @@ public final class ModCreativeTabs {
             InfinityStellarisDefinitions.ensureStats(clientStack);
          } else if ("nightfall_dragon".equals(bladeName)) {
             NightfallDragonDefinitions.ensureStats(clientStack);
+         } else if ("loli_blade".equals(bladeName)) {
+            LoliBladeDefinitions.ensureStats(clientStack);
          } else if ("annihilation_blade".equals(bladeName)) {
             AnnihilationBladeDefinitions.ensureStats(clientStack);
          }
@@ -61,6 +65,8 @@ public final class ModCreativeTabs {
          return InfinityStellarisDefinitions.createStack();
       } else if ("nightfall_dragon".equals(bladeName)) {
          return NightfallDragonDefinitions.createStack();
+      } else if ("loli_blade".equals(bladeName)) {
+         return LoliBladeDefinitions.createStack();
       } else {
          return "blood_prison".equals(bladeName) ? BloodPrisonDefinitions.createStack() : ItemStack.EMPTY;
       }

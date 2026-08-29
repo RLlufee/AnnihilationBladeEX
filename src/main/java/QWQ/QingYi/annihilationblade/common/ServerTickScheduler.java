@@ -32,6 +32,9 @@ public final class ServerTickScheduler {
    @SubscribeEvent
    public static void onServerTick(ServerTickEvent event) {
       if (event.phase == Phase.END) {
+         if (TASKS.isEmpty() && PENDING_ADDS.isEmpty()) {
+            return;
+         }
          iterating = true;
          Iterator<ServerTickScheduler.DelayedTask> iterator = TASKS.iterator();
 

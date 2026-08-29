@@ -32,57 +32,62 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix4f;
 
 /**
- * <h1>无限星芒 - 炫彩星空自定义 Tooltip 渲染器</h1>
- * <p>
+ * 无尽星空 - 炫彩星空自定义 Tooltip 渲染器
+ * 
  * 本类展示了 1.20.1 Minecraft 客户端 GUI 自定义高阶渲染技巧：
- * <ul>
- *   <li><b>GuiGraphics & PoseStack 矩阵偏移 (graphics.pose())</b>：利用 {@code pushPose()} 和 {@code translate(0, 0, 760F)} 改变 Z 轴渲染层级，确保 Tooltip 在所有 UI 元素之上最顶层显示。</li>
- *   <li><b>Tesselator & BufferBuilder 直接顶点绘制</b>：配置 {@link GameRenderer#getPositionTexShader()}，在 GL 上下文中绑定纹理材质并手工构建四边形 (Mode.QUADS) 顶点。</li>
- *   <li><b>RGB 彩虹宇宙光谱渐变 (COSMIC_SPECTRUM)</b>：根据系统当前毫秒时间戳算出的浮点数时间参数 {@code time}，在六种星空亮色之间做 RGB 线性插值。</li>
- *   <li><b>自适应屏幕边界重定位算法</b>：根据 {@code mouseX/mouseY} 和屏幕宽高动态矫正位置，防止 Tooltip 框超出屏幕边缘。</li>
- * </ul>
+ * 
+ * GuiGraphics & PoseStack 矩阵偏移 (graphics.pose())：利用
+ * {@code pushPose()} 和 {@code translate(0, 0, 760F)} 改变 Z 轴渲染层级，确保 Tooltip 在所有
+ * UI 元素之上最顶层显示。
+ * Tesselator & BufferBuilder 直接顶点绘制：配置
+ * {@link GameRenderer#getPositionTexShader()}，在 GL 上下文中绑定纹理材质并手工构建四边形
+ * (Mode.QUADS) 顶点。
+ * RGB 彩虹宇宙光谱渐变 (COSMIC_SPECTRUM)：根据系统当前毫秒时间戳算出的浮点数时间参数
+ * {@code time}，在六种星空亮色之间做 RGB 线性插值。
+ * 自适应屏幕边界重定位算法：根据 {@code mouseX/mouseY} 和屏幕宽高动态矫正位置，防止 Tooltip
+ * 框超出屏幕边缘。
+ * 
  */
 public final class InfinityStellarisTooltipRenderer {
    /** 动态黑洞背景材质纹理 */
    private static final ResourceLocation BLACK_HOLE_BACKGROUND = ResourceLocation.fromNamespaceAndPath(
-      "annihilationblade", "textures/gui/infinity_stellaris_black_hole.png"
-   );
-   
+         "annihilationblade", "textures/gui/infinity_stellaris_black_hole.png");
+
    /** 星图叠加背景材质纹理 */
    private static final ResourceLocation STAR_MAP_OVERLAY = ResourceLocation.fromNamespaceAndPath(
-      "annihilationblade", "textures/gui/infinity_stellaris_star_map.png"
-   );
-   
+         "annihilationblade", "textures/gui/infinity_stellaris_star_map.png");
+
    private static final int BLACK_HOLE_TEXTURE_WIDTH = 1280;
    private static final int BLACK_HOLE_TEXTURE_HEIGHT = 853;
    private static final int STAR_MAP_TEXTURE_WIDTH = 1734;
    private static final int STAR_MAP_TEXTURE_HEIGHT = 907;
-   
+
    /** Tooltip 框基准宽度与最小宽度 */
    private static final int WIDTH = 320;
    private static final int MIN_WIDTH = 238;
-   
+
    /** 宇宙彩虹渐变色系数组（包含天蓝、亮白、星紫、霓虹粉、金色与深天蓝） */
-   private static final int[] COSMIC_SPECTRUM = new int[]{0x28F7FF, 0xF2FEFF, 0x8D7CFF, 0xFF4FD8, 0xFFE27A, 0x58B7FF};
+   private static final int[] COSMIC_SPECTRUM = new int[] { 0x28F7FF, 0xF2FEFF, 0x8D7CFF, 0xFF4FD8, 0xFFE27A,
+         0x58B7FF };
    private static final long TITLE_CYCLE_MILLIS = 4200L;
    private static final String FINAL_WEAPON_KEY = "item.annihilationblade.infinity_stellaris.tooltip.final_weapon";
-   
+
    /** 特权芯片列表（飞行、无敌、强制斩杀、极光高亮等） */
-   private static final AuthorityChip[] AUTHORITY_CHIPS = new AuthorityChip[]{
-      new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.flight", 0x58B7FF),
-      new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.invulnerable", 0xF2FEFF),
-      new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.kill_fallback", 0xFF4FD8),
-      new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.no_recipe", 0xFFE27A),
-      new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.fullbright", 0x28F7FF)
+   private static final AuthorityChip[] AUTHORITY_CHIPS = new AuthorityChip[] {
+         new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.flight", 0x58B7FF),
+         new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.invulnerable", 0xF2FEFF),
+         new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.kill_fallback", 0xFF4FD8),
+         new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.no_recipe", 0xFFE27A),
+         new AuthorityChip("item.annihilationblade.infinity_stellaris.tooltip.chip.fullbright", 0x28F7FF)
    };
-   
+
    /** 特殊SA技能芯片列表 */
-   private static final EffectChip[] EFFECT_CHIPS = new EffectChip[]{
-      new EffectChip("se.annihilationblade.entropy_dissolution", 0x28F7FF),
-      new EffectChip("se.annihilationblade.cosmic_string_cut", 0xF2FEFF),
-      new EffectChip("se.annihilationblade.curvature_rupture", 0x8D7CFF),
-      new EffectChip("se.annihilationblade.gamma_thunderburst", 0xFF4FD8),
-      new EffectChip("slash_art.annihilationblade.vacuum_decay_collapse", 0xFFE27A)
+   private static final EffectChip[] EFFECT_CHIPS = new EffectChip[] {
+         new EffectChip("se.annihilationblade.entropy_dissolution", 0x28F7FF),
+         new EffectChip("se.annihilationblade.cosmic_string_cut", 0xF2FEFF),
+         new EffectChip("se.annihilationblade.curvature_rupture", 0x8D7CFF),
+         new EffectChip("se.annihilationblade.gamma_thunderburst", 0xFF4FD8),
+         new EffectChip("slash_art.annihilationblade.vacuum_decay_collapse", 0xFFE27A)
    };
 
    private InfinityStellarisTooltipRenderer() {
@@ -91,28 +96,29 @@ public final class InfinityStellarisTooltipRenderer {
    /**
     * 自定义 Tooltip 渲染入口主函数。
     *
-    * @param graphics 1.20.1 Forge GUI 绘图上下文
-    * @param font 字体渲染器
-    * @param stack 当前悬停查看的 ItemStack
+    * @param graphics     1.20.1 Forge GUI 绘图上下文
+    * @param font         字体渲染器
+    * @param stack        当前悬停查看的 ItemStack
     * @param vanillaLines 原版 Tooltip 文本行列表
-    * @param mouseX 鼠标当前 X 坐标
-    * @param mouseY 鼠标当前 Y 坐标
+    * @param mouseX       鼠标当前 X 坐标
+    * @param mouseY       鼠标当前 Y 坐标
     */
-   public static void render(GuiGraphics graphics, Font font, ItemStack stack, List<Component> vanillaLines, int mouseX, int mouseY) {
+   public static void render(GuiGraphics graphics, Font font, ItemStack stack, List<Component> vanillaLines, int mouseX,
+         int mouseY) {
       int screenWidth = graphics.guiWidth();
       int screenHeight = graphics.guiHeight();
-      
+
       // 1. 自动根据屏幕宽度分配 Tooltip 框尺寸
       int width = Math.min(WIDTH, Math.max(MIN_WIDTH, screenWidth - 18));
       int contentWidth = width - 24;
-      
+
       // 2. 计算附魔条目数与排版网格高度
       List<EnchantmentLine> enchantments = getEnchantments(stack);
       int enchantRows = (enchantments.size() + 1) / 2;
       int enchantRowHeight = screenHeight < 300 ? 9 : 10;
       int height = 208 + Math.max(1, enchantRows) * enchantRowHeight;
       height = Math.min(height, Math.max(210, screenHeight - 12));
-      
+
       // 3. 边界检测：自动校正坐标，防止超出屏幕左右或上下边缘
       int x = mouseX + 12;
       int y = mouseY - 14;
@@ -126,7 +132,7 @@ public final class InfinityStellarisTooltipRenderer {
       y = Mth.clamp(y, 6, Math.max(6, screenHeight - height - 6));
 
       // 4. 动画时间步长（秒）
-      float time = (float)(System.currentTimeMillis() % 120000L) / 1000.0F;
+      float time = (float) (System.currentTimeMillis() % 120000L) / 1000.0F;
 
       // 5. 推入矩阵，将 Z 轴平移 760 单位以居于顶层，渲染完毕后 popPose 恢复
       graphics.pose().pushPose();
@@ -135,7 +141,8 @@ public final class InfinityStellarisTooltipRenderer {
       // 渲染框体背景纹理与流彩边框
       renderFrame(graphics, x, y, width, height, time);
       // 渲染文本、面板属性与图标芯片
-      renderContent(graphics, font, stack, vanillaLines, enchantments, x, y, width, height, contentWidth, enchantRowHeight, time);
+      renderContent(graphics, font, stack, vanillaLines, enchantments, x, y, width, height, contentWidth,
+            enchantRowHeight, time);
 
       graphics.pose().popPose();
    }
@@ -158,19 +165,19 @@ public final class InfinityStellarisTooltipRenderer {
       int backdropHeight = outerHeight + backdropMargin * 2;
       graphics.enableScissor(backdropX, backdropY, backdropX + backdropWidth, backdropY + backdropHeight);
       blitCover(
-         graphics,
-         BLACK_HOLE_BACKGROUND,
-         backdropX,
-         backdropY,
-         backdropWidth,
-         backdropHeight,
-         BLACK_HOLE_TEXTURE_WIDTH,
-         BLACK_HOLE_TEXTURE_HEIGHT,
-         -10.0F,
-         time * 0.28F,
-         0.86F
-      );
-      graphics.fillGradient(backdropX, backdropY, backdropX + backdropWidth, backdropY + backdropHeight, 0x32000514, 0x70000514);
+            graphics,
+            BLACK_HOLE_BACKGROUND,
+            backdropX,
+            backdropY,
+            backdropWidth,
+            backdropHeight,
+            BLACK_HOLE_TEXTURE_WIDTH,
+            BLACK_HOLE_TEXTURE_HEIGHT,
+            -10.0F,
+            time * 0.28F,
+            0.86F);
+      graphics.fillGradient(backdropX, backdropY, backdropX + backdropWidth, backdropY + backdropHeight, 0x32000514,
+            0x70000514);
       graphics.disableScissor();
       drawOuterMagicCircle(matrix, backdropX, backdropY, backdropWidth, backdropHeight, time);
       renderWhiteOrbitBorder(matrix, outerX, outerY, outerWidth, outerHeight, time);
@@ -181,7 +188,8 @@ public final class InfinityStellarisTooltipRenderer {
       RenderSystem.enableBlend();
       RenderSystem.defaultBlendFunc();
       graphics.fillGradient(x + 2, y + 2, x + width - 2, y + height - 2, 0x9A020615, 0xD40A1024);
-      blitCover(graphics, STAR_MAP_OVERLAY, x, y, width, height, STAR_MAP_TEXTURE_WIDTH, STAR_MAP_TEXTURE_HEIGHT, 10.0F, time * 0.45F, 0.16F);
+      blitCover(graphics, STAR_MAP_OVERLAY, x, y, width, height, STAR_MAP_TEXTURE_WIDTH, STAR_MAP_TEXTURE_HEIGHT, 10.0F,
+            time * 0.45F, 0.16F);
       graphics.fillGradient(x + 4, y + 4, x + width - 4, y + 45, 0x8205091A, 0x2605091A);
       graphics.fillGradient(x + 5, y + 142, x + width - 5, y + height - 5, 0x4605091A, 0xB705091A);
       drawMovingAccents(matrix, x, y, width, height, time);
@@ -191,20 +199,19 @@ public final class InfinityStellarisTooltipRenderer {
    }
 
    private static void blitCover(
-      GuiGraphics graphics,
-      ResourceLocation texture,
-      int x,
-      int y,
-      int width,
-      int height,
-      int textureWidth,
-      int textureHeight,
-      float biasX,
-      float time,
-      float alpha
-   ) {
-      float imageAspect = (float)textureWidth / textureHeight;
-      float targetAspect = (float)width / height;
+         GuiGraphics graphics,
+         ResourceLocation texture,
+         int x,
+         int y,
+         int width,
+         int height,
+         int textureWidth,
+         int textureHeight,
+         float biasX,
+         float time,
+         float alpha) {
+      float imageAspect = (float) textureWidth / textureHeight;
+      float targetAspect = (float) width / height;
       int imageWidth;
       int imageHeight;
       if (imageAspect > targetAspect) {
@@ -218,54 +225,64 @@ public final class InfinityStellarisTooltipRenderer {
       int imageX = x - (imageWidth - width) / 2 + Math.round(biasX + Mth.sin(time * 0.18F) * 3.0F);
       int imageY = y - (imageHeight - height) / 2 + Math.round(Mth.cos(time * 0.16F) * 3.0F);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-      graphics.blit(texture, imageX, imageY, imageWidth, imageHeight, 0.0F, 0.0F, textureWidth, textureHeight, textureWidth, textureHeight);
+      graphics.blit(texture, imageX, imageY, imageWidth, imageHeight, 0.0F, 0.0F, textureWidth, textureHeight,
+            textureWidth, textureHeight);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
    private static void renderContent(
-      GuiGraphics graphics,
-      Font font,
-      ItemStack stack,
-      List<Component> vanillaLines,
-      List<EnchantmentLine> enchantments,
-      int x,
-      int y,
-      int width,
-      int height,
-      int contentWidth,
-      int enchantRowHeight,
-      float time
-   ) {
+         GuiGraphics graphics,
+         Font font,
+         ItemStack stack,
+         List<Component> vanillaLines,
+         List<EnchantmentLine> enchantments,
+         int x,
+         int y,
+         int width,
+         int height,
+         int contentWidth,
+         int enchantRowHeight,
+         float time) {
       int center = x + width / 2;
       Component itemName = vanillaLines.isEmpty() ? stack.getHoverName() : vanillaLines.get(0);
       drawGlowText(graphics, font, itemName, center - font.width(itemName) / 2, y + 8, 0xF2FEFF, 0x28F7FF);
       MutableComponent title = buildSpectralTitle(time);
       drawGlowText(graphics, font, title, center - font.width(title) / 2, y + 20, 0xF2FEFF, 0xFF4FD8);
-      graphics.drawCenteredString(font, Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.subtitle"), center, y + 34, 0xA8D9FF);
+      graphics.drawCenteredString(font,
+            Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.subtitle"), center, y + 34,
+            0xA8D9FF);
       graphics.renderItem(stack, x + 13, y + 13);
 
       int cursorY = y + 52;
-      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth, Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.authority"), time);
+      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth,
+            Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.authority"), time);
       cursorY += 13;
       drawAuthorityChips(graphics, font, x + 12, cursorY, contentWidth, time);
       cursorY += 26;
-      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth, Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.attributes"), time + 0.4F);
+      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth,
+            Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.attributes"),
+            time + 0.4F);
       cursorY += 13;
       drawStats(graphics, font, stack, x + 12, cursorY, contentWidth, time);
       cursorY += 28;
-      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth, Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.effects"), time + 0.8F);
+      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth,
+            Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.effects"), time + 0.8F);
       cursorY += 13;
       drawEffectChips(graphics, font, x + 12, cursorY, contentWidth, time);
       cursorY += 40;
-      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth, Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.enchantments"), time + 1.2F);
+      drawSectionTitle(graphics, font, x + 12, cursorY, contentWidth,
+            Component.translatable("item.annihilationblade.infinity_stellaris.tooltip.section.enchantments"),
+            time + 1.2F);
       cursorY += 13;
-      drawEnchantments(graphics, font, x + 12, cursorY, contentWidth, height - (cursorY - y) - 10, enchantRowHeight, enchantments, time);
-      int pulse = (int)((contentWidth - 2) * (0.5F + 0.5F * Mth.sin(time * 2.1F)));
+      drawEnchantments(graphics, font, x + 12, cursorY, contentWidth, height - (cursorY - y) - 10, enchantRowHeight,
+            enchantments, time);
+      int pulse = (int) ((contentWidth - 2) * (0.5F + 0.5F * Mth.sin(time * 2.1F)));
       graphics.fill(x + 13, y + height - 7, x + width - 13, y + height - 6, 0x5528F7FF);
       graphics.fill(x + 13, y + height - 7, x + 13 + pulse, y + height - 6, 0xCCF2FEFF);
    }
 
-   private static void drawSectionTitle(GuiGraphics graphics, Font font, int x, int y, int width, Component title, float phase) {
+   private static void drawSectionTitle(GuiGraphics graphics, Font font, int x, int y, int width, Component title,
+         float phase) {
       int accent = sampleSpectrum(phase * 1.2F);
       int railWidth = Math.max(42, Math.round(width * 0.62F));
       float pulsePhase = 0.5F + 0.5F * Mth.sin(phase * 2.3F);
@@ -280,18 +297,23 @@ public final class InfinityStellarisTooltipRenderer {
       int chipWidth = (width - gap * (AUTHORITY_CHIPS.length - 1)) / AUTHORITY_CHIPS.length;
       for (int i = 0; i < AUTHORITY_CHIPS.length; i++) {
          AuthorityChip chip = AUTHORITY_CHIPS[i];
-         drawSmallChip(graphics, font, x + i * (chipWidth + gap), y, chipWidth, 12, Component.translatable(chip.key()), chip.color(), time + i * 0.31F);
+         drawSmallChip(graphics, font, x + i * (chipWidth + gap), y, chipWidth, 12, Component.translatable(chip.key()),
+               chip.color(), time + i * 0.31F);
       }
    }
 
-   private static void drawStats(GuiGraphics graphics, Font font, ItemStack stack, int x, int y, int width, float time) {
+   private static void drawStats(GuiGraphics graphics, Font font, ItemStack stack, int x, int y, int width,
+         float time) {
       BladeStats stats = readBladeStats(stack);
-      StatCell[] cells = new StatCell[]{
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.kills", formatNumber(stats.killCount()), 0x28F7FF),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.souls", formatNumber(stats.proudSoul()), 0xFFE27A),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.refine", formatNumber(stats.refine()), 0xFF4FD8),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.attack", "2147483647", 0xF2FEFF),
-         new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.durability", "何意味", 0x8D7CFF)
+      StatCell[] cells = new StatCell[] {
+            new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.kills",
+                  formatNumber(stats.killCount()), 0x28F7FF),
+            new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.souls",
+                  formatNumber(stats.proudSoul()), 0xFFE27A),
+            new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.refine", formatNumber(stats.refine()),
+                  0xFF4FD8),
+            new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.attack", "2147483647", 0xF2FEFF),
+            new StatCell("item.annihilationblade.infinity_stellaris.tooltip.stat.durability", "何意味", 0x8D7CFF)
       };
       int gap = 3;
       int cellWidth = (width - gap * (cells.length - 1)) / cells.length;
@@ -308,21 +330,21 @@ public final class InfinityStellarisTooltipRenderer {
          int col = i % columns;
          int row = i / columns;
          EffectChip chip = EFFECT_CHIPS[i];
-         drawSmallChip(graphics, font, x + col * (chipWidth + gap), y + row * 15, chipWidth, 12, Component.translatable(chip.key()), chip.color(), time + i * 0.42F);
+         drawSmallChip(graphics, font, x + col * (chipWidth + gap), y + row * 15, chipWidth, 12,
+               Component.translatable(chip.key()), chip.color(), time + i * 0.42F);
       }
    }
 
    private static void drawEnchantments(
-      GuiGraphics graphics,
-      Font font,
-      int x,
-      int y,
-      int width,
-      int height,
-      int rowHeight,
-      List<EnchantmentLine> enchantments,
-      float time
-   ) {
+         GuiGraphics graphics,
+         Font font,
+         int x,
+         int y,
+         int width,
+         int height,
+         int rowHeight,
+         List<EnchantmentLine> enchantments,
+         float time) {
       if (enchantments.isEmpty() || height <= 8) {
          return;
       }
@@ -339,18 +361,20 @@ public final class InfinityStellarisTooltipRenderer {
          EnchantmentLine line = enchantments.get(i);
          int entryX = x + col * (colWidth + gap);
          int entryY = y + row * rowHeight;
-      int color = sampleSpectrum(time * 0.6F + i * 0.37F);
+         int color = sampleSpectrum(time * 0.6F + i * 0.37F);
          int railWidth = Math.max(28, Math.round(colWidth * 0.66F));
-         int pulseWidth = Math.max(16, Math.round(railWidth * (0.28F + 0.36F * (0.5F + 0.5F * Mth.sin(time * 2.0F + i * 0.31F)))));
-         graphics.fill(entryX, entryY + rowHeight - 2, entryX + railWidth, entryY + rowHeight - 1, withAlpha(color, 0.18F));
-         graphics.fill(entryX, entryY + rowHeight - 2, entryX + pulseWidth, entryY + rowHeight - 1, withAlpha(color, 0.42F));
+         int pulseWidth = Math.max(16,
+               Math.round(railWidth * (0.28F + 0.36F * (0.5F + 0.5F * Mth.sin(time * 2.0F + i * 0.31F)))));
+         graphics.fill(entryX, entryY + rowHeight - 2, entryX + railWidth, entryY + rowHeight - 1,
+               withAlpha(color, 0.18F));
+         graphics.fill(entryX, entryY + rowHeight - 2, entryX + pulseWidth, entryY + rowHeight - 1,
+               withAlpha(color, 0.42F));
          graphics.drawString(font, trimToWidth(font, line.text(), colWidth - 4), entryX + 2, entryY, 0xE8F6FF, false);
       }
    }
 
    private static void drawSmallChip(
-      GuiGraphics graphics, Font font, int x, int y, int width, int height, Component text, int rgb, float phase
-   ) {
+         GuiGraphics graphics, Font font, int x, int y, int width, int height, Component text, int rgb, float phase) {
       graphics.fill(x, y, x + width, y + height, 0x8A061024);
       graphics.fill(x, y, x + width, y + 1, withAlpha(rgb, 0.78F));
       int railWidth = Math.max(14, Math.round((width - 4) * 0.58F));
@@ -360,7 +384,8 @@ public final class InfinityStellarisTooltipRenderer {
       graphics.drawString(font, trimToWidth(font, text.getString(), width - 7), x + 4, y + 2, 0xF2FEFF, false);
    }
 
-   private static void drawStatCell(GuiGraphics graphics, Font font, int x, int y, int width, int height, StatCell cell, float phase) {
+   private static void drawStatCell(GuiGraphics graphics, Font font, int x, int y, int width, int height, StatCell cell,
+         float phase) {
       int accent = cell.color();
       graphics.fill(x, y, x + width, y + height, 0x8F050B1C);
       graphics.fill(x, y, x + width, y + 1, withAlpha(accent, 0.72F));
@@ -368,7 +393,8 @@ public final class InfinityStellarisTooltipRenderer {
       int pulse = Math.max(8, Math.round(railWidth * (0.28F + 0.34F * (0.5F + 0.5F * Mth.sin(phase * 2.2F)))));
       graphics.fill(x + 2, y + height - 3, x + 2 + railWidth, y + height - 2, withAlpha(accent, 0.18F));
       graphics.fill(x + 2, y + height - 3, x + 2 + pulse, y + height - 2, withAlpha(accent, 0.68F));
-      graphics.drawString(font, trimToWidth(font, Component.translatable(cell.labelKey()).getString(), width - 4), x + 3, y + 2, 0xA8D9FF, false);
+      graphics.drawString(font, trimToWidth(font, Component.translatable(cell.labelKey()).getString(), width - 4),
+            x + 3, y + 2, 0xA8D9FF, false);
       graphics.drawString(font, trimToWidth(font, cell.value(), width - 4), x + 3, y + 11, 0xF2FEFF, false);
    }
 
@@ -379,13 +405,15 @@ public final class InfinityStellarisTooltipRenderer {
       }
 
       MutableComponent title = Component.empty();
-      float drift = ((System.currentTimeMillis() % TITLE_CYCLE_MILLIS) / (float)TITLE_CYCLE_MILLIS) * COSMIC_SPECTRUM.length;
+      float drift = ((System.currentTimeMillis() % TITLE_CYCLE_MILLIS) / (float) TITLE_CYCLE_MILLIS)
+            * COSMIC_SPECTRUM.length;
       int visualIndex = 0;
-      for (int offset = 0; offset < text.length(); ) {
+      for (int offset = 0; offset < text.length();) {
          int codePoint = text.codePointAt(offset);
          String glyph = new String(Character.toChars(codePoint));
          int color = sampleSpectrum(visualIndex * 0.42F - drift + Mth.sin(time * 0.8F) * 0.12F);
-         title.append(Component.literal(glyph).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)).withBold(true)));
+         title.append(
+               Component.literal(glyph).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)).withBold(true)));
          offset += Character.charCount(codePoint);
          if (!Character.isWhitespace(codePoint)) {
             visualIndex++;
@@ -395,7 +423,16 @@ public final class InfinityStellarisTooltipRenderer {
       return title;
    }
 
+   private static ItemStack cachedEnchantStack = ItemStack.EMPTY;
+   private static CompoundTag cachedEnchantTag = null;
+   private static List<EnchantmentLine> cachedEnchantmentLines = null;
+
    private static List<EnchantmentLine> getEnchantments(ItemStack stack) {
+      CompoundTag tag = stack.getTag();
+      if (cachedEnchantmentLines != null && ItemStack.matches(cachedEnchantStack, stack) && java.util.Objects.equals(cachedEnchantTag, tag)) {
+         return cachedEnchantmentLines;
+      }
+
       List<EnchantmentLine> lines = new ArrayList<>();
       for (Entry<Enchantment, Integer> entry : sortedEnchantments(stack).entrySet()) {
          Enchantment enchantment = entry.getKey();
@@ -406,6 +443,9 @@ public final class InfinityStellarisTooltipRenderer {
       }
 
       lines.sort(Comparator.comparing(EnchantmentLine::sortKey));
+      cachedEnchantStack = stack.copy();
+      cachedEnchantTag = tag != null ? tag.copy() : null;
+      cachedEnchantmentLines = lines;
       return lines;
    }
 
@@ -415,21 +455,21 @@ public final class InfinityStellarisTooltipRenderer {
 
    private static BladeStats readBladeStats(ItemStack stack) {
       return stack.getCapability(ItemSlashBlade.BLADESTATE)
-         .map(state -> new BladeStats(state.getProudSoulCount(), state.getKillCount(), state.getRefine()))
-         .orElseGet(() -> readBladeStatsFromTag(stack));
+            .map(state -> new BladeStats(state.getProudSoulCount(), state.getKillCount(), state.getRefine()))
+            .orElseGet(() -> readBladeStatsFromTag(stack));
    }
 
    private static BladeStats readBladeStatsFromTag(ItemStack stack) {
       CompoundTag tag = stack.getTag();
       CompoundTag bladeState = tag == null ? null : tag.getCompound("bladeState");
       int proudSoul = firstAvailable(
-         readInt(bladeState, "proudSoul", "ProudSoul", "ProudSoulCount", "proudsoul"), readInt(tag, "ProudSoul", "ProudSoulCount", "proudSoul", "proudsoul")
-      );
-      int killCount = firstAvailable(readInt(bladeState, "killCount", "KillCount"), readInt(tag, "KillCount", "killCount"));
+            readInt(bladeState, "proudSoul", "ProudSoul", "ProudSoulCount", "proudsoul"),
+            readInt(tag, "ProudSoul", "ProudSoulCount", "proudSoul", "proudsoul"));
+      int killCount = firstAvailable(readInt(bladeState, "killCount", "KillCount"),
+            readInt(tag, "KillCount", "killCount"));
       int refine = firstAvailable(
-         readInt(bladeState, "RepairCounter", "refine", "Refine", "RefineCount", "refineCount"),
-         readInt(tag, "RepairCounter", "Refine", "RefineCount", "refine", "refineCount")
-      );
+            readInt(bladeState, "RepairCounter", "refine", "Refine", "RefineCount", "refineCount"),
+            readInt(tag, "RepairCounter", "Refine", "RefineCount", "refine", "refineCount"));
       return new BladeStats(proudSoul, killCount, refine);
    }
 
@@ -464,7 +504,8 @@ public final class InfinityStellarisTooltipRenderer {
       return font.plainSubstrByWidth(text, Math.max(0, width - font.width(ellipsis))) + ellipsis;
    }
 
-   private static void drawGlowText(GuiGraphics graphics, Font font, Component text, int x, int y, int color, int glow) {
+   private static void drawGlowText(GuiGraphics graphics, Font font, Component text, int x, int y, int color,
+         int glow) {
       graphics.drawString(font, text, x - 1, y, withAlpha(glow, 0.45F), false);
       graphics.drawString(font, text, x + 1, y, withAlpha(glow, 0.45F), false);
       graphics.drawString(font, text, x, y - 1, withAlpha(0xF2FEFF, 0.26F), false);
@@ -553,15 +594,15 @@ public final class InfinityStellarisTooltipRenderer {
    }
 
    private static void drawBorderTrail(
-      Matrix4f matrix, int x, int y, int width, int height, float start, float length, float thickness, int headColor, int tailColor
-   ) {
+         Matrix4f matrix, int x, int y, int width, int height, float start, float length, float thickness,
+         int headColor, int tailColor) {
       int segments = 18;
       for (int i = 0; i < segments; i++) {
          float a = start + length * i / segments;
          float b = start + length * (i + 1) / segments;
          Point2 p1 = pointOnBorder(x, y, width, height, a);
          Point2 p2 = pointOnBorder(x, y, width, height, b);
-         float blend = i / (float)Math.max(1, segments - 1);
+         float blend = i / (float) Math.max(1, segments - 1);
          int colorA = lerpArgb(headColor, tailColor, blend);
          int colorB = lerpArgb(headColor, tailColor, Math.min(1.0F, blend + 1.0F / segments));
          drawBeam(matrix, p1.x(), p1.y(), p2.x(), p2.y(), thickness, colorA, colorB);
@@ -583,7 +624,7 @@ public final class InfinityStellarisTooltipRenderer {
    }
 
    private static Point2 pointOnBorder(int x, int y, int width, int height, float progress) {
-      float p = progress - (float)Math.floor(progress);
+      float p = progress - (float) Math.floor(progress);
       float perimeter = (width + height) * 2.0F;
       float distance = p * perimeter;
       if (distance < width) {
@@ -604,7 +645,8 @@ public final class InfinityStellarisTooltipRenderer {
       return new Point2(x, y + height - distance);
    }
 
-   private static void drawRotatingHexagram(Matrix4f matrix, float cx, float cy, float radius, float rotation, int color) {
+   private static void drawRotatingHexagram(Matrix4f matrix, float cx, float cy, float radius, float rotation,
+         int color) {
       float[] xs = new float[6];
       float[] ys = new float[6];
       for (int i = 0; i < 6; i++) {
@@ -621,7 +663,8 @@ public final class InfinityStellarisTooltipRenderer {
       drawBeam(matrix, xs[5], ys[5], xs[1], ys[1], 0.45F, color, color);
    }
 
-   private static void drawRotatingDiamond(Matrix4f matrix, float cx, float cy, float radius, float rotation, int color) {
+   private static void drawRotatingDiamond(Matrix4f matrix, float cx, float cy, float radius, float rotation,
+         int color) {
       float x1 = cx + Mth.cos(rotation) * radius;
       float y1 = cy + Mth.sin(rotation) * radius;
       float x2 = cx + Mth.cos(rotation + Mth.HALF_PI) * radius * 0.62F;
@@ -636,7 +679,8 @@ public final class InfinityStellarisTooltipRenderer {
       drawBeam(matrix, x4, y4, x1, y1, 0.55F, color, color);
    }
 
-   private static void drawCircle(Matrix4f matrix, float cx, float cy, float radius, float rotation, int segments, float thickness, int color) {
+   private static void drawCircle(Matrix4f matrix, float cx, float cy, float radius, float rotation, int segments,
+         float thickness, int color) {
       Point2 previous = radialPoint(cx, cy, radius, rotation);
       for (int i = 1; i <= segments; i++) {
          float angle = rotation + i * Mth.PI * 2.0F / segments;
@@ -646,7 +690,8 @@ public final class InfinityStellarisTooltipRenderer {
       }
    }
 
-   private static void drawPolygon(Matrix4f matrix, float cx, float cy, float radius, int points, float rotation, float thickness, int color) {
+   private static void drawPolygon(Matrix4f matrix, float cx, float cy, float radius, int points, float rotation,
+         float thickness, int color) {
       Point2 previous = radialPoint(cx, cy, radius, rotation);
       for (int i = 1; i <= points; i++) {
          float angle = rotation + i * Mth.PI * 2.0F / points;
@@ -657,8 +702,8 @@ public final class InfinityStellarisTooltipRenderer {
    }
 
    private static void drawSteppedStar(
-      Matrix4f matrix, float cx, float cy, float radius, int points, int step, float rotation, float thickness, int color
-   ) {
+         Matrix4f matrix, float cx, float cy, float radius, int points, int step, float rotation, float thickness,
+         int color) {
       for (int i = 0; i < points; i++) {
          Point2 a = radialPoint(cx, cy, radius, rotation + i * Mth.PI * 2.0F / points);
          Point2 b = radialPoint(cx, cy, radius, rotation + ((i + step) % points) * Mth.PI * 2.0F / points);
@@ -674,33 +719,39 @@ public final class InfinityStellarisTooltipRenderer {
       for (int layer = 4; layer >= 1; layer--) {
          float spread = layer * 1.9F;
          float alpha = 0.07F + (4 - layer) * 0.07F;
-         drawSegmentedBorder(matrix, x, y, width, height, spread, 0.8F + layer * 0.15F, time * 0.08F + layer * 0.13F, alpha);
+         drawSegmentedBorder(matrix, x, y, width, height, spread, 0.8F + layer * 0.15F, time * 0.08F + layer * 0.13F,
+               alpha);
       }
 
       drawSegmentedBorder(matrix, x, y, width, height, 0.8F, 1.3F, time * 0.11F, 0.88F);
       drawCornerMarks(matrix, x, y, width, height, time);
    }
 
-   private static void drawSegmentedBorder(Matrix4f matrix, int x, int y, int width, int height, float spread, float thickness, float drift, float alpha) {
+   private static void drawSegmentedBorder(Matrix4f matrix, int x, int y, int width, int height, float spread,
+         float thickness, float drift, float alpha) {
       int segments = 18;
       for (int i = 0; i < segments; i++) {
-         float t1 = (float)i / segments;
-         float t2 = (float)(i + 1) / segments;
+         float t1 = (float) i / segments;
+         float t2 = (float) (i + 1) / segments;
          int c1 = withAlpha(sampleSpectrum(t1 * COSMIC_SPECTRUM.length + drift), alpha);
          int c2 = withAlpha(sampleSpectrum(t2 * COSMIC_SPECTRUM.length + drift), alpha);
          float sx = x + width * t1;
          float ex = x + width * t2;
-         drawQuad(matrix, sx, y - spread, ex, y - spread, ex, y - spread + thickness, sx, y - spread + thickness, c1, c2, c2, c1);
-         drawQuad(matrix, sx, y + height + spread, ex, y + height + spread, ex, y + height + spread - thickness, sx, y + height + spread - thickness, c2, c1, c1, c2);
+         drawQuad(matrix, sx, y - spread, ex, y - spread, ex, y - spread + thickness, sx, y - spread + thickness, c1,
+               c2, c2, c1);
+         drawQuad(matrix, sx, y + height + spread, ex, y + height + spread, ex, y + height + spread - thickness, sx,
+               y + height + spread - thickness, c2, c1, c1, c2);
          if (i < segments / 2) {
-            float vt1 = (float)i / (segments / 2);
-            float vt2 = (float)(i + 1) / (segments / 2);
+            float vt1 = (float) i / (segments / 2);
+            float vt2 = (float) (i + 1) / (segments / 2);
             int v1 = withAlpha(sampleSpectrum(vt1 * COSMIC_SPECTRUM.length - drift), alpha * 0.9F);
             int v2 = withAlpha(sampleSpectrum(vt2 * COSMIC_SPECTRUM.length - drift), alpha * 0.9F);
             float sy = y + height * vt1;
             float ey = y + height * vt2;
-            drawQuad(matrix, x - spread, sy, x - spread + thickness, sy, x - spread + thickness, ey, x - spread, ey, v1, v1, v2, v2);
-            drawQuad(matrix, x + width + spread, sy, x + width + spread - thickness, sy, x + width + spread - thickness, ey, x + width + spread, ey, v2, v2, v1, v1);
+            drawQuad(matrix, x - spread, sy, x - spread + thickness, sy, x - spread + thickness, ey, x - spread, ey, v1,
+                  v1, v2, v2);
+            drawQuad(matrix, x + width + spread, sy, x + width + spread - thickness, sy, x + width + spread - thickness,
+                  ey, x + width + spread, ey, v2, v2, v1, v1);
          }
       }
    }
@@ -715,7 +766,8 @@ public final class InfinityStellarisTooltipRenderer {
       drawBeam(matrix, x + width - 7.0F, y + height - 18.0F, x + width - 26.0F, y + height - 7.0F, 1.4F, cyan, white);
    }
 
-   private static void drawBeam(Matrix4f matrix, float x1, float y1, float x2, float y2, float width, int colorA, int colorB) {
+   private static void drawBeam(Matrix4f matrix, float x1, float y1, float x2, float y2, float width, int colorA,
+         int colorB) {
       float dx = x2 - x1;
       float dy = y2 - y1;
       float length = Mth.sqrt(dx * dx + dy * dy);
@@ -725,7 +777,8 @@ public final class InfinityStellarisTooltipRenderer {
 
       float nx = -dy / length * width;
       float ny = dx / length * width;
-      drawQuad(matrix, x1 - nx, y1 - ny, x1 + nx, y1 + ny, x2 + nx, y2 + ny, x2 - nx, y2 - ny, colorA, colorA, colorB, colorB);
+      drawQuad(matrix, x1 - nx, y1 - ny, x1 + nx, y1 + ny, x2 + nx, y2 + ny, x2 - nx, y2 - ny, colorA, colorA, colorB,
+            colorB);
    }
 
    private static void drawQuad(Matrix4f matrix, float x1, float y1, float x2, float y2, int color) {
@@ -733,8 +786,8 @@ public final class InfinityStellarisTooltipRenderer {
    }
 
    private static void drawQuad(
-      Matrix4f matrix, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int color1, int color2, int color3, int color4
-   ) {
+         Matrix4f matrix, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int color1,
+         int color2, int color3, int color4) {
       RenderSystem.enableBlend();
       RenderSystem.defaultBlendFunc();
       RenderSystem.disableDepthTest();
@@ -751,17 +804,18 @@ public final class InfinityStellarisTooltipRenderer {
    }
 
    private static void vertex(BufferBuilder builder, Matrix4f matrix, float x, float y, int color) {
-      builder.vertex(matrix, x, y, 0.0F).color(color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF, color >>> 24 & 0xFF).endVertex();
+      builder.vertex(matrix, x, y, 0.0F).color(color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF, color >>> 24 & 0xFF)
+            .endVertex();
    }
 
    private static int sampleSpectrum(float position) {
       int length = COSMIC_SPECTRUM.length;
-      float wrapped = position - (float)Math.floor(position / length) * length;
+      float wrapped = position - (float) Math.floor(position / length) * length;
       if (wrapped >= length) {
          wrapped = 0.0F;
       }
 
-      int index = Math.min(length - 1, Math.max(0, (int)Math.floor(wrapped)));
+      int index = Math.min(length - 1, Math.max(0, (int) Math.floor(wrapped)));
       int next = index == length - 1 ? 0 : index + 1;
       float blend = wrapped - index;
       blend = blend * blend * (3.0F - 2.0F * blend);
@@ -791,7 +845,7 @@ public final class InfinityStellarisTooltipRenderer {
 
    private static float noise(float seed) {
       float value = Mth.sin(seed) * 43758.545F;
-      return value - (float)Math.floor(value);
+      return value - (float) Math.floor(value);
    }
 
    private record AuthorityChip(String key, int color) {

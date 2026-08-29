@@ -1,4 +1,4 @@
-# 拔刀剑扩展模组 (Annihilation Blade) AI Agent 开发指南
+# 拔刀剑：终焉藏刀阁 (SlashBlade: Finale Blade Sanctum) AI Agent 开发指南
 
 为了让 AI Agent 更好地协助开发本模组（基于 Forge 1.20.1 的 SlashBlade: Resharped 扩展），请在生成代码和修改项目时严格遵守以下核心准则：
 

@@ -7,6 +7,7 @@ import QWQ.QingYi.annihilationblade.registry.ModCreativeTabs;
 import QWQ.QingYi.annihilationblade.registry.ModEntities;
 import QWQ.QingYi.annihilationblade.registry.ModItems;
 import QWQ.QingYi.annihilationblade.registry.ModSlashArts;
+import QWQ.QingYi.annihilationblade.registry.ModSounds;
 import QWQ.QingYi.annihilationblade.registry.ModSpecialEffects;
 import com.iafenvoy.jupiter.ConfigManager;
 import com.iafenvoy.jupiter.ServerConfigManager;
@@ -29,6 +30,7 @@ public class Annihilationblade {
       ModSlashArts.register(modEventBus);
       ModComboStates.register(modEventBus);
       ModSpecialEffects.register(modEventBus);
+      ModSounds.register(modEventBus);
       ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
       ModNetwork.register();
       ConfigManager.getInstance().registerServerConfigHandler(ModConfig.COMMON, ServerConfigManager.PermissionChecker.IS_OPERATOR);

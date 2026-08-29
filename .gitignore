@@ -29,3 +29,11 @@ __pycache__/
 # Java / Gradle 运行残留
 hs_err_pid*
 replay_pid*
+run/
+crash-*.txt
+.workbuddy/
+.！备份/
+local_backups/
+*.ipr
+*.iws
+

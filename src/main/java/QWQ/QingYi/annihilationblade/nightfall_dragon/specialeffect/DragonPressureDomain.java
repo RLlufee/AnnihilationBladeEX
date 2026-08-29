@@ -34,6 +34,10 @@ public class DragonPressureDomain extends SpecialEffect {
       }
 
       Player player = event.player;
+      if (player.tickCount % 10 != 0) {
+         return;
+      }
+
       ItemStack stack = NightfallDragonItemSupport.heldNightfallDragon(player);
       if (stack.isEmpty() || !hasDragonPressure(stack)) {
          return;
@@ -47,8 +51,10 @@ public class DragonPressureDomain extends SpecialEffect {
       }
 
       if (player.tickCount % AURA_INTERVAL_TICKS == 0 && player.level() instanceof ServerLevel level) {
-         level.sendParticles(ParticleTypes.DRAGON_BREATH, player.getX(), player.getY() + player.getBbHeight() * 0.55, player.getZ(), AURA_DRAGON_BREATH_PARTICLES, 0.85, 0.5, 0.85, 0.025);
-         level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + player.getBbHeight() * 0.48, player.getZ(), AURA_ENCHANT_PARTICLES, 1.05, 0.65, 1.05, 0.08);
+         if (level.hasNearbyAlivePlayer(player.getX(), player.getY(), player.getZ(), 64.0)) {
+            level.sendParticles(ParticleTypes.DRAGON_BREATH, player.getX(), player.getY() + player.getBbHeight() * 0.55, player.getZ(), AURA_DRAGON_BREATH_PARTICLES, 0.85, 0.5, 0.85, 0.025);
+            level.sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + player.getBbHeight() * 0.48, player.getZ(), AURA_ENCHANT_PARTICLES, 1.05, 0.65, 1.05, 0.08);
+         }
       }
    }
 

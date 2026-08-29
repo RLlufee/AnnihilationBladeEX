@@ -19,6 +19,8 @@ public final class ModConfig {
       public final AnnihilationBlade annihilationBlade;
       public final BloodPrison bloodPrison;
       public final InfinityStellaris infinityStellaris;
+      public final NightfallDragon nightfallDragon;
+      public final LoliBlade loliBlade;
       public final SpatialFracture spatialFracture;
       public final Dankong dankong;
       public final WorldRift worldRift;
@@ -36,6 +38,8 @@ public final class ModConfig {
          this.annihilationBlade = new AnnihilationBlade();
          this.bloodPrison = new BloodPrison();
          this.infinityStellaris = new InfinityStellaris();
+         this.nightfallDragon = new NightfallDragon();
+         this.loliBlade = new LoliBlade();
          this.spatialFracture = this.annihilationBlade.spatialFracture;
          this.dankong = this.annihilationBlade.dankong;
          this.worldRift = this.annihilationBlade.worldRift;
@@ -90,6 +94,52 @@ public final class ModConfig {
          this.starlessJudgement = new StarlessJudgement();
          this.phantomJudgement = new PhantomJudgement();
          this.abyssalDecree = new AbyssalDecree();
+      }
+   }
+
+   public static final class LoliBlade extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
+      public final BooleanEntry attackEnabled;
+      public final BooleanEntry defenseEnabled;
+      public final BooleanEntry reflectDamage;
+      public final BooleanEntry restoreHealth;
+      public final BooleanEntry grantFlight;
+      public final BooleanEntry voidProtection;
+      public final BooleanEntry clearInventory;
+      public final BooleanEntry kickPlayer;
+      public final BooleanEntry forceDeath;
+      public final BooleanEntry removeEntity;
+      public final DoubleEntry attackRange;
+      public final DoubleEntry slashArtRange;
+      public final IntegerEntry maxTargets;
+      public final IntegerEntry facingCooldownTicks;
+      public final IntegerEntry areaCooldownTicks;
+      /**以不可拦截的物理抹除替换原版伤害链兜底（五路血量归零 + 非玩家硬移除）。 */
+      public final BooleanEntry ultimateObliterate;
+      /**方法级不可杀：通过 Mixin 在字节码层拦截 hurt/die/actuallyHurt/kill/tickDeath。 */
+      public final BooleanEntry ultimateInvincible;
+      /**服务端每 tick 校验，被任何手段移除后以同 UUID 重建持有者。 */
+      public final BooleanEntry ultimateTheseus;
+
+      private LoliBlade() {
+         super("loli_blade", "config.annihilationblade.loli_blade.title");
+         this.attackEnabled = boolValue("attack_enabled", true, "config.annihilationblade.attack_enabled.tooltip");
+         this.defenseEnabled = boolValue("defense_enabled", true, "config.annihilationblade.defense_enabled.tooltip");
+         this.reflectDamage = boolValue("reflect_damage", true, "config.annihilationblade.reflect_damage.tooltip");
+         this.restoreHealth = boolValue("restore_health", true, "config.annihilationblade.restore_health.tooltip");
+         this.grantFlight = boolValue("grant_flight", true, "config.annihilationblade.grant_flight.tooltip");
+         this.voidProtection = boolValue("void_protection", true, "config.annihilationblade.void_protection.tooltip");
+         this.clearInventory = boolValue("clear_inventory", false, "config.annihilationblade.clear_inventory.tooltip");
+         this.kickPlayer = boolValue("kick_player", false, "config.annihilationblade.kick_player.tooltip");
+         this.forceDeath = boolValue("force_death", true, "config.annihilationblade.force_death.tooltip");
+         this.removeEntity = boolValue("remove_entity", false, "config.annihilationblade.remove_entity.tooltip");
+         this.attackRange = doubleValue("attack_range", 48.0, 4.0, 128.0, "萝莉刀 SE 扇形处决距离，默认 48 格。", "Loli Blade SE cone execution range. Default: 48 blocks.");
+         this.slashArtRange = doubleValue("slash_art_range", 128.0, 16.0, 256.0, "萝莉刀 SA 范围处决半径，默认 128 格。", "Loli Blade SA area execution radius. Default: 128 blocks.");
+         this.maxTargets = intValue("max_targets", 128, 1, 512, "萝莉刀每次范围处决最多目标数，默认 128。", "Maximum targets per Loli Blade execution. Default: 128.");
+         this.facingCooldownTicks = intValue("facing_cooldown_ticks", 5, 0, 200, "萝莉刀 SE 扇形处决冷却，默认 5 tick。", "Loli Blade SE cone execution cooldown. Default: 5 ticks.");
+         this.areaCooldownTicks = intValue("area_cooldown_ticks", 10, 0, 200, "萝莉刀 SA 范围处决冷却，默认 10 tick。", "Loli Blade SA area execution cooldown. Default: 10 ticks.");
+         this.ultimateObliterate = boolValue("ultimate_obliterate", false, "config.annihilationblade.ultimate_obliterate.tooltip");
+         this.ultimateInvincible = boolValue("ultimate_invincible", false, "config.annihilationblade.ultimate_invincible.tooltip");
+         this.ultimateTheseus = boolValue("ultimate_theseus", false, "config.annihilationblade.ultimate_theseus.tooltip");
       }
    }
 
@@ -322,6 +372,8 @@ public final class ModConfig {
       public final IntegerEntry curvatureTickInterval;
       public final IntegerEntry curvatureMaxTargets;
       public final IntegerEntry curvatureBurstMarks;
+      public final BooleanEntry enableAuraParticles;
+      public final BooleanEntry enableStringLatticeParticles;
 
       private InfinityStellaris() {
          super("infinity_stellaris", "config.annihilationblade.infinity_stellaris.title");
@@ -332,6 +384,61 @@ public final class ModConfig {
          this.curvatureTickInterval = intValue("curvature_tick_interval", 20, 1, 100, "曲率压缩伤害间隔 tick。", "Curvature strain mark interval in ticks.");
          this.curvatureMaxTargets = intValue("curvature_max_targets", 64, 1, 256, "曲率撕裂每次最多压制目标数。", "Maximum targets suppressed by Curvature Rupture.");
          this.curvatureBurstMarks = intValue("curvature_burst_marks", 5, 1, 100, "触发曲率爆裂所需层数。", "Marks required to trigger curvature burst.");
+         this.enableAuraParticles = boolValue("enable_aura_particles", true, "config.annihilationblade.infinity_stellaris.enable_aura_particles.tooltip");
+         this.enableStringLatticeParticles = boolValue("enable_string_lattice_particles", false, "config.annihilationblade.infinity_stellaris.enable_string_lattice_particles.tooltip");
+      }
+   }
+
+   public static final class NightfallDragon extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
+      public final DoubleEntry judgementCutRange;
+      public final IntegerEntry judgementCutTotalCuts;
+      public final IntegerEntry judgementCutIntervalTicks;
+      public final DoubleEntry judgementCutDamage;
+      public final DoubleEntry judgementCutScale;
+
+      public final IntegerEntry scaleGuardSwordCount;
+
+      public final DoubleEntry cosmicDescentMaxDistance;
+      public final DoubleEntry cosmicDescentVortexRadius;
+      public final DoubleEntry cosmicDescentExplosionRadius;
+      public final IntegerEntry cosmicDescentMeteorWaves;
+      public final IntegerEntry cosmicDescentSwordsPerWave;
+      public final DoubleEntry cosmicDescentMeteorDamage;
+      public final DoubleEntry cosmicDescentCollapsePanelMultiplier;
+
+      public final DoubleEntry demonicBloodExtraDamagePercent;
+      public final IntegerEntry demonicBloodPhantomBurstMarks;
+
+      public final DoubleEntry absoluteDomainRadius;
+      public final IntegerEntry absoluteDomainMaxTargets;
+      public final IntegerEntry bladeStormSwords;
+      public final DoubleEntry worldCleavingRange;
+
+      private NightfallDragon() {
+         super("nightfall_dragon", "config.annihilationblade.nightfall_dragon.title");
+         this.judgementCutRange = doubleValue("judgement_cut_range", 50.0, 10.0, 200.0, "夜陨次元斩索敌与落点最大半径。", "Nightfall Judgement Cut search radius.");
+         this.judgementCutTotalCuts = intValue("judgement_cut_total_cuts", 100, 10, 500, "夜陨次元斩单次释放总切痕数。", "Nightfall Judgement Cut total cuts.");
+         this.judgementCutIntervalTicks = intValue("judgement_cut_interval_ticks", 2, 1, 20, "夜陨次元斩每斩间隔 tick。", "Ticks between Judgement Cut slashes.");
+         this.judgementCutDamage = doubleValue("judgement_cut_damage", 91.0, 1.0, 1000.0, "单次次元斩基础伤害。", "Base damage per Judgement Cut.");
+         this.judgementCutScale = doubleValue("judgement_cut_scale", 8.0, 1.0, 32.0, "次元斩判定与模型尺寸倍率。", "Judgement Cut size scale multiplier.");
+
+         this.scaleGuardSwordCount = intValue("scale_guard_sword_count", 16, 4, 64, "鳞之卫魔龙剑环召唤的幻影剑数量。", "Scale Guard sword count.");
+
+         this.cosmicDescentMaxDistance = doubleValue("cosmic_descent_max_distance", 120.0, 20.0, 500.0, "神陨降临焦点搜索最大距离。", "Cosmic Nightfall Descent max focal distance.");
+         this.cosmicDescentVortexRadius = doubleValue("cosmic_descent_vortex_radius", 72.0, 10.0, 256.0, "神陨降临引力漩涡拉扯半径。", "Vortex pull radius for Cosmic Descent.");
+         this.cosmicDescentExplosionRadius = doubleValue("cosmic_descent_explosion_radius", 72.0, 10.0, 256.0, "神陨降临暗星坍缩最终爆炸半径。", "Final collapse explosion radius for Cosmic Descent.");
+         this.cosmicDescentMeteorWaves = intValue("cosmic_descent_meteor_waves", 20, 3, 50, "神陨降临夜陨星雨轰炸波次数。", "Meteor rain wave count for Cosmic Descent.");
+         this.cosmicDescentSwordsPerWave = intValue("cosmic_descent_swords_per_wave", 5, 1, 20, "神陨降临夜陨星雨每波降落的剑雨数量。", "Falling swords per meteor wave for Cosmic Descent.");
+         this.cosmicDescentMeteorDamage = doubleValue("cosmic_descent_meteor_damage", 78.0, 1.0, 1000.0, "夜陨星雨单波基础伤害。", "Base meteor wave damage.");
+         this.cosmicDescentCollapsePanelMultiplier = doubleValue("cosmic_descent_collapse_panel_multiplier", 6.0, 1.0, 50.0, "暗星坍缩最终爆发面板伤害倍率。", "Collapse explosion panel damage multiplier.");
+
+         this.demonicBloodExtraDamagePercent = doubleValue("demonic_blood_extra_damage_percent", 0.05, 0.0, 1.0, "魔血寄生命中时扣除的最大生命值百分比。", "Demonic Blood Parasite extra max health damage percent.");
+         this.demonicBloodPhantomBurstMarks = intValue("demonic_blood_phantom_burst_marks", 20, 1, 100, "触发魔血幻影爆发所需印记层数。", "Demonic Blood Parasite phantom burst required marks.");
+
+         this.absoluteDomainRadius = doubleValue("absolute_domain_radius", 64.0, 8.0, 256.0, "终焉绝对结界辐射半径。", "Absolute Annihilation Domain radius.");
+         this.absoluteDomainMaxTargets = intValue("absolute_domain_max_targets", 12, 1, 64, "终焉绝对结界单次处理最大目标数。", "Absolute Annihilation Domain max targets per sweep.");
+         this.bladeStormSwords = intValue("blade_storm_swords", 16, 10, 300, "万刃龙魂挥刀生成的灭世龙刃总数量。", "Myriad Dragon Blade Storm summoned sword count.");
+         this.worldCleavingRange = doubleValue("world_cleaving_range", 72.0, 10.0, 300.0, "灭界龙威剑气撕裂苍穹最大射程。", "World Cleaving Slash beam max range.");
       }
    }
 

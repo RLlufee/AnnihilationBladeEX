@@ -1,5 +1,6 @@
 package QWQ.QingYi.annihilationblade.nightfall_dragon.logic;
 
+import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.NightfallDragonDefinitions;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.entity.ScaleGuardSwordEntity;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.item.NightfallDragonItemSupport;
@@ -13,7 +14,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 public final class ScaleGuardLogic {
-   public static final int SWORD_COUNT = 16;
+   public static int getSwordCount() {
+      return ModConfig.COMMON.nightfallDragon.scaleGuardSwordCount.getValue();
+   }
 
    private ScaleGuardLogic() {
    }
@@ -35,8 +38,9 @@ public final class ScaleGuardLogic {
 
       ServerLevel level = serverPlayer.serverLevel();
       Vec3 center = serverPlayer.position().add(0.0D, 1.1D, 0.0D);
-      for (int i = 0; i < SWORD_COUNT; i++) {
-         ScaleGuardSwordEntity sword = ScaleGuardSwordEntity.create(level, serverPlayer, i, SWORD_COUNT);
+      int swordCount = getSwordCount();
+      for (int i = 0; i < swordCount; i++) {
+         ScaleGuardSwordEntity sword = ScaleGuardSwordEntity.create(level, serverPlayer, i, swordCount);
          if (sword != null) {
             level.addFreshEntity(sword);
          }
