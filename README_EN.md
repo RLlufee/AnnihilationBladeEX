@@ -1,10 +1,10 @@
-# SlashBlade: Finale Blade Sanctum 2.9.0-1.20.1-forge (Unreleased)
+# SlashBlade: Finale Blade Sanctum 2.9.2-1.20.1-forge
 
 > Chinese name: 拔刀剑：终焉藏刀阁. A Forge 1.20.1 SlashBlade expansion mod based on SlashBlade / SlashBlade Resharped. Revolving around themes of "Terminus, World Rift, Collapse, Judgement, Blood Prison, Cosmic Laws, and Nightfall Dragon", this mod provides finale-tier named blades, Slash Arts (SA), Special Effect (SE) chains, configurable low-risk parameters, and visual/hotkey controls designed for real-combat readability.
 
 Author: QingYi_Li (青衣_璃)
 
-> This README targets the unreleased `2.9.0-1.20.1-forge` development line. `2.8.0` is the latest published baseline, while 2.9 focuses on Loli Blade, recipe coverage, and publishing-name cleanup.
+> This README targets the `2.9.2-1.20.1-forge` release. `2.8.0` is the latest published baseline, while 2.9 focuses on Loli Blade, Nightfall Dragon tooltip visual overhaul, recipe coverage, and publishing-name cleanup.
 
 ## Overview
 
@@ -244,13 +244,14 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 
 Build output will be generated at:
 
-`build/libs/slashblade-finale-blade-sanctum-2.9.0-1.20.1-forge.jar`
+`build/libs/slashblade-finale-blade-sanctum-2.9.2-1.20.1-forge.jar`
 
 ## Changelog
 
-### 2.9.0-1.20.1-forge · Unreleased
+### 2.9.2-1.20.1-forge
 
 **Features**
+- Added Nightfall Dragon Tooltip visual overhaul: dynamic 3x3 Dragon Authority chip matrix, interactive mouse spotlight tracking, holographic scanline, pulsing dragon eye core, chromatic aberration glitch shift, dual counter-rotating magic circles, and floating dragon soul sparks.
 - Added `annihilationblade:loli_blade` as the main 2.9 development-line named blade, including named-blade JSON, model/texture assets, JEI description, localization, owner binding, active execution, defensive fallback, and optional server-side high-pressure countermeasures.
 - Added missing `slashblade:shaped_blade` recipes for `annihilationblade:annihilation_blade`, `annihilationblade:nightfall_dragon`, and `annihilationblade:loli_blade`.
 - Added a real entry to `annihilationblade.mixins.json` through a no-op `LivingEntityMixin` placeholder.
@@ -258,8 +259,8 @@ Build output will be generated at:
 
 **Publishing & Docs**
 - Renamed the public project name to `SlashBlade: Finale Blade Sanctum` / `拔刀剑：终焉藏刀阁` while keeping `mod_id=annihilationblade` and existing registry/resource paths stable for compatibility.
-- Bumped the development version to `2.9.0-1.20.1-forge` so unreleased builds no longer collide with the published `2.8.0` line.
-- Reorganized the Chinese README so Loli Blade and post-2.8 changes are grouped under `2.9.0-1.20.1-forge · 未发布`.
+- Bumped version to `2.9.2-1.20.1-forge`.
+- Reorganized README documentation and changelogs under `2.9.2-1.20.1-forge`.
 - Removed the old Loli Blade `LeftClickEmpty` and sneaking right-click skill listeners plus their client-to-server action packet registration, so normal SlashBlade input flow remains in charge.
 
 ### 2.7.0-1.20.1-forge

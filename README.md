@@ -3,7 +3,7 @@
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.20.1-brightgreen.svg)
 ![Forge Version](https://img.shields.io/badge/Forge-47.4.21-blue.svg)
 ![Java Version](https://img.shields.io/badge/Java-17-orange.svg)
-![Version](https://img.shields.io/badge/Version-2.9.0--1.20.1--forge-purple.svg)
+![Version](https://img.shields.io/badge/Version-2.9.2--1.20.1--forge-purple.svg)
 
 > **中文全称**：拔刀剑：终焉藏刀阁  
 > **英文标识**：`SlashBlade: Finale Blade Sanctum`  
@@ -19,7 +19,7 @@
 本模组围绕 **“终焉、裂界、坍缩、审判、血狱、宇宙法则、混沌魔龙、萝莉法则”** 八大核心主题构建，提供了 **5 把机制独特的顶级命名刀**、完整严谨的 **SA / SE 战斗链路**、支持 Jupiter 配置系统的 **低风险参数调节**，以及兼具极佳视觉冲击力与流畅实战体验的 **动态渲染与控制体系**。
 
 > [!NOTE]
-> 当前 README 对应开发版本 **`2.9.0-1.20.1-forge`**。`2.8.0` 已作为正式版本发布。2.9.0 版本重构并拓展了萝莉刀体系、完善了合成表链路、统一规范了项目命名与描述体系。
+> 当前 README 对应版本 **`2.9.2-1.20.1-forge`**。`2.8.0` 已作为正式版本发布。2.9.0 版本重构并拓展了萝莉刀体系、完善了合成表链路、统一规范了项目命名与描述体系。
 
 ---
 
@@ -275,7 +275,7 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 ```
 
 构建完成后的产物将生成在：
-`build/libs/slashblade-finale-blade-sanctum-2.9.0-1.20.1-forge.jar`
+`build/libs/slashblade-finale-blade-sanctum-2.9.2-1.20.1-forge.jar`
 
 ---
 
@@ -283,9 +283,10 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 
 > 分类说明：**新增 (Added)** \| **重构·变更 (Changed)** \| **修复 (Fixed)** \| **资源与视觉 (Assets & Visuals)** \| **文档 (Documentation)** \| **开发环境 (Development)**
 
-### 2.9.0-1.20.1-forge (开发中)
+### 2.9.2-1.20.1-forge
 
 **新增 (Added)**
+- **魔龙夜陨 Tooltip 视觉强化**：新增龙魂核心、动态轨道符文、鼠标斩痕反馈与形态状态舷窗，让三形态 Tooltip 拥有更强的层次感与实时动效。
 - **新命名刀**：新增「萝莉(。>︿<   。)」(`annihilationblade:loli_blade`)，集成主人唯一绑定、防御兜底与十级原生附魔（耐久、抢夺、多重射击、力量、灵魂疾行、摔落缓冲、保护、击退、经验修补）。
 - **萝莉刀本土化 SA/SE**：实装 `loli_facing_execution` SE (48格扇形处决) 与 `loli_area_execution` SA (128格广域处决，播放 `loli_success` 音效)。
 - **究极高压与多维防护增补**：
