@@ -1,0 +1,51 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All rights reserved"
+issueTrackerURL="https://github.com/"
+
+[[mods]]
+modId="annihilationblade"
+version="2.9.2-1.20.1-forge"
+displayName="SlashBlade: Finale Blade Sanctum"
+authors="青衣_璃"
+description='''
+§5§lSlashBlade: Finale Blade Sanctum§r
+§8§o拔刀剑：终焉藏刀阁§r
+§7A Forge 1.20.1 SlashBlade expansion built around §dterminus§7, §5spatial rifts§7, §cblood prisons§7, §bcosmic law§7 and the §6chaos dragon§7.
+§d§lBlades§r§8 > §5Annihilation Blade§7 / §cBlood Prison§7 / §bInfinity Stellaris§7 / §6Nightfall Dragon§7 / §dLoli Blade
+§b§lHighlights§r§8 > §7rift-chain executions, lifesteal shields, ritual end-game forging, black-hole domains, form-shifting dragon arts and bespoke tooltip panels.
+§a§lCompatibility§r§8 > §7Chinese/English localization, JEI recipe viewing, multiplayer friendly-fire checks, and configurable low-risk visual/combat tuning.
+'''
+logoFile="icon.png"
+
+
+[[dependencies.annihilationblade]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.annihilationblade]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.annihilationblade]]
+modId="slashblade"
+mandatory=true
+versionRange="[0.0.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.annihilationblade]]
+modId="jei_slashblade"
+mandatory=false
+versionRange="[0.0.1,)"
+ordering="AFTER"
+side="CLIENT"
+
+[[mixins]]
+    type = "FML"
+    config = "annihilationblade.mixins.json"

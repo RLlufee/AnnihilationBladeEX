@@ -1,8 +1,10 @@
-# Annihilation Blade · Terminus 2.8.0-1.20.1-forge
+# SlashBlade: Finale Blade Sanctum 2.9.2-1.20.1-forge
 
-> A Forge 1.20.1 SlashBlade expansion mod based on SlashBlade / SlashBlade Resharped. Revolving around themes of "Terminus, World Rift, Collapse, Judgement, Blood Prison, and Cosmic Laws", this mod provides three named blades, three sets of Slash Arts (SA), a complete Special Effect (SE) chain, configurable low-risk parameters, and visual/hotkey controls designed for real-combat readability.
+> Chinese name: 拔刀剑：终焉藏刀阁. A Forge 1.20.1 SlashBlade expansion mod based on SlashBlade / SlashBlade Resharped. Revolving around themes of "Terminus, World Rift, Collapse, Judgement, Blood Prison, Cosmic Laws, and Nightfall Dragon", this mod provides finale-tier named blades, Slash Arts (SA), Special Effect (SE) chains, configurable low-risk parameters, and visual/hotkey controls designed for real-combat readability.
 
 Author: QingYi_Li (青衣_璃)
+
+> This README targets the `2.9.2-1.20.1-forge` release. `2.8.0` is the latest published baseline, while 2.9 focuses on Loli Blade, Nightfall Dragon tooltip visual overhaul, recipe coverage, and publishing-name cleanup.
 
 ## Overview
 
@@ -11,8 +13,11 @@ The current version includes:
 - Main Blade: `annihilationblade:annihilation_blade`
 - Blood Prison Blade: `annihilationblade:blood_prison`
 - Ultimate Blade: `annihilationblade:infinity_stellaris`
-- 3 Slash Arts (SA): `spatial_fracture`, `infernal_slaughter`, and `vacuum_decay_collapse`
-- 15 Registered Special Effects (SE): Annihilation Blade uses 8 "Terminus" SEs, Blood Prison uses 3 "Blood Prison" SEs, and Infinity Stellaris uses 4 "Cosmic Law" SEs
+- Nightfall Dragon Blade: `annihilationblade:nightfall_dragon`
+- Loli Blade: `annihilationblade:loli_blade`
+- 6 Slash Arts (SA): `spatial_fracture`, `infernal_slaughter`, `vacuum_decay_collapse`, `nightfall_judgement_cut`, `scale_guard`, and `loli_area_execution`
+- 24 Registered Special Effects (SE): Annihilation Blade uses 8 "Terminus" SEs, Blood Prison uses 3 "Blood Prison" SEs, Infinity Stellaris uses 4 "Cosmic Law" SEs, Nightfall Dragon uses 8 demonic-dragon SEs across its forms, and Loli Blade uses 1 native-slash SE
+- Loli Blade server-side authority logic: owner binding, native SE/SA execution, defensive fallback, and optional high-pressure countermeasures
 - Named blade datapack definitions
 - Forge common configuration file
 - Language localization resources (Simplified Chinese, Traditional Chinese, English)
@@ -239,9 +244,26 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 
 Build output will be generated at:
 
-`build/libs/annihilationblade-2.8.0-1.20.1-forge.jar`
+`build/libs/slashblade-finale-blade-sanctum-2.9.2-1.20.1-forge.jar`
 
 ## Changelog
+
+### 2.9.2-1.20.1-forge
+
+**Features**
+- Added Nightfall Dragon Tooltip visual overhaul: dynamic 3x3 Dragon Authority chip matrix, interactive mouse spotlight tracking, holographic scanline, pulsing dragon eye core, chromatic aberration glitch shift, dual counter-rotating magic circles, and floating dragon soul sparks.
+- Added `annihilationblade:loli_blade` as the main 2.9 development-line named blade, including named-blade JSON, model/texture assets, JEI description, localization, owner binding, active execution, defensive fallback, and optional server-side high-pressure countermeasures.
+- Added missing `slashblade:shaped_blade` recipes for `annihilationblade:annihilation_blade`, `annihilationblade:nightfall_dragon`, and `annihilationblade:loli_blade`.
+- Added a real entry to `annihilationblade.mixins.json` through a no-op `LivingEntityMixin` placeholder.
+- Reworked Loli Blade active execution into SlashBlade-native hooks: `loli_facing_execution` SE handles the 48-block cone execution, while `loli_area_execution` SA handles the 128-block area execution and plays `annihilationblade:loli_success`.
+
+**Publishing & Docs**
+- Renamed the public project name to `SlashBlade: Finale Blade Sanctum` / `拔刀剑：终焉藏刀阁` while keeping `mod_id=annihilationblade` and existing registry/resource paths stable for compatibility.
+- Bumped version to `2.9.2-1.20.1-forge`.
+- Reorganized README documentation and changelogs under `2.9.2-1.20.1-forge`.
+- Removed the old Loli Blade `LeftClickEmpty` and sneaking right-click skill listeners plus their client-to-server action packet registration, so normal SlashBlade input flow remains in charge.
+- Reworked Loli Blade attack sound trigger: instead of broadcasting on empty SA activation, the `loli_success` sound now plays whenever the player holds the Loli Blade in the main hand and any attack released by it deals damage to a valid living entity, protected by per-tick multi-target audio burst throttling.
+- Fixed missing `TimeLineTickAction` in `LOLI_AREA_EXECUTION_STATE`, restoring server-side execution for Loli Blade SA at tick 8.
 
 ### 2.7.0-1.20.1-forge
 
