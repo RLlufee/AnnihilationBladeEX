@@ -25,14 +25,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * <h1>永夜魔龙 - 终极 SA【神陨·宇宙夜陨降临】 (Cosmic Nightfall Descent) 逻辑类</h1>
- * <p>
+ * 魔龙夜陨 - 终极 SA【神陨·宇宙夜陨降临】 (Cosmic Nightfall Descent) 逻辑类
+ * 
  * 包含三个阶段的天灾级演出与规则：
- * <ul>
- *   <li><b>一阶段：引力撕裂与暗星聚能 (0 ~ 10 Ticks)</b>：寻找视线前方最远 40 格焦点，拉扯 24 格内敌对实体至焦点并浮空。</li>
- *   <li><b>二阶段：夜陨星雨轰炸 (10 ~ 40 Ticks)</b>：在焦点高空 15 格处打开多维裂隙，节流下落 15 轮流星/龙刃暴击与地爆。</li>
- *   <li><b>三阶段：暗星坍缩与法则湮灭 (40 ~ 50 Ticks)</b>：暗星内核剧烈坍缩，引发大范围终极湮灭冲击波、剥离护盾并斩杀半血目标。</li>
- * </ul>
+ * 
+ *   一阶段：引力撕裂与暗星聚能 (0 ~ 10 Ticks)：寻找视线前方最远 40 格焦点，拉扯 24 格内敌对实体至焦点并浮空。
+ *   二阶段：夜陨星雨轰炸 (10 ~ 40 Ticks)：在焦点高空 15 格处打开多维裂隙，节流下落 15 轮流星/龙刃暴击与地爆。
+ *   三阶段：暗星坍缩与法则湮灭 (40 ~ 50 Ticks)：暗星内核剧烈坍缩，引发大范围终极湮灭冲击波、剥离护盾并斩杀半血目标。
+ * 
  */
 import QWQ.QingYi.annihilationblade.config.ModConfig;
 
@@ -71,8 +71,10 @@ public final class CosmicNightfallDescentLogic {
       if (player instanceof ServerPlayer serverPlayer && canUseFinalArt(serverPlayer)) {
          ServerLevel level = serverPlayer.serverLevel();
          Vec3 center = serverPlayer.position().add(0.0, serverPlayer.getBbHeight() * 0.5, 0.0);
-         level.playSound(null, center.x, center.y, center.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.5F, 0.65F);
-         level.playSound(null, center.x, center.y, center.z, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.PLAYERS, 1.8F, 0.5F);
+         level.playSound(null, center.x, center.y, center.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 1.5F,
+               0.65F);
+         level.playSound(null, center.x, center.y, center.z, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.PLAYERS,
+               1.8F, 0.5F);
          level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 96, 4.5, 2.0, 4.5, 0.2);
          level.sendParticles(ParticleTypes.DRAGON_BREATH, center.x, center.y, center.z, 72, 3.5, 1.2, 3.5, 0.1);
       }
@@ -87,8 +89,10 @@ public final class CosmicNightfallDescentLogic {
       Vec3 focalPoint = findFocalPoint(level, serverPlayer);
 
       // 阶段一：引力漩涡拉扯 & 视听提示
-      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 2.5F, 0.5F);
-      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 2.2F, 0.6F);
+      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS,
+            2.5F, 0.5F);
+      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.AMETHYST_BLOCK_RESONATE,
+            SoundSource.PLAYERS, 2.2F, 0.6F);
 
       // 1. 抓取周围目标拉向焦点
       pullTargetsToFocalPoint(level, serverPlayer, focalPoint);
@@ -114,7 +118,8 @@ public final class CosmicNightfallDescentLogic {
 
    private static boolean canUseFinalArt(ServerPlayer player) {
       ItemStack stack = player.getMainHandItem();
-      return NightfallDragonItemSupport.isNightfallDragon(stack) && NightfallDragonDefinitions.FORM_FINAL.equals(NightfallDragonDefinitions.getForm(stack));
+      return NightfallDragonItemSupport.isNightfallDragon(stack)
+            && NightfallDragonDefinitions.FORM_FINAL.equals(NightfallDragonDefinitions.getForm(stack));
    }
 
    private static Vec3 findFocalPoint(ServerLevel level, ServerPlayer player) {
@@ -150,7 +155,8 @@ public final class CosmicNightfallDescentLogic {
    private static void spawnMeteorWave(ServerLevel level, ServerPlayer player, Vec3 focalPoint, int waveIndex) {
       int swordsPerWave = getSwordsPerWave();
       for (int s = 0; s < swordsPerWave; s++) {
-         double angle = waveIndex * 0.85 + s * (Math.PI * 2.0 / Math.max(1, swordsPerWave)) + player.getRandom().nextDouble() * 0.5;
+         double angle = waveIndex * 0.85 + s * (Math.PI * 2.0 / Math.max(1, swordsPerWave))
+               + player.getRandom().nextDouble() * 0.5;
          double offsetRadius = (waveIndex % 3 == 0 ? 1.5 : 7.5 + (waveIndex % 5) * 3.6);
          Vec3 meteorImpact = focalPoint.add(Math.cos(angle) * offsetRadius, 0.0, Math.sin(angle) * offsetRadius);
          Vec3 meteorOrigin = meteorImpact.add(0.0, 32.0, 0.0);
@@ -159,9 +165,10 @@ public final class CosmicNightfallDescentLogic {
          EntityAbstractSummonedSword sword = new EntityAbstractSummonedSword(RegistryEvents.SummonedSword, level);
          sword.setOwner(player);
          sword.setShooter(player);
-         sword.setColor(waveIndex % 2 == 0 ? NightfallDragonDefinitions.FINAL_SUMMONED_SWORD_COLOR : NightfallDragonDefinitions.FINAL_VOID_PURPLE);
+         sword.setColor(waveIndex % 2 == 0 ? NightfallDragonDefinitions.FINAL_SUMMONED_SWORD_COLOR
+               : NightfallDragonDefinitions.FINAL_VOID_PURPLE);
          sword.setDamage(0.0);
-         sword.setPierce((byte)0);
+         sword.setPierce((byte) 0);
          sword.setDelay(20);
          sword.setPos(meteorOrigin.x, meteorOrigin.y, meteorOrigin.z);
          sword.moveTo(meteorOrigin.x, meteorOrigin.y, meteorOrigin.z, 0.0F, -90.0F);
@@ -169,12 +176,17 @@ public final class CosmicNightfallDescentLogic {
          level.addFreshEntity(sword);
 
          // 特效与冲击
-         level.sendParticles(ParticleTypes.DRAGON_BREATH, meteorImpact.x, meteorImpact.y + 0.5, meteorImpact.z, 36, 2.4, 0.8, 2.4, 0.12);
-         level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, meteorImpact.x, meteorImpact.y + 0.5, meteorImpact.z, 28, 1.8, 1.0, 1.8, 0.08);
-         level.playSound(null, meteorImpact.x, meteorImpact.y, meteorImpact.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.0F, 1.1F);
+         level.sendParticles(ParticleTypes.DRAGON_BREATH, meteorImpact.x, meteorImpact.y + 0.5, meteorImpact.z, 36, 2.4,
+               0.8, 2.4, 0.12);
+         level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, meteorImpact.x, meteorImpact.y + 0.5, meteorImpact.z, 28,
+               1.8, 1.0, 1.8, 0.08);
+         level.playSound(null, meteorImpact.x, meteorImpact.y, meteorImpact.z, SoundEvents.GENERIC_EXPLODE,
+               SoundSource.PLAYERS, 1.0F, 1.1F);
 
-         AABB area = new AABB(meteorImpact.x - 12.0, meteorImpact.y - 6.0, meteorImpact.z - 12.0, meteorImpact.x + 12.0, meteorImpact.y + 6.0, meteorImpact.z + 12.0);
-         List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, area, target -> SlashBladeTargeting.canAttack(player, target));
+         AABB area = new AABB(meteorImpact.x - 12.0, meteorImpact.y - 6.0, meteorImpact.z - 12.0, meteorImpact.x + 12.0,
+               meteorImpact.y + 6.0, meteorImpact.z + 12.0);
+         List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, area,
+               target -> SlashBladeTargeting.canAttack(player, target));
          for (LivingEntity target : targets) {
             target.invulnerableTime = 0;
             target.hurt(level.damageSources().indirectMagic(player, player), getMeteorDamage());
@@ -188,14 +200,19 @@ public final class CosmicNightfallDescentLogic {
 
    private static void triggerCoreCollapse(ServerLevel level, ServerPlayer player, Vec3 focalPoint) {
       // 1. 视听震场
-      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.get(), SoundSource.PLAYERS, 3.0F, 0.5F);
-      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 3.0F, 0.5F);
+      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.get(),
+            SoundSource.PLAYERS, 3.0F, 0.5F);
+      level.playSound(null, focalPoint.x, focalPoint.y, focalPoint.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS,
+            3.0F, 0.5F);
       NightfallDragonScreenShakeEntity.spawn(level, focalPoint, 96.0F, 0.35F, 5, 30);
 
       // 2. 特效粒子爆发
-      level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, focalPoint.x, focalPoint.y + 1.0, focalPoint.z, 12, 4.5, 4.5, 4.5, 0.0);
-      level.sendParticles(ParticleTypes.DRAGON_BREATH, focalPoint.x, focalPoint.y + 1.0, focalPoint.z, 256, 13.5, 4.5, 13.5, 0.25);
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, focalPoint.x, focalPoint.y + 1.0, focalPoint.z, 192, 12.0, 6.0, 12.0, 0.35);
+      level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, focalPoint.x, focalPoint.y + 1.0, focalPoint.z, 12, 4.5, 4.5,
+            4.5, 0.0);
+      level.sendParticles(ParticleTypes.DRAGON_BREATH, focalPoint.x, focalPoint.y + 1.0, focalPoint.z, 256, 13.5, 4.5,
+            13.5, 0.25);
+      level.sendParticles(ParticleTypes.REVERSE_PORTAL, focalPoint.x, focalPoint.y + 1.0, focalPoint.z, 192, 12.0, 6.0,
+            12.0, 0.35);
 
       // 3. 产生 24 道落雷在 3 重圆环上轰击 (12, 24, 36 格半径)
       for (int i = 0; i < 24; i++) {
@@ -212,7 +229,7 @@ public final class CosmicNightfallDescentLogic {
          target.invulnerableTime = 0;
          target.setAbsorptionAmount(0.0F); // 剥离黄血盾
 
-         float damage = baseDamage + (float)(target.getMaxHealth() * COLLAPSE_MAX_HEALTH_RATIO);
+         float damage = baseDamage + (float) (target.getMaxHealth() * COLLAPSE_MAX_HEALTH_RATIO);
          target.hurt(level.damageSources().indirectMagic(player, player), damage);
 
          // 5. 极低血量直接热寂斩杀

@@ -6,6 +6,7 @@ import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.VacuumDecayCollapse
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.CosmicNightfallDescentLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.NightfallDragonJudgementCutLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.ScaleGuardLogic;
+import QWQ.QingYi.annihilationblade.loli_blade.logic.LoliBladeCombatLogic;
 import mods.flammpfeil.slashblade.init.DefaultResources;
 import mods.flammpfeil.slashblade.registry.combo.ComboState;
 import mods.flammpfeil.slashblade.registry.combo.ComboState.Builder;
@@ -151,6 +152,25 @@ public class ModComboStates {
                .put(10, entity -> {
                   if (entity instanceof Player player && !player.level().isClientSide) {
                      CosmicNightfallDescentLogic.unleash(player);
+                  }
+               })
+               .build()
+         )
+         .build()
+   );
+   public static final RegistryObject<ComboState> LOLI_AREA_EXECUTION_STATE = REGISTRY.register(
+      "loli_area_execution_state",
+      () -> Builder.newInstance()
+         .priority(88)
+         .startAndEnd(880, 920)
+         .motionLoc(DefaultResources.ExMotionLocation)
+         .next(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .nextOfTimeout(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .addTickAction(
+            TimeLineTickAction.getBuilder()
+               .put(8, entity -> {
+                  if (entity instanceof Player player && !player.level().isClientSide) {
+                     LoliBladeCombatLogic.handleAreaSlashArt(player);
                   }
                })
                .build()

@@ -2,6 +2,7 @@ package QWQ.QingYi.annihilationblade.registry;
 
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.VacuumDecayCollapseLogic;
+import QWQ.QingYi.annihilationblade.loli_blade.logic.LoliBladeCombatLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.CosmicNightfallDescentLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.NightfallDragonJudgementCutLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.logic.ScaleGuardLogic;
@@ -50,6 +51,13 @@ public class ModSlashArts {
       }
 
       return ModComboStates.COSMIC_NIGHTFALL_DESCENT_STATE.getId();
+   }));
+   public static final RegistryObject<SlashArts> LOLI_AREA_EXECUTION = ARTS.register("loli_area_execution", () -> new SlashArts(entity -> {
+      if (entity instanceof Player player && !player.level().isClientSide) {
+         LoliBladeCombatLogic.prepareCast(player);
+      }
+
+      return ModComboStates.LOLI_AREA_EXECUTION_STATE.getId();
    }));
 
    public static void register(IEventBus eventBus) {
