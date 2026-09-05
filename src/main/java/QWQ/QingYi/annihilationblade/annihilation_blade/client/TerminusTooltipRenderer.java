@@ -207,7 +207,20 @@ public final class TerminusTooltipRenderer {
       return lines;
    }
 
+   private static ItemStack cachedTerminusEnchantStack = ItemStack.EMPTY;
+   private static CompoundTag cachedTerminusEnchantTag = null;
+   private static int cachedTerminusEnchantWidth = -1;
+   private static List<FormattedCharSequence> cachedTerminusEnchantLines = null;
+
    private static List<FormattedCharSequence> wrapEnchantments(Font font, ItemStack stack, int contentWidth) {
+      CompoundTag tag = stack.getTag();
+      if (cachedTerminusEnchantLines != null 
+            && cachedTerminusEnchantWidth == contentWidth 
+            && ItemStack.matches(cachedTerminusEnchantStack, stack) 
+            && java.util.Objects.equals(cachedTerminusEnchantTag, tag)) {
+         return cachedTerminusEnchantLines;
+      }
+
       Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
       if (enchantments.isEmpty()) {
          return List.of();
@@ -243,6 +256,10 @@ public final class TerminusTooltipRenderer {
          lines.add(current.getVisualOrderText());
       }
 
+      cachedTerminusEnchantStack = stack.copy();
+      cachedTerminusEnchantTag = tag != null ? tag.copy() : null;
+      cachedTerminusEnchantWidth = contentWidth;
+      cachedTerminusEnchantLines = lines;
       return lines;
    }
 

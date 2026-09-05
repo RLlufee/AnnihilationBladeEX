@@ -27,15 +27,18 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 /**
- * <h1>曲率撕裂与 AI 抹杀 (Curvature Rupture & AI Erasure) 核心逻辑类</h1>
- * <p>
+ * 曲率撕裂与 AI 抹杀 (Curvature Rupture & AI Erasure) 核心逻辑类
+ * 
  * 本类展示了控制周围生物行为、时空冻结与应力印记引爆的高级玩法：
- * <ul>
- *   <li><b>强行抹杀/封印生物 AI (setNoAi)</b>：将范围内的 Mob 设置为 NoAI 并清除寻路，实现“时间停止/时空冻结”的效果。</li>
- *   <li><b>多玩家并发所有权管理 (FrozenMobState)</b>：记录生物原本的 NoAI 状态以及当前正在对其施压的所有玩家 UUID，防止多玩家同时施法导致 AI 恢复逻辑混乱。</li>
- *   <li><b>曲率应力印记 (Strain Marks) 叠加机制</b>：在 Tick 循环中逐渐为目标增加应力印记，达到配置上限后触发“曲率撕裂爆破 (Curvature Burst)”。</li>
- *   <li><b>重置无敌帧 (invulnerableTime = 0)</b>：破除目标的受击无敌保护，确保高频打击能立刻生效。</li>
- * </ul>
+ * 
+ * 强行抹杀/封印生物 AI (setNoAi)：将范围内的 Mob 设置为 NoAI
+ * 并清除寻路，实现“时间停止/时空冻结”的效果。
+ * 多玩家并发所有权管理 (FrozenMobState)：记录生物原本的 NoAI 状态以及当前正在对其施压的所有玩家
+ * UUID，防止多玩家同时施法导致 AI 恢复逻辑混乱。
+ * 曲率应力印记 (Strain Marks) 叠加机制：在 Tick 循环中逐渐为目标增加应力印记，达到配置上限后触发“曲率撕裂爆破
+ * (Curvature Burst)”。
+ * 重置无敌帧 (invulnerableTime = 0)：破除目标的受击无敌保护，确保高频打击能立刻生效。
+ * 
  */
 @EventBusSubscriber(modid = "annihilationblade")
 public final class CurvatureRuptureLogic {
@@ -56,7 +59,7 @@ public final class CurvatureRuptureLogic {
 
    /**
     * 玩家 Tick 监听器（服务端、Phase.END 阶段执行）。
-    * 只要玩家手持无限星芒刀并开启了曲率气场，就会持续抹除周围敌对生物的 AI。
+    * 只要玩家手持无尽星空刀并开启了曲率气场，就会持续抹除周围敌对生物的 AI。
     */
    @SubscribeEvent
    public static void onPlayerTick(PlayerTickEvent event) {
@@ -70,7 +73,7 @@ public final class CurvatureRuptureLogic {
          return;
       }
 
-      // 如果未手持无限星芒，强制关闭 AI 抹杀气场并释放被冻结生物
+      // 如果未手持无尽星空，强制关闭 AI 抹杀气场并释放被冻结生物
       if (!InfinityStellarisItemSupport.isHoldingInfinityStellaris(player)) {
          setAiErasureEnabled(player, false);
          releasePlayer(player);
@@ -135,14 +138,13 @@ public final class CurvatureRuptureLogic {
     */
    private static void freezeNearby(ServerLevel level, Player player) {
       ModConfig.InfinityStellaris config = ModConfig.COMMON.infinityStellaris;
-      
+
       // 以玩家坐标为中心，在半径 curvatureRadius 范围内寻找可攻击目标，并限制最大目标数量
       List<LivingEntity> targets = SpecialEffectSupport.limit(
-         SpecialEffectSupport.radialTargets(
-            level, player, player.position(), config.curvatureRadius.getValue(), entity -> SlashBladeTargeting.canAttack(player, entity)
-         ),
-         config.curvatureMaxTargets.getValue()
-      );
+            SpecialEffectSupport.radialTargets(
+                  level, player, player.position(), config.curvatureRadius.getValue(),
+                  entity -> SlashBladeTargeting.canAttack(player, entity)),
+            config.curvatureMaxTargets.getValue());
 
       long gameTime = level.getGameTime();
       // 判断当前 Tick 是否需要更新应力印记
@@ -153,7 +155,7 @@ public final class CurvatureRuptureLogic {
          if (target instanceof Mob mob) {
             freezeMob(mob, player); // 带有 AI 的常规 Mob：剥夺 AI 与寻路
          } else {
-            freezeLiving(target);  // 普通 LivingEntity（如玩家等）：锁定动量与位置
+            freezeLiving(target); // 普通 LivingEntity（如玩家等）：锁定动量与位置
          }
 
          // 满足 Tick 间隔时，增加曲率应力印记
@@ -170,7 +172,8 @@ public final class CurvatureRuptureLogic {
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y, center.z, 12, 0.5, 0.5, 0.5, 0.05);
             if (gameTime % 20L == 0L) {
                level.sendParticles(ParticleTypes.SONIC_BOOM, center.x, center.y + 0.5, center.z, 1, 0.0, 0.0, 0.0, 0.0);
-               level.playSound(null, center.x, center.y, center.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.7F, 1.5F);
+               level.playSound(null, center.x, center.y, center.z, SoundEvents.ILLUSIONER_MIRROR_MOVE,
+                     SoundSource.PLAYERS, 0.7F, 1.5F);
             }
          }
       }
@@ -190,12 +193,12 @@ public final class CurvatureRuptureLogic {
       FrozenMobState state = FROZEN_MOBS.computeIfAbsent(mobId, ignored -> new FrozenMobState(mob.isNoAi()));
       state.owners.add(player.getUUID()); // 将当前玩家标记为该 Mob 的控制者之一
 
-      mob.setTarget(null);           // 清除仇恨目标
-      mob.getNavigation().stop();    // 立即停止寻路
-      mob.setNoAi(true);             // 禁用 AI Tick，使生物木僵在原地
+      mob.setTarget(null); // 清除仇恨目标
+      mob.getNavigation().stop(); // 立即停止寻路
+      mob.setNoAi(true); // 禁用 AI Tick，使生物木僵在原地
       mob.hasImpulse = true;
       mob.setDeltaMovement(Vec3.ZERO);// 清空三维速度向量（防止惯性滑行）
-      mob.fallDistance = 0.0F;        // 清空摔落距离
+      mob.fallDistance = 0.0F; // 清空摔落距离
    }
 
    /**
@@ -285,7 +288,8 @@ public final class CurvatureRuptureLogic {
    /**
     * 施加曲率应力印记。若层数达到阈值，则触发“曲率爆破”。
     */
-   private static void applyCurvatureStrain(ServerLevel level, Player player, LivingEntity target, ModConfig.InfinityStellaris config) {
+   private static void applyCurvatureStrain(ServerLevel level, Player player, LivingEntity target,
+         ModConfig.InfinityStellaris config) {
       if (!target.isAlive() || !SlashBladeTargeting.canAttack(player, target)) {
          return;
       }
@@ -370,8 +374,10 @@ public final class CurvatureRuptureLogic {
    private static void spawnStrainParticles(ServerLevel level, LivingEntity target, int marks) {
       Vec3 center = SpecialEffectSupport.centerOf(target);
       double radius = Math.max(0.8, target.getBbWidth() * (1.2 + marks * 0.1));
-      level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y, center.z, 10 + marks * 2, radius * 0.45, radius * 0.45, radius * 0.45, 0.04);
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 16 + marks * 3, radius * 0.55, radius * 0.55, radius * 0.55, 0.08);
+      level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y, center.z, 10 + marks * 2, radius * 0.45,
+            radius * 0.45, radius * 0.45, 0.04);
+      level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y, center.z, 16 + marks * 3, radius * 0.55,
+            radius * 0.55, radius * 0.55, 0.08);
    }
 
    /**
@@ -384,8 +390,10 @@ public final class CurvatureRuptureLogic {
       level.sendParticles(ParticleTypes.SONIC_BOOM, center.x, center.y + 0.35, center.z, 1, 0.0, 0.0, 0.0, 0.0);
       level.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z, 80, radius, radius * 0.8, radius, 0.12);
       level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y, center.z, 96, radius, radius, radius, 0.18);
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.8F, 0.7F);
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.4F, 0.55F);
+      level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.8F,
+            0.7F);
+      level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.4F,
+            0.55F);
    }
 
    /**
@@ -401,4 +409,3 @@ public final class CurvatureRuptureLogic {
       }
    }
 }
-

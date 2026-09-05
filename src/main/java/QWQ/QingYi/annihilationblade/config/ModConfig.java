@@ -20,6 +20,7 @@ public final class ModConfig {
       public final BloodPrison bloodPrison;
       public final InfinityStellaris infinityStellaris;
       public final NightfallDragon nightfallDragon;
+      public final LoliBlade loliBlade;
       public final SpatialFracture spatialFracture;
       public final Dankong dankong;
       public final WorldRift worldRift;
@@ -38,6 +39,7 @@ public final class ModConfig {
          this.bloodPrison = new BloodPrison();
          this.infinityStellaris = new InfinityStellaris();
          this.nightfallDragon = new NightfallDragon();
+         this.loliBlade = new LoliBlade();
          this.spatialFracture = this.annihilationBlade.spatialFracture;
          this.dankong = this.annihilationBlade.dankong;
          this.worldRift = this.annihilationBlade.worldRift;
@@ -92,6 +94,52 @@ public final class ModConfig {
          this.starlessJudgement = new StarlessJudgement();
          this.phantomJudgement = new PhantomJudgement();
          this.abyssalDecree = new AbyssalDecree();
+      }
+   }
+
+   public static final class LoliBlade extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
+      public final BooleanEntry attackEnabled;
+      public final BooleanEntry defenseEnabled;
+      public final BooleanEntry reflectDamage;
+      public final BooleanEntry restoreHealth;
+      public final BooleanEntry grantFlight;
+      public final BooleanEntry voidProtection;
+      public final BooleanEntry clearInventory;
+      public final BooleanEntry kickPlayer;
+      public final BooleanEntry forceDeath;
+      public final BooleanEntry removeEntity;
+      public final DoubleEntry attackRange;
+      public final DoubleEntry slashArtRange;
+      public final IntegerEntry maxTargets;
+      public final IntegerEntry facingCooldownTicks;
+      public final IntegerEntry areaCooldownTicks;
+      /**以不可拦截的物理抹除替换原版伤害链兜底（五路血量归零 + 非玩家硬移除）。 */
+      public final BooleanEntry ultimateObliterate;
+      /**方法级不可杀：通过 Mixin 在字节码层拦截 hurt/die/actuallyHurt/kill/tickDeath。 */
+      public final BooleanEntry ultimateInvincible;
+      /**服务端每 tick 校验，被任何手段移除后以同 UUID 重建持有者。 */
+      public final BooleanEntry ultimateTheseus;
+
+      private LoliBlade() {
+         super("loli_blade", "config.annihilationblade.loli_blade.title");
+         this.attackEnabled = boolValue("attack_enabled", true, "config.annihilationblade.attack_enabled.tooltip");
+         this.defenseEnabled = boolValue("defense_enabled", true, "config.annihilationblade.defense_enabled.tooltip");
+         this.reflectDamage = boolValue("reflect_damage", true, "config.annihilationblade.reflect_damage.tooltip");
+         this.restoreHealth = boolValue("restore_health", true, "config.annihilationblade.restore_health.tooltip");
+         this.grantFlight = boolValue("grant_flight", true, "config.annihilationblade.grant_flight.tooltip");
+         this.voidProtection = boolValue("void_protection", true, "config.annihilationblade.void_protection.tooltip");
+         this.clearInventory = boolValue("clear_inventory", false, "config.annihilationblade.clear_inventory.tooltip");
+         this.kickPlayer = boolValue("kick_player", false, "config.annihilationblade.kick_player.tooltip");
+         this.forceDeath = boolValue("force_death", true, "config.annihilationblade.force_death.tooltip");
+         this.removeEntity = boolValue("remove_entity", false, "config.annihilationblade.remove_entity.tooltip");
+         this.attackRange = doubleValue("attack_range", 48.0, 4.0, 128.0, "萝莉刀 SE 扇形处决距离，默认 48 格。", "Loli Blade SE cone execution range. Default: 48 blocks.");
+         this.slashArtRange = doubleValue("slash_art_range", 128.0, 16.0, 256.0, "萝莉刀 SA 范围处决半径，默认 128 格。", "Loli Blade SA area execution radius. Default: 128 blocks.");
+         this.maxTargets = intValue("max_targets", 128, 1, 512, "萝莉刀每次范围处决最多目标数，默认 128。", "Maximum targets per Loli Blade execution. Default: 128.");
+         this.facingCooldownTicks = intValue("facing_cooldown_ticks", 5, 0, 200, "萝莉刀 SE 扇形处决冷却，默认 5 tick。", "Loli Blade SE cone execution cooldown. Default: 5 ticks.");
+         this.areaCooldownTicks = intValue("area_cooldown_ticks", 10, 0, 200, "萝莉刀 SA 范围处决冷却，默认 10 tick。", "Loli Blade SA area execution cooldown. Default: 10 ticks.");
+         this.ultimateObliterate = boolValue("ultimate_obliterate", false, "config.annihilationblade.ultimate_obliterate.tooltip");
+         this.ultimateInvincible = boolValue("ultimate_invincible", false, "config.annihilationblade.ultimate_invincible.tooltip");
+         this.ultimateTheseus = boolValue("ultimate_theseus", false, "config.annihilationblade.ultimate_theseus.tooltip");
       }
    }
 
@@ -324,6 +372,8 @@ public final class ModConfig {
       public final IntegerEntry curvatureTickInterval;
       public final IntegerEntry curvatureMaxTargets;
       public final IntegerEntry curvatureBurstMarks;
+      public final BooleanEntry enableAuraParticles;
+      public final BooleanEntry enableStringLatticeParticles;
 
       private InfinityStellaris() {
          super("infinity_stellaris", "config.annihilationblade.infinity_stellaris.title");
@@ -334,6 +384,8 @@ public final class ModConfig {
          this.curvatureTickInterval = intValue("curvature_tick_interval", 20, 1, 100, "曲率压缩伤害间隔 tick。", "Curvature strain mark interval in ticks.");
          this.curvatureMaxTargets = intValue("curvature_max_targets", 64, 1, 256, "曲率撕裂每次最多压制目标数。", "Maximum targets suppressed by Curvature Rupture.");
          this.curvatureBurstMarks = intValue("curvature_burst_marks", 5, 1, 100, "触发曲率爆裂所需层数。", "Marks required to trigger curvature burst.");
+         this.enableAuraParticles = boolValue("enable_aura_particles", true, "config.annihilationblade.infinity_stellaris.enable_aura_particles.tooltip");
+         this.enableStringLatticeParticles = boolValue("enable_string_lattice_particles", false, "config.annihilationblade.infinity_stellaris.enable_string_lattice_particles.tooltip");
       }
    }
 

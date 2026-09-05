@@ -2,6 +2,7 @@ package QWQ.QingYi.annihilationblade.infinity_stellaris.logic;
 
 import QWQ.QingYi.annihilationblade.common.ServerTickScheduler;
 import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
+import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.registry.ModSpecialEffects;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,9 @@ public final class CosmicStringCutLogic {
 
       ServerLevel level = player.serverLevel();
       Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-      spawnLocalStringLattice(level, center);
+      if (ModConfig.COMMON.infinityStellaris.enableStringLatticeParticles.getValue()) {
+         spawnLocalStringLattice(level, center);
+      }
       level.playSound(null, center.x, center.y, center.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 6.0F, 0.35F);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 6.0F, 1.8F);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 4.0F, 0.7F);

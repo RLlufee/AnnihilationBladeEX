@@ -1,5 +1,6 @@
 package QWQ.QingYi.annihilationblade.infinity_stellaris.logic;
 
+import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.InfinityStellarisDefinitions;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.item.InfinityStellarisItemSupport;
 import java.util.HashSet;
@@ -70,7 +71,7 @@ public final class InfinityStellarisLogic {
          }
 
          // 顶尖常驻视觉特效 (Held visual effects)
-         if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+         if (ModConfig.COMMON.infinityStellaris.enableAuraParticles.getValue() && player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             if (player.tickCount % 2 == 0) {
                double px = player.getX();
                double py = player.getY() + player.getBbHeight() / 2.0;

@@ -106,15 +106,27 @@ public final class SpatialFractureExecutor {
       }
 
       double pathLength = Math.min(config.maxDistance.getValue(), eye.distanceTo(center));
+      if (pathLength >= 2.0 && targets.size() < maxTargets) {
+         double sampleRadius = config.raySampleRadius.getValue();
+         double sampleRadiusSqr = sampleRadius * sampleRadius;
+         Vec3 rayEnd = eye.add(look.scale(pathLength));
+         AABB rayBox = new AABB(eye, rayEnd).inflate(sampleRadius);
 
-      for (double distance = 2.0; distance <= pathLength && targets.size() < maxTargets; distance += config.rayStep.getValue()) {
-         Vec3 sampleCenter = eye.add(look.scale(distance));
-         AABB sample = new AABB(sampleCenter, sampleCenter).inflate(config.raySampleRadius.getValue());
-
-         for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, sample, entity -> canTarget(player, entity))) {
-            targets.add(candidate);
-            if (targets.size() < maxTargets) {
+         for (LivingEntity candidate : level.getEntitiesOfClass(LivingEntity.class, rayBox, entity -> canTarget(player, entity))) {
+            if (targets.contains(candidate)) {
                continue;
+            }
+            Vec3 candidatePos = candidate.position().add(0.0, candidate.getBbHeight() * 0.5, 0.0);
+            Vec3 v = candidatePos.subtract(eye);
+            double proj = v.dot(look);
+            if (proj >= 2.0 && proj <= pathLength) {
+               double distToRaySqr = v.lengthSqr() - proj * proj;
+               if (distToRaySqr <= sampleRadiusSqr) {
+                  targets.add(candidate);
+                  if (targets.size() >= maxTargets) {
+                     break;
+                  }
+               }
             }
          }
       }
