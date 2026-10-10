@@ -41,6 +41,7 @@ public final class NamedBladeStacks {
       }
    }
 
+   /** 仅用于新武器初始化；已有武器的维护不能覆盖附魔、主人等自定义 NBT。 */
    public static boolean copyDefinitionTag(ItemStack target, Level level, String bladeName, @Nullable Item bladeItem) {
       ItemStack definedStack = get(level, bladeName, bladeItem);
       if (definedStack.isEmpty()) {
