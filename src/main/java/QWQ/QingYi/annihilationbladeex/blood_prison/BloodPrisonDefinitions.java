@@ -58,7 +58,10 @@ public final class BloodPrisonDefinitions {
             return stack;
          }
       }
-      return createStack();
+      ItemStack stack = createFallbackStack();
+      ensureStats(stack);
+      applyEnchantments(stack, level == null ? null : level.registryAccess());
+      return stack;
    }
 
    public static ItemStack createStack(HolderLookup.Provider registries) {
@@ -74,6 +77,7 @@ public final class BloodPrisonDefinitions {
       }
       ItemStack stack = createFallbackStack();
       ensureStats(stack, registries);
+      applyEnchantments(stack, registries);
       return stack;
    }
 
@@ -127,6 +131,7 @@ public final class BloodPrisonDefinitions {
          false,
          INFERNAL_SLAUGHTER_ID,
          true,
+         false, // destructable（2.0.7 新增）：断裂时不销毁物品
          COMBO_ROOT_ID,
          CarryType.NINJA,
          0xFFFF2020,
@@ -137,7 +142,6 @@ public final class BloodPrisonDefinitions {
          SPECIAL_EFFECTS
       ));
       BladeStateAccess.ensureRuntimeComponent(stack);
-      applyEnchantments(stack, registries);
    }
 
    private static void applyEnchantments(ItemStack stack, @Nullable HolderLookup.Provider registries) {

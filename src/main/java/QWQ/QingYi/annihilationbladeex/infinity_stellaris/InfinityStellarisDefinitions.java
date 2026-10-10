@@ -4,15 +4,18 @@ import QWQ.QingYi.annihilationbladeex.common.NamedBladeStacks;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import mods.flammpfeil.slashblade.SlashBlade;
 import mods.flammpfeil.slashblade.capability.slashblade.BladeStateAccess;
 import mods.flammpfeil.slashblade.capability.slashblade.BladeStateData;
 import mods.flammpfeil.slashblade.capability.slashblade.SlashBladeDataComponents;
 import mods.flammpfeil.slashblade.client.renderer.CarryType;
+import mods.flammpfeil.slashblade.registry.slashblade.SlashBladeDefinition;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.Unbreakable;
@@ -56,11 +59,11 @@ public final class InfinityStellarisDefinitions {
    }
 
    public static void ensureStats(ItemStack stack) {
-      applyStats(stack, (HolderLookup.Provider)null);
+      applyRuntimeStats(stack);
    }
 
    public static void ensureStats(ItemStack stack, @Nullable Level level) {
-      applyStats(stack, level == null ? null : level.registryAccess());
+      applyRuntimeStats(stack);
    }
 
    private static void applyStats(ItemStack stack, @Nullable Level level) {
@@ -68,6 +71,32 @@ public final class InfinityStellarisDefinitions {
    }
 
    private static void applyStats(ItemStack stack, @Nullable HolderLookup.Provider registries) {
+      if (!stack.isEmpty()) {
+         applyRuntimeStats(stack);
+         applyEnchantments(stack, registries);
+      }
+   }
+
+   /** 创造栏创建新刀时使用注册表，默认附魔无需在后续 Tick 补齐。 */
+   public static ItemStack createFromLookup(HolderLookup.Provider registries) {
+      var slashbladeItem = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("slashblade", "slashblade"));
+      if (registries != null) {
+         var lookup = SlashBlade.getSlashBladeDefinitionRegistry(registries);
+         var key = ResourceKey.create(SlashBladeDefinition.REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath("annihilationbladeex", NAME));
+         Optional<ItemStack> defined = lookup.get(key).map(holder -> holder.value().getBlade(slashbladeItem, registries));
+         if (defined.isPresent()) {
+            ItemStack stack = defined.get();
+            applyRuntimeStats(stack);
+            return stack;
+         }
+      }
+      ItemStack stack = new ItemStack(slashbladeItem);
+      applyStats(stack, registries);
+      return stack;
+   }
+
+   /** 已有武器的属性维护不补齐、降级或覆盖附魔。 */
+   private static void applyRuntimeStats(ItemStack stack) {
       if (stack.isEmpty()) {
          return;
       }
@@ -91,6 +120,7 @@ public final class InfinityStellarisDefinitions {
          false,
          VACUUM_DECAY_COLLAPSE,
          true,
+         false, // destructable（2.0.7 新增）：断裂时不销毁物品
          COMBO_ROOT_ID,
          CarryType.NINJA,
          SUMMONED_SWORD_COLOR,
@@ -101,7 +131,6 @@ public final class InfinityStellarisDefinitions {
          SPECIAL_EFFECTS
       ));
       BladeStateAccess.ensureRuntimeComponent(stack);
-      applyEnchantments(stack, registries);
    }
 
    private static void applyEnchantments(ItemStack stack, @Nullable HolderLookup.Provider registries) {

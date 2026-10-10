@@ -2,6 +2,8 @@ package QWQ.QingYi.annihilationbladeex.registry;
 
 import QWQ.QingYi.annihilationbladeex.annihilation_blade.AnnihilationBladeDefinitions;
 import QWQ.QingYi.annihilationbladeex.blood_prison.BloodPrisonDefinitions;
+import QWQ.QingYi.annihilationbladeex.infinity_stellaris.InfinityStellarisDefinitions;
+import QWQ.QingYi.annihilationbladeex.loli_blade.LoliBladeDefinitions;
 import QWQ.QingYi.annihilationbladeex.nightfall_dragon.NightfallDragonDefinitions;
 import QWQ.QingYi.annihilationbladeex.AnnihilationBladeEX;
 import net.minecraft.core.registries.Registries;
@@ -23,6 +25,8 @@ public final class ModCreativeTabs {
             output.accept(AnnihilationBladeDefinitions.createFromLookup(parameters.holders()));
             output.accept(NightfallDragonDefinitions.createFromLookup(parameters.holders()));
             output.accept(BloodPrisonDefinitions.createStack(parameters.holders()));
+            output.accept(InfinityStellarisDefinitions.createFromLookup(parameters.holders()));
+            output.accept(LoliBladeDefinitions.createFromLookup(parameters.holders()));
             output.accept(new ItemStack((ItemLike)ModItems.ANNIHILATION_FRAGMENT.get()));
             output.accept(new ItemStack((ItemLike)ModItems.ANNIHILATION_CORE.get()));
          })

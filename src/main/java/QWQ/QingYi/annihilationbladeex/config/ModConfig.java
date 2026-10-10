@@ -20,6 +20,7 @@ public final class ModConfig {
       public final BloodPrison bloodPrison;
       public final InfinityStellaris infinityStellaris;
       public final NightfallDragon nightfallDragon;
+      public final LoliBlade loliBlade;
       public final SpatialFracture spatialFracture;
       public final Dankong dankong;
       public final WorldRift worldRift;
@@ -38,6 +39,7 @@ public final class ModConfig {
          this.bloodPrison = new BloodPrison();
          this.infinityStellaris = new InfinityStellaris();
          this.nightfallDragon = new NightfallDragon();
+         this.loliBlade = new LoliBlade();
          this.spatialFracture = this.annihilationBlade.spatialFracture;
          this.dankong = this.annihilationBlade.dankong;
          this.worldRift = this.annihilationBlade.worldRift;
@@ -63,6 +65,7 @@ public final class ModConfig {
    public static final class ClientTooltips extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
       public final BooleanEntry enableAnnihilationBladeRenderer = boolValue("client_tooltips", "enable_annihilation_blade_renderer", true);
       public final BooleanEntry enableInfinityStellarisRenderer = boolValue("client_tooltips", "enable_infinity_stellaris_renderer", true);
+      public final BooleanEntry enableNightfallDragonRenderer = boolValue("client_tooltips", "enable_nightfall_dragon_renderer", true);
 
       private ClientTooltips() {
          super("client_tooltips", "config.annihilationbladeex.client_tooltips.title");
@@ -90,6 +93,52 @@ public final class ModConfig {
          this.starlessJudgement = new StarlessJudgement();
          this.phantomJudgement = new PhantomJudgement();
          this.abyssalDecree = new AbyssalDecree();
+      }
+   }
+
+   public static final class LoliBlade extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
+      public final BooleanEntry attackEnabled;
+      public final BooleanEntry defenseEnabled;
+      public final BooleanEntry reflectDamage;
+      public final BooleanEntry restoreHealth;
+      public final BooleanEntry grantFlight;
+      public final BooleanEntry voidProtection;
+      public final BooleanEntry clearInventory;
+      public final BooleanEntry kickPlayer;
+      public final BooleanEntry forceDeath;
+      public final BooleanEntry removeEntity;
+      public final DoubleEntry attackRange;
+      public final DoubleEntry slashArtRange;
+      public final IntegerEntry maxTargets;
+      public final IntegerEntry facingCooldownTicks;
+      public final IntegerEntry areaCooldownTicks;
+      /**以不可拦截的物理抹除替换原版伤害链兜底（五路血量归零 + 非玩家硬移除）。 */
+      public final BooleanEntry ultimateObliterate;
+      /**方法级不可杀：通过 Mixin 在字节码层拦截 hurt/die/actuallyHurt/kill/tickDeath。 */
+      public final BooleanEntry ultimateInvincible;
+      /**服务端每 tick 校验，被任何手段移除后以同 UUID 重建持有者。 */
+      public final BooleanEntry ultimateTheseus;
+
+      private LoliBlade() {
+         super("loli_blade", "config.annihilationbladeex.loli_blade.title");
+         this.attackEnabled = boolValue("loli_blade", "attack_enabled", true);
+         this.defenseEnabled = boolValue("loli_blade", "defense_enabled", true);
+         this.reflectDamage = boolValue("loli_blade", "reflect_damage", true);
+         this.restoreHealth = boolValue("loli_blade", "restore_health", true);
+         this.grantFlight = boolValue("loli_blade", "grant_flight", true);
+         this.voidProtection = boolValue("loli_blade", "void_protection", true);
+         this.clearInventory = boolValue("loli_blade", "clear_inventory", false);
+         this.kickPlayer = boolValue("loli_blade", "kick_player", false);
+         this.forceDeath = boolValue("loli_blade", "force_death", true);
+         this.removeEntity = boolValue("loli_blade", "remove_entity", false);
+         this.attackRange = doubleValue("loli_blade", "attack_range", 48.0, 4.0, 128.0);
+         this.slashArtRange = doubleValue("loli_blade", "slash_art_range", 128.0, 16.0, 256.0);
+         this.maxTargets = intValue("loli_blade", "max_targets", 128, 1, 512);
+         this.facingCooldownTicks = intValue("loli_blade", "facing_cooldown_ticks", 5, 0, 200);
+         this.areaCooldownTicks = intValue("loli_blade", "area_cooldown_ticks", 10, 0, 200);
+         this.ultimateObliterate = boolValue("loli_blade", "ultimate_obliterate", false);
+         this.ultimateInvincible = boolValue("loli_blade", "ultimate_invincible", false);
+         this.ultimateTheseus = boolValue("loli_blade", "ultimate_theseus", false);
       }
    }
 

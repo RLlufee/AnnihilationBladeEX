@@ -81,7 +81,7 @@ public final class NightfallDragonDefinitions {
       }
 
       ItemStack stack = new ItemStack(bladeItem());
-      applyFallbackStats(stack, null);
+      applyFallbackStats(stack, level == null ? null : level.registryAccess());
       return stack;
    }
 
@@ -128,6 +128,7 @@ public final class NightfallDragonDefinitions {
    private static void applyFallbackStats(ItemStack stack, @Nullable HolderLookup.Provider registries) {
       if (!stack.isEmpty()) {
          applyRuntimeStats(stack, FORM_SEALED, registries);
+         applyEnchantments(stack, registries);
       }
    }
 
@@ -230,6 +231,7 @@ public final class NightfallDragonDefinitions {
          false,
          slashArt,
          true,
+         false, // destructable（2.0.7 新增）：断裂时不销毁物品
          COMBO_ROOT_ID,
          CarryType.NINJA,
          color,
@@ -240,7 +242,6 @@ public final class NightfallDragonDefinitions {
          createSpecialEffects(normalizedForm)
       ));
       BladeStateAccess.ensureRuntimeComponent(stack);
-      applyEnchantments(stack, registries);
    }
 
    private static void applyEnchantments(ItemStack stack, @Nullable HolderLookup.Provider registries) {

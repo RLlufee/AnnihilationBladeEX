@@ -76,7 +76,9 @@ public final class AnnihilationBladeDefinitions {
             return stack;
          }
       }
-      return createStack();
+      ItemStack stack = new ItemStack(bladeItem());
+      applyStats(stack, level);
+      return stack;
    }
 
    public static void applyStats(ItemStack stack) {
@@ -88,15 +90,15 @@ public final class AnnihilationBladeDefinitions {
    }
 
    public static void ensureStats(ItemStack stack) {
-      applyStats(stack);
+      applyRuntimeStats(stack);
    }
 
    public static void ensureStats(ItemStack stack, @Nullable Level level) {
-      applyStats(stack, level);
+      applyRuntimeStats(stack);
    }
 
    public static void refreshHeldStats(ItemStack stack, Entity holder) {
-      applyStats(stack, holder == null ? null : holder.registryAccess());
+      applyRuntimeStats(stack);
    }
 
    private static ItemStack getDefinedStack(Level level) {
@@ -110,6 +112,14 @@ public final class AnnihilationBladeDefinitions {
    }
 
    private static void applyStats(ItemStack stack, @Nullable HolderLookup.Provider registries) {
+      if (!stack.isEmpty()) {
+         applyRuntimeStats(stack);
+         applyEnchantments(stack, registries);
+      }
+   }
+
+   /** 已有武器只维护刀属性，保留玩家当前的附魔组件。 */
+   private static void applyRuntimeStats(ItemStack stack) {
       if (stack.isEmpty()) {
          return;
       }
@@ -136,6 +146,7 @@ public final class AnnihilationBladeDefinitions {
          false,
           SPATIAL_FRACTURE_ID,
          true,
+         false, // destructable（2.0.7 新增）：断裂时不销毁物品
          COMBO_ROOT_ID,
          CarryType.NINJA,
          0xFFAA00FF,
@@ -146,7 +157,6 @@ public final class AnnihilationBladeDefinitions {
          SPECIAL_EFFECTS
       ));
       BladeStateAccess.ensureRuntimeComponent(stack);
-      applyEnchantments(stack, registries);
    }
 
    private static void applyEnchantments(ItemStack stack, @Nullable HolderLookup.Provider registries) {
@@ -173,7 +183,7 @@ public final class AnnihilationBladeDefinitions {
           Optional<ItemStack> defined = lookup.get(key).map(holder -> holder.value().getBlade(bladeItem(), registries));
          if (defined.isPresent()) {
             ItemStack stack = defined.get();
-            applyStats(stack, registries);
+            applyRuntimeStats(stack);
             return stack;
          }
       }

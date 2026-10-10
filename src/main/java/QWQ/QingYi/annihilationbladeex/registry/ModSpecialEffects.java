@@ -13,6 +13,7 @@ import QWQ.QingYi.annihilationbladeex.infinity_stellaris.specialeffect.CosmicStr
 import QWQ.QingYi.annihilationbladeex.infinity_stellaris.specialeffect.CurvatureRupture;
 import QWQ.QingYi.annihilationbladeex.infinity_stellaris.specialeffect.EntropyDissolution;
 import QWQ.QingYi.annihilationbladeex.infinity_stellaris.specialeffect.GammaThunderburst;
+import QWQ.QingYi.annihilationbladeex.loli_blade.specialeffect.LoliFacingExecution;
 import QWQ.QingYi.annihilationbladeex.nightfall_dragon.specialeffect.AbsoluteAnnihilationDomain;
 import QWQ.QingYi.annihilationbladeex.nightfall_dragon.specialeffect.DemonicBloodParasite;
 import QWQ.QingYi.annihilationbladeex.nightfall_dragon.specialeffect.DragonGodBody;
@@ -55,6 +56,7 @@ public class ModSpecialEffects {
    public static final DeferredHolder<SpecialEffect, SpecialEffect> ABSOLUTE_ANNIHILATION_DOMAIN = SPECIAL_EFFECTS.register("absolute_annihilation_domain", AbsoluteAnnihilationDomain::new);
    public static final DeferredHolder<SpecialEffect, SpecialEffect> MYRIAD_DRAGON_BLADE_STORM = SPECIAL_EFFECTS.register("myriad_dragon_blade_storm", MyriadDragonBladeStorm::new);
    public static final DeferredHolder<SpecialEffect, SpecialEffect> WORLD_CLEAVING_SLASH = SPECIAL_EFFECTS.register("world_cleaving_slash", WorldCleavingSlash::new);
+   public static final DeferredHolder<SpecialEffect, SpecialEffect> LOLI_FACING_EXECUTION = SPECIAL_EFFECTS.register("loli_facing_execution", LoliFacingExecution::new);
 
    public static void register(IEventBus eventBus) {
       SPECIAL_EFFECTS.register(eventBus);

@@ -4,6 +4,7 @@ import QWQ.QingYi.annihilationbladeex.AnnihilationBladeEX;
 import QWQ.QingYi.annihilationbladeex.annihilation_blade.logic.SpatialFractureExecutor;
 import QWQ.QingYi.annihilationbladeex.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationbladeex.infinity_stellaris.logic.VacuumDecayCollapseLogic;
+import QWQ.QingYi.annihilationbladeex.loli_blade.logic.LoliBladeCombatLogic;
 import QWQ.QingYi.annihilationbladeex.nightfall_dragon.logic.CosmicNightfallDescentLogic;
 import QWQ.QingYi.annihilationbladeex.nightfall_dragon.logic.NightfallDragonJudgementCutLogic;
 import QWQ.QingYi.annihilationbladeex.nightfall_dragon.logic.ScaleGuardLogic;
@@ -160,6 +161,21 @@ public class ModComboStates {
                })
                .build()
          )
+         .build()
+   );
+   public static final DeferredHolder<ComboState, ComboState> LOLI_AREA_EXECUTION_STATE = REGISTRY.register(
+      "loli_area_execution_state",
+      () -> Builder.newInstance()
+         .priority(120)
+         .startAndEnd(880, 940)
+         .motionLoc(DefaultResources.ExMotionLocation)
+         .next(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .nextOfTimeout(entity -> ResourceLocation.fromNamespaceAndPath("slashblade", "none"))
+         .addTickAction(TimeLineTickAction.getBuilder().put(8, entity -> {
+            if (entity instanceof Player player && !player.level().isClientSide) {
+               LoliBladeCombatLogic.handleAreaSlashArt(player);
+            }
+         }).build())
          .build()
    );
 

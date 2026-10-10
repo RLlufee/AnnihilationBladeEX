@@ -7,6 +7,7 @@ import QWQ.QingYi.annihilationbladeex.registry.ModComboStates;
 import QWQ.QingYi.annihilationbladeex.registry.ModCreativeTabs;
 import QWQ.QingYi.annihilationbladeex.registry.ModItems;
 import QWQ.QingYi.annihilationbladeex.registry.ModSlashArts;
+import QWQ.QingYi.annihilationbladeex.registry.ModSounds;
 import QWQ.QingYi.annihilationbladeex.registry.ModSpecialEffects;
 import com.iafenvoy.jupiter.ConfigManager;
 import com.iafenvoy.jupiter.ServerConfigManager;
@@ -50,6 +51,7 @@ public class AnnihilationBladeEX {
       ModSlashArts.register(modEventBus);
       ModComboStates.register(modEventBus);
       ModSpecialEffects.register(modEventBus);
+      ModSounds.register(modEventBus);
       ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
       modEventBus.addListener(ModNetwork::registerPayloads);
       ConfigManager.getInstance().registerServerConfigHandler(ModConfig.COMMON, ServerConfigManager.PermissionChecker.IS_OPERATOR);
