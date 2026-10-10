@@ -1,0 +1,31 @@
+{
+  "name": "annihilationblade:loli_blade",
+  "enchantments": [
+    { "id": "minecraft:unbreaking", "lvl": 10 },
+    { "id": "minecraft:looting", "lvl": 10 },
+    { "id": "minecraft:multishot", "lvl": 10 },
+    { "id": "minecraft:power", "lvl": 10 },
+    { "id": "minecraft:soul_speed", "lvl": 10 },
+    { "id": "minecraft:feather_falling", "lvl": 10 },
+    { "id": "minecraft:protection", "lvl": 10 },
+    { "id": "minecraft:knockback", "lvl": 10 },
+    { "id": "minecraft:mending", "lvl": 10 }
+  ],
+  "properties": {
+    "attack_base": 4.0,
+    "max_damage": 1000,
+    "slash_art": "annihilationblade:loli_area_execution",
+    "special_effects": [
+      "annihilationblade:loli_facing_execution"
+    ],
+    "sword_type": [
+      "bewitched"
+    ]
+  },
+  "render": {
+    "carry_type": "ninja",
+    "model": "annihilationblade:model/loli_blade.obj",
+    "texture": "annihilationblade:model/loli_blade.png",
+    "summon_sword_color": 16738740
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "type": "slashblade:shaped_blade",
+  "blade": "annihilationblade:loli_blade",
+  "category": "equipment",
+  "key": {
+    "B": {
+      "type": "slashblade:blade",
+      "item": "slashblade:slashblade",
+      "request": {
+        "name": "annihilationblade:annihilation_blade",
+        "kill": 2500,
+        "proud_soul": 15000,
+        "refine": 40
+      }
+    },
+    "D": {
+      "item": "minecraft:diamond_block"
+    },
+    "G": {
+      "item": "minecraft:gold_block"
+    },
+    "P": {
+      "tag": "forge:dyes/pink"
+    },
+    "S": {
+      "item": "slashblade:proudsoul_trapezohedron"
+    }
+  },
+  "pattern": [
+    "PGP",
+    "SBS",
+    "PDP"
+  ],
+  "result": {
+    "count": 1,
+    "item": "slashblade:slashblade"
+  },
+  "show_notification": true
+}

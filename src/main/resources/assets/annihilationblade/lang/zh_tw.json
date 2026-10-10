@@ -228,5 +228,18 @@
   "config.annihilationblade.client_tooltips.enable_annihilation_blade_renderer.tooltip": "启用湮灭之刃专属 Tooltip 渲染器。",
   "config.annihilationblade.client_tooltips.enable_infinity_stellaris_renderer.tooltip": "启用无尽星空专属 Tooltip 渲染器。",
   "enchantment.level.10": "「§6极限级§r」",
-  "enchantment.level.15": "「§e神威级§r」"
+  "enchantment.level.15": "「§e神威级§r」",
+  "item.annihilationblade.loli_blade": "§d§l蘿莉§r§8(§f。>︿<   。§8)",
+  "slashblade.slash_art.annihilationblade.loli_area_execution": "§d§l蘿莉終判§8·§5全域肅清",
+  "slashblade.slash_art.annihilationblade.loli_area_execution.desc": "§7透過§dSlashBlade 原生 SA§7釋放蘿莉刀全域處決，掃描持刀者周圍§d128 格§7內合法目標並執行伺服器處決，同時播放§d蘿莉成功§7音效；不再接管潛行右鍵。§r",
+  "annihilationblade.slash_art.loli_area_execution": "§d§l蘿莉終判§8·§5全域肅清",
+  "annihilationblade.slash_art.loli_area_execution.desc": "§7透過§dSlashBlade 原生 SA§7釋放蘿莉刀全域處決，掃描持刀者周圍§d128 格§7內合法目標並執行伺服器處決，同時播放§d蘿莉成功§7音效；不再接管潛行右鍵。§r",
+  "slash_art.annihilationblade.loli_area_execution": "§d§l蘿莉終判§8·§5全域肅清",
+  "slash_art.annihilationblade.loli_area_execution.desc": "§7透過§dSlashBlade 原生 SA§7釋放蘿莉刀全域處決，掃描持刀者周圍§d128 格§7內合法目標並執行伺服器處決，同時播放§d蘿莉成功§7音效；不再接管潛行右鍵。§r",
+  "se.annihilationblade.loli_facing_execution": "§d§l蘿莉裁斷§8·§5扇形處決",
+  "se.annihilationblade.loli_facing_execution.desc": "§7透過§dSlashBlade 原生揮刀 SE§7觸發，沿視線§d48 格§7扇形掃描合法目標並執行伺服器處決；不再接管左鍵空揮輸入。§r",
+  "subtitle.annihilationblade.loli_success": "蘿莉刀釋放成功",
+  "jei.annihilationblade.blade_desc.loli_blade": "蘿莉之刃繼承氪金蘿莉的高壓權限：主手直接命中合法目標時執行伺服器強制處決；48 格扇形處決改為原生揮刀 SE，128 格範圍處決改為原生 SA 並播放成功音效，不再接管左鍵空揮或潛行右鍵。持有者預設獲得傷害攔截、死亡回滿、飽食、飛行與虛空保護。所有效果均限制在 Minecraft 伺服器邏輯內，不包含藍屏、崩端或系統級操作。",
+  "config.annihilationblade.loli_max_targets": "蘿莉刀範圍攻擊最大目標數",
+  "config.annihilationblade.loli_blade.title": "蘿莉之刃高壓對抗"
 }

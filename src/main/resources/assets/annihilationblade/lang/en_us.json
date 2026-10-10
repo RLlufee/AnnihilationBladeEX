@@ -232,5 +232,18 @@
   "config.annihilationblade.enable_annihilation_blade_renderer.tooltip": "Enable the custom Annihilation Blade tooltip renderer.",
   "config.annihilationblade.enable_infinity_stellaris_renderer.tooltip": "Enable the custom Infinity Stellaris tooltip renderer.",
   "enchantment.level.10": "\"§6Limit Level§r\"",
-  "enchantment.level.15": "\"§eDivine Level§r\""
+  "enchantment.level.15": "\"§eDivine Level§r\"",
+  "item.annihilationblade.loli_blade": "§d§lLoli§r§8(§f。>︿<   。§8)",
+  "slashblade.slash_art.annihilationblade.loli_area_execution": "§d§lLoli Final Judgement§8 · §5Total Purge",
+  "slashblade.slash_art.annihilationblade.loli_area_execution.desc": "§7Recasts the Loli Blade area execution as a §dSlashBlade-native SA§7: scans legal targets within §d128 blocks§7, executes them on the server, and plays the §dLoli success§7 sound. It no longer intercepts sneaking right-click.§r",
+  "annihilationblade.slash_art.loli_area_execution": "§d§lLoli Final Judgement§8 · §5Total Purge",
+  "annihilationblade.slash_art.loli_area_execution.desc": "§7Recasts the Loli Blade area execution as a §dSlashBlade-native SA§7: scans legal targets within §d128 blocks§7, executes them on the server, and plays the §dLoli success§7 sound. It no longer intercepts sneaking right-click.§r",
+  "slash_art.annihilationblade.loli_area_execution": "§d§lLoli Final Judgement§8 · §5Total Purge",
+  "slash_art.annihilationblade.loli_area_execution.desc": "§7Recasts the Loli Blade area execution as a §dSlashBlade-native SA§7: scans legal targets within §d128 blocks§7, executes them on the server, and plays the §dLoli success§7 sound. It no longer intercepts sneaking right-click.§r",
+  "se.annihilationblade.loli_facing_execution": "§d§lLoli Verdict§8 · §5Cone Execution",
+  "se.annihilationblade.loli_facing_execution.desc": "§7Triggers from a §dSlashBlade-native slash SE§7, scanning a §d48-block§7 forward cone for legal targets and executing them on the server. It no longer intercepts left-click empty input.§r",
+  "subtitle.annihilationblade.loli_success": "Loli Blade released successfully",
+  "jei.annihilationblade.blade_desc.loli_blade": "Loli Blade inherits the high-pressure authority of the original Loli Pickaxe: direct main-hand hits execute legal targets on the server; the 48-block cone execution is now a native slash SE, while the 128-block area execution is now a native SA with a success sound. It no longer intercepts left-click empty or sneaking right-click. Holders receive damage interception, full-health recovery, saturation, flight, and void protection by default. All effects stay inside Minecraft server logic and exclude blue screens, client crashes, forced client exits, and system-level operations.",
+  "config.annihilationblade.loli_max_targets": "Loli Blade maximum area attack targets",
+  "config.annihilationblade.loli_blade.title": "Loli Blade High-Pressure Combat"
 }

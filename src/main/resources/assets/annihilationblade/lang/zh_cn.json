@@ -237,5 +237,19 @@
   "enchantment.level.10": "「§6极限级§r」",
   "enchantment.level.15": "「§6神威级§r」",
   "enchantment.level.100": "「§6终焉级§r」",
-  "enchantment.level.255": "「§6神明级§r」"
+  "enchantment.level.255": "「§6神明级§r」",
+  "item.annihilationblade.loli_blade": "§d§l萝莉§r§8(§f。>︿<   。§8)",
+  "slashblade.slash_art.annihilationblade.loli_area_execution": "§d§l萝莉审判§8·§5Ciallo～(∠・ω< )⌒☆",
+  "slashblade.slash_art.annihilationblade.loli_area_execution.desc": "§7通过§dSlashBlade 原生 SA§7释放萝莉刀全域处决，扫描持刀者周围§d128 格§7内合法目标并执行服务端处决，同时播放§d萝莉成功§7音效；不再接管潜行右键。§r",
+  "annihilationblade.slash_art.loli_area_execution": "§d§l萝莉审判§8·§5Ciallo～(∠・ω< )⌒☆",
+  "annihilationblade.slash_art.loli_area_execution.desc": "§7通过§dSlashBlade 原生 SA§7释放萝莉刀全域处决，扫描持刀者周围§d128 格§7内合法目标并执行服务端处决，同时播放§d萝莉成功§7音效；不再接管潜行右键。§r",
+  "slash_art.annihilationblade.loli_area_execution": "§d§l萝莉审判§8·§5Ciallo～(∠・ω< )⌒☆",
+  "slash_art.annihilationblade.loli_area_execution.desc": "§7通过§dSlashBlade 原生 SA§7释放萝莉刀全域处决，扫描持刀者周围§d128 格§7内合法目标并执行服务端处决，同时播放§d萝莉成功§7音效；不再接管潜行右键。§r",
+  "se.annihilationblade.loli_facing_execution": "§d§l萝莉斩§8·§5Ciallo～(∠・ω< )⌒☆",
+  "se.annihilationblade.loli_facing_execution.desc": "§7通过§dSlashBlade 原生挥刀 SE§7触发，沿视线§d48 格§7扇形扫描合法目标并执行服务端处决；不再接管左键空挥输入。§r",
+  "subtitle.annihilationblade.loli_success": "成功释放萝莉！",
+  "jei.annihilationblade.blade_desc.loli_blade": "萝莉之刃继承氪金萝莉的高压（互相秒杀）权限：主手直接命中合法目标时执行服务端强制处决；48 格扇形处决改为原生挥刀 SE，128 格范围处决改为原生 SA 并播放成功音效，不再接管左键空挥或潜行右键。持有者默认获得伤害拦截、死亡回满、饱食、飞行与虚空保护。所有效果均限制在 Minecraft 服务器逻辑内，不包含蓝屏、崩端或系统级操作。",
+  "config.annihilationblade.loli_blade.title": "萝莉之刃の机制",
+  "config.annihilationblade.loli_max_targets": "萝莉刀范围攻击最大目标数",
+  "message.annihilationblade.loli_blade.kick": "Ciallo～(∠・ω< )⌒☆  你被萝莉一脚踢飞啦！！！"
 }

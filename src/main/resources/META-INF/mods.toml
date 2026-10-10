@@ -6,10 +6,10 @@ issueTrackerURL="https://github.com/"
 [[mods]]
 modId="annihilationblade"
 version="${mod_version}"
-displayName="Annihilation Blade · Terminus"
+displayName="${mod_name}"
 authors="青衣_璃"
 description='''
-§5Annihilation Blade · Terminus
+§5SlashBlade: Finale Blade Sanctum
 §7A forbidden SlashBlade forged from void, causality and the silence after all stars.
 §d
 Features:
