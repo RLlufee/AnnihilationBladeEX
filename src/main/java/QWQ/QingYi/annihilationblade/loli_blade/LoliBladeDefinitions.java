@@ -49,14 +49,12 @@ public final class LoliBladeDefinitions {
    public static void ensureStats(ItemStack stack) {
       if (!stack.isEmpty()) {
          ensureIdentity(stack);
-         applyEnchantments(stack);
          applyBladeState(stack);
       }
    }
 
    public static void ensureStats(ItemStack stack, @Nullable Level level) {
       if (!stack.isEmpty()) {
-         NamedBladeStacks.copyDefinitionTag(stack, level, NAME, null);
          ensureStats(stack);
       }
    }
@@ -64,6 +62,7 @@ public final class LoliBladeDefinitions {
    private static void applyFallbackStats(ItemStack stack) {
       if (!stack.isEmpty()) {
          ensureIdentity(stack);
+         applyEnchantments(stack);
          applyBladeState(stack);
       }
    }

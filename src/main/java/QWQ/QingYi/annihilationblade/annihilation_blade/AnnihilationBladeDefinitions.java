@@ -78,7 +78,6 @@ public final class AnnihilationBladeDefinitions {
 
    public static void ensureStats(ItemStack stack, @Nullable Level level) {
       if (!stack.isEmpty()) {
-         applyDatapackStats(stack, level);
          ensureRuntimeStats(stack);
       }
    }

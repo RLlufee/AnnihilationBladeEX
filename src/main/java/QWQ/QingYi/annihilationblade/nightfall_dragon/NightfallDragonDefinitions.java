@@ -69,7 +69,6 @@ public final class NightfallDragonDefinitions {
    public static void ensureStats(ItemStack stack, @Nullable Level level) {
       if (!stack.isEmpty()) {
          String form = getForm(stack);
-         NamedBladeStacks.copyDefinitionTag(stack, level, NAME, null);
          applyRuntimeStats(stack, form);
       }
    }
@@ -100,6 +99,7 @@ public final class NightfallDragonDefinitions {
          tag.putString("SlashArts", SEALED_SLASH_ART.toString());
          tag.putBoolean("Unbreakable", true);
          tag.putString(FORM_TAG, FORM_SEALED);
+         applyEnchantments(stack);
          applyRuntimeStats(stack);
       }
    }
@@ -176,7 +176,6 @@ public final class NightfallDragonDefinitions {
       tag.putBoolean("Unbreakable", true);
       tag.putBoolean(IDENTITY_TAG, true);
       tag.putString(FORM_TAG, normalizedForm);
-      ensureNightfallEnchantments(stack);
       stack.getCapability(ItemSlashBlade.BLADESTATE).ifPresent(state -> {
          state.setTranslationKey(finalForm ? FINAL_DESCRIPTION_ID : awakened ? AWAKENED_DESCRIPTION_ID : DESCRIPTION_ID);
          state.setSlashArtsKey(slashArt);
@@ -192,7 +191,7 @@ public final class NightfallDragonDefinitions {
       });
    }
 
-   private static void ensureNightfallEnchantments(ItemStack stack) {
+   private static void applyEnchantments(ItemStack stack) {
       Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
       putMaxEnchant(enchantments, Enchantments.SHARPNESS, 10);
       putMaxEnchant(enchantments, Enchantments.POWER_ARROWS, 10);

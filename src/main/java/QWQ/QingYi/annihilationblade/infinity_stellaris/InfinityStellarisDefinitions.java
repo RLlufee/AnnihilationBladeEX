@@ -57,7 +57,6 @@ public final class InfinityStellarisDefinitions {
 
    public static void ensureStats(ItemStack stack, @Nullable Level level) {
       if (!stack.isEmpty()) {
-         NamedBladeStacks.copyDefinitionTag(stack, level, NAME, null);
          ensureRuntimeStats(stack);
       }
    }
@@ -78,7 +77,6 @@ public final class InfinityStellarisDefinitions {
    private static void ensureRuntimeStats(ItemStack stack) {
       ensureIdentity(stack);
       applySpecialEffects(stack);
-      applyEnchantments(stack);
       applyBladeState(stack);
    }
 
