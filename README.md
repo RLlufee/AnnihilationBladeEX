@@ -1,5 +1,3 @@
-# AnnihilationBladeEX 2.8.0-1.21.1-neoforge
-
 湮灭之刃的 1.21.1 NeoForge 移植版，公开命名空间为 `annihilationbladeex`，目标版本固定为 `2.8.0-1.21.1-neoforge`。
 
 ## 环境
