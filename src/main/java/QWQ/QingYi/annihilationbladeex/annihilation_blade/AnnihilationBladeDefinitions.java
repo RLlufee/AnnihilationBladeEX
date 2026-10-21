@@ -146,6 +146,7 @@ public final class AnnihilationBladeDefinitions {
          false,
           SPATIAL_FRACTURE_ID,
          true,
+         Optional.empty(), // defaultSwordTypes（2.1.9 新增）：无默认剑类型，保持 2.0.7 时期行为
          false, // destructable（2.0.7 新增）：断裂时不销毁物品
          COMBO_ROOT_ID,
          CarryType.NINJA,
