@@ -262,6 +262,8 @@ Build output will be generated at:
 - Bumped version to `2.9.2-1.20.1-forge`.
 - Reorganized README documentation and changelogs under `2.9.2-1.20.1-forge`.
 - Removed the old Loli Blade `LeftClickEmpty` and sneaking right-click skill listeners plus their client-to-server action packet registration, so normal SlashBlade input flow remains in charge.
+- Reworked Loli Blade attack sound trigger: instead of broadcasting on empty SA activation, the `loli_success` sound now plays whenever the player holds the Loli Blade in the main hand and any attack released by it deals damage to a valid living entity, protected by per-tick multi-target audio burst throttling.
+- Fixed missing `TimeLineTickAction` in `LOLI_AREA_EXECUTION_STATE`, restoring server-side execution for Loli Blade SA at tick 8.
 
 ### 2.7.0-1.20.1-forge
 

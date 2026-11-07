@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import mods.flammpfeil.slashblade.entity.EntityAbstractSummonedSword;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -18,10 +19,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -33,8 +37,24 @@ public final class LoliBladeCombatLogic {
    private static final Set<UUID> ACTIVE_ACTIONS = new HashSet<>();
    private static final java.util.Map<UUID, Long> FACING_COOLDOWNS = new java.util.HashMap<>();
    private static final java.util.Map<UUID, Long> AREA_COOLDOWNS = new java.util.HashMap<>();
+   private static final java.util.Map<UUID, Long> LAST_SOUND_TICK = new java.util.HashMap<>();
 
    private LoliBladeCombatLogic() {
+   }
+
+   /** 准备施法：确保手持萝莉之刃属性与附魔就绪。 */
+   public static void prepareCast(Player player) {
+      ItemStack blade = player.getMainHandItem();
+      if (!blade.isEmpty()) {
+         LoliBladeDefinitions.ensureStats(blade, player.level());
+      }
+   }
+
+   public static void clearPlayerState(UUID id) {
+      FACING_COOLDOWNS.remove(id);
+      AREA_COOLDOWNS.remove(id);
+      LAST_SOUND_TICK.remove(id);
+      ACTIVE_ACTIONS.remove(id);
    }
 
    public static void handleLivingAttack(LivingAttackEvent event) {
@@ -87,6 +107,52 @@ public final class LoliBladeCombatLogic {
       }
    }
 
+   /** 监听任意伤害事件：主手持有萝莉之刃且对合法生物造成任何伤害时播放音效。 */
+   public static void handleLivingDamage(LivingDamageEvent event) {
+      if (event.getEntity().level().isClientSide || event.getAmount() <= 0.0F) {
+         return;
+      }
+
+      Entity directSource = event.getSource().getDirectEntity();
+      Entity trueSource = event.getSource().getEntity();
+      Player attacker = null;
+      if (trueSource instanceof Player player) {
+         attacker = player;
+      } else if (directSource instanceof Player player) {
+         attacker = player;
+      }
+
+      if (attacker == null) {
+         return;
+      }
+
+      if (!isLoliBladeAttack(event.getSource(), attacker)) {
+         return;
+      }
+
+      LivingEntity target = event.getEntity();
+      if (target == attacker || !SlashBladeTargeting.canAttack(attacker, target) || isProtectedOwner(target)) {
+         return;
+      }
+
+      playLoliAttackSound(attacker, target);
+   }
+
+   private static boolean isLoliBladeAttack(DamageSource source, Player attacker) {
+      if (!LoliBladeDefinitions.isLoliBlade(attacker.getMainHandItem())) {
+         return false;
+      }
+      Entity direct = source.getDirectEntity();
+      if (direct == attacker || direct == null) {
+         return true;
+      }
+      if (direct instanceof AbstractArrow || direct instanceof ThrowableItemProjectile) {
+         return false;
+      }
+      return direct.getType().toString().contains("slashblade")
+         || direct instanceof EntityAbstractSummonedSword;
+   }
+
    public static void handleAction(Player attacker, Action action) {
       if (attacker.level().isClientSide || !isActiveAttacker(attacker) || !(attacker.level() instanceof ServerLevel level)) {
          return;
@@ -109,9 +175,6 @@ public final class LoliBladeCombatLogic {
          List<Entity> targets = action == Action.FACING
             ? facingTargets(level, attacker, range, config.maxTargets.getValue())
             : areaTargets(level, attacker, range, config.maxTargets.getValue());
-         if (action == Action.AREA) {
-            playSuccessSound(level, attacker);
-         }
          for (Entity target : targets) {
             executeEntity(target, attacker);
          }
@@ -149,6 +212,7 @@ public final class LoliBladeCombatLogic {
 
       // 第一击：走原版伤害链，保留战利品、经验、统计和死亡事件。
       target.hurt(source, EXECUTION_DAMAGE);
+      playLoliAttackSound(attacker, target);
 
       if (config.ultimateObliterate.getValue()) {
          //不依赖原版伤害链是否成功，直接物理抹除，不可被第三方拦截。
@@ -303,8 +367,15 @@ public final class LoliBladeCombatLogic {
       }
    }
 
-   private static void playSuccessSound(ServerLevel level, Player attacker) {
-      level.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), ModSounds.LOLI_SUCCESS.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+   public static void playLoliAttackSound(Player attacker, LivingEntity target) {
+      if (attacker.level() instanceof ServerLevel level) {
+         long gameTime = level.getGameTime();
+         Long lastTick = LAST_SOUND_TICK.get(attacker.getUUID());
+         if (lastTick == null || lastTick != gameTime) {
+            LAST_SOUND_TICK.put(attacker.getUUID(), gameTime);
+            level.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), ModSounds.LOLI_SUCCESS.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+         }
+      }
    }
 
    public enum Action {

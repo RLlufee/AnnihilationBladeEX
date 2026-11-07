@@ -3,7 +3,7 @@
 ![Minecraft Version](https://img.shields.io/badge/Minecraft-1.20.1-brightgreen.svg)
 ![Forge Version](https://img.shields.io/badge/Forge-47.4.21-blue.svg)
 ![Java Version](https://img.shields.io/badge/Java-17-orange.svg)
-![Version](https://img.shields.io/badge/Version-2.9.2--1.20.1--forge-purple.svg)
+![Version](https://img.shields.io/badge/Version-2.9.4--1.20.1--forge-purple.svg)
 
 > **中文全称**：拔刀剑：终焉藏刀阁  
 > **英文标识**：`SlashBlade: Finale Blade Sanctum`  
@@ -19,7 +19,7 @@
 本模组围绕 **“终焉、裂界、坍缩、审判、血狱、宇宙法则、混沌魔龙、萝莉法则”** 八大核心主题构建，提供了 **5 把机制独特的顶级命名刀**、完整严谨的 **SA / SE 战斗链路**、支持 Jupiter 配置系统的 **低风险参数调节**，以及兼具极佳视觉冲击力与流畅实战体验的 **动态渲染与控制体系**。
 
 > [!NOTE]
-> 当前 README 对应版本 **`2.9.2-1.20.1-forge`**。`2.8.0` 已作为正式版本发布。2.9.0 版本重构并拓展了萝莉刀体系、完善了合成表链路、统一规范了项目命名与描述体系。
+> 当前 README 对应版本 **`2.9.4-1.20.1-forge`**。`2.8.0` 已作为正式版本发布。2.9.0 版本重构并拓展了萝莉刀体系、完善了合成表链路、统一规范了项目命名与描述体系。
 
 ---
 
@@ -275,13 +275,23 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 ```
 
 构建完成后的产物将生成在：
-`build/libs/slashblade-finale-blade-sanctum-2.9.2-1.20.1-forge.jar`
+`build/libs/slashblade-finale-blade-sanctum-2.9.4-1.20.1-forge.jar`
 
 ---
 
 ## 📝 更新日志 (Changelog)
 
 > 分类说明：**新增 (Added)** \| **重构·变更 (Changed)** \| **修复 (Fixed)** \| **资源与视觉 (Assets & Visuals)** \| **文档 (Documentation)** \| **开发环境 (Development)**
+
+### 2.9.4-附魔问题修复
+
+- 取消终焉、无尽星空、魔龙夜陨和萝莉之刃在运行时维护及 SA 准备阶段的整份模板 NBT 覆盖。
+- 默认附魔仅在新武器创建时由数据包定义或代码兜底赋予；玩家新增、删除及升降级的附魔不再被自动恢复。
+- 魔龙夜陨切换形态时保留当前附魔，武器身份、专属能力及形态维护继续执行。
+- 清理未接入当前技能链的龙头技能残留文件，修复远程 Forge 分支的编译错误。
+- 版本更新为 `2.9.4-1.20.1-forge`，适用于 Minecraft 1.20.1 / Forge；发布前通过 Java 17 完整构建。
+
+---
 
 ### 2.9.2-1.20.1-forge
 
@@ -298,6 +308,14 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 **重构/变更 (Changed)**
 - **项目全量更名**：项目正式重命名为 `SlashBlade: Finale Blade Sanctum`（中文名：`拔刀剑：终焉藏刀阁`），同步更新 Gradle 构件名、模组描述与 README 架构。
 - **萝莉刀架构优化**：移除旧版 `LeftClickEmpty` / `RightClickItem` 监听与网络包，全面接入 SlashBlade 原生 SA/SE 事件响应链。
+- **萝莉刀攻击音效触发机制重构**：将原先仅在 SA 空放时广播的音效，重构为“当玩家主手手持萝莉之刃时，其释放的任何攻击（普通近战斩击、拔刀剑刀光与幻影剑、SE 扇形处决与 SA 全域处决）对合法生物造成任何伤害时播放 `loli_success` 音效”，并加入同一 Tick 多目标防爆音节流防护。
+
+**修复 (Fixed)**
+- **GitHub 发布流程 Skill（2026-10-10）**：将本次已验证的分支隔离、精准暂存、GitHub 认证、Tag、Release 草稿上传及产物版本/SHA-256 校验流程整理为 `github-release-publish`，安装到当前 Codex 用户 skills 目录；Skill 不包含凭据，README 与 `.gitignore` 仍由用户人工上传。
+- **本机 Git GUI 启动修复（2026-10-10）**：定位 Git 安装缺少 `D:/tools/Git/usr/bin/sh.exe` 导致 shell 配置错误，使用同目录 Bash 补齐 shell 可执行文件；验证 Git shell 路径与 GUI 仓库主界面正常。本项仅为本机环境修复，不上传 Git 安装文件。
+- **远程 Forge 分支编译修复（2026-10-10）**：清理远程分支残留且未接入当前技能链的 `DragonHeadChargeEntity`、`DragonHeadChargeLogic` 和 `DragonHeadChargeRenderer`；消除对不存在的 `ModEntities.DRAGON_HEAD_CHARGE` 的引用，当前【鳞之卫】技能继续使用现有实现。
+- **已有武器附魔保留（2026-10-10）**：取消终焉、无尽星空、魔龙夜陨和萝莉之刃在运行时维护及 SA 准备阶段的整份模板 NBT 覆盖；默认附魔仅在新武器创建时由数据包定义或代码兜底赋予。移除运行时附魔补齐，玩家新增、删除及升降级的附魔不再被自动恢复；魔龙夜陨切换形态也保留当前附魔。武器身份、专属能力和形态维护继续执行，同时避免模板覆盖主人绑定与其他自定义 NBT。
+- **萝莉刀 SA 触发链路修复**：修复 `ModComboStates` 中 `LOLI_AREA_EXECUTION_STATE` 缺少 `TimeLineTickAction` 导致 SA 无法在服务端正常执行处决的问题，将其对齐名刀规范并在动作第 8 tick 执行广域处决。
 
 **资源与视觉 (Assets & Visuals)**
 - 补全 `loli_blade.obj` 与 `loli_blade.png`，支持连续鞘壳、立体挂坠、粉青发光晶体与彩虹能量刃纹。
@@ -335,3 +353,26 @@ $env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
 > **制作不易，如果觉得模组好玩，欢迎支持作者买杯咖啡！**  
 > ⚠️ **温馨提示**：若自身经济拮据请**绝对不要**赞助，照顾好自己的生活最重要！祝君安好！
 
+- **2.9.4 Forge 发布资源补齐（2026-10-11）**：确认远程 Forge 发布分支和 Jar 缺少萝莉刀 OBJ、PNG、命名刀定义、配方、说明、音效映射及音效文件。独立修复工作区补入本地已有资源与四语言萝莉刀缺失键，保留 2.9.4 附魔修复；新增成品 Jar 资源完整性校验，防止仅编译通过但资源漏包。该修复尚未推送或更新 Release。
+
+- **萝莉刀资源修复验证**：独立工作区 Java 17 `clean build` 成功；修复 Jar 全部文件可读取，5 把命名刀本模组资源引用、萝莉刀分组/贴图/音效/四语言校验通过。GitHub 原附件 SHA-256 与缺资源的本地发布备份一致。新增 `tools/verify-release-resources.ps1` 成品资源检查脚本，可使用 PowerShell 传入 `-JarPath` 执行；游戏内渲染待实测。
+
+- **2.9.3 备份与 2.9.4 修复版源码复核（2026-10-11）**：备份内部实际为 2.9.2，且本身缺少萝莉刀资源并使用空 Mixin 注册。修复版相对备份清理 3 个未接入龙头残留、调整 5 个附魔维护源码、更新版本并补资源。与本地主工程交叉核对，确认修复版仍遗漏新模组名/描述、终焉与魔龙配方、萝莉刀防护 Mixin 注册和部分配置翻译；NeoForge 1.21.1 已使用 SlashBlade: Finale Blade Sanctum 和参数化 TOML。详细报告位于 local_backups/comparison_2.9.3_20261011/comparison.md。本轮仅对比，未修改功能源码或远程发布。
+
+- **本地 2.9.4 修复包名称校正（2026-10-11）**：用户确认萝莉刀游戏内渲染正常；仅将实际打包的 mods.toml 显示名称改为引用 mod_name（SlashBlade: Finale Blade Sanctum），同步描述首行的名称，保留当前版本号及其他功能。重新构建本地修复 Jar，未推送或更新 Release。
+
+
+### 2.9.4-hotfix1-1.20.1-forge（2026-10-11）
+
+## 2.9.4 热修1 — Forge 1.20.1
+
+- 补回发布分支遗漏的萝莉刀模型与贴图，以及对应命名刀定义、配方、说明、音效和相关语言资源。
+- 将游戏内模组名称及描述中的名称校正为 SlashBlade: Finale Blade Sanctum（拔刀剑：终焉藏刀阁）。
+- 保留 2.9.4 的附魔修复：默认附魔在创建武器时赋予，已有武器不再被周期性整份模板覆盖或补回附魔。
+- 新增成品 Jar 资源检查脚本，核对模型、贴图、音效和语言资源是否完整打包。
+
+验证：Java 17 构建；成品 Jar 内版本、名称与资源检查。用户已实测确认本次补回的萝莉刀资源渲染正常。
+
+适用于 Minecraft 1.20.1 / Forge；内部版本为 2.9.4-hotfix1-1.20.1-forge。请替换旧版本 Jar，避免同时加载两份模组。
+
+- **热修1发布完成**：Forge 分支 1.20.1-forge 已推送发布提交 4c2eb4c；Tag 2.9.4-hotfix1；正式 Release：https://github.com/RLlufee/AnnihilationBladeEX/releases/tag/2.9.4-hotfix1 。附件 slashblade-finale-blade-sanctum-2.9.4-hotfix1-1.20.1-forge.jar 的 GitHub SHA-256 与本地一致。用户随后在远程删除 tools 检查脚本（d562c8c），发布工作区已 fast-forward 同步至 d562c8c，Ahead/Behind=0/0；发布 Tag 保留指向 4c2eb4c，游戏源码和 Jar 不受影响。README 保留本地待用户手动上传。

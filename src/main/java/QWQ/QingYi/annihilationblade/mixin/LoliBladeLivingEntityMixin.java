@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * 方法级不可杀：对受保护的萝莉之刃持有者，在字节码层拦截整条死亡链
  * （hurt / die / actuallyHurt / kill / tickDeath）。
- * <p>
  * 这是 Forge 事件层（{@code LivingAttackEvent} / {@code LivingHurtEvent} / {@code LivingDeathEvent}）
  * 永远做不到的——事件可被更底层的代码绕开，而 Mixin 堵的是方法入口本身。
  * {@code priority = Integer.MAX_VALUE} 确保我们的取消优先于其它 Mixin。

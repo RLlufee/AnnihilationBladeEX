@@ -54,7 +54,7 @@ public class ModSlashArts {
    }));
    public static final RegistryObject<SlashArts> LOLI_AREA_EXECUTION = ARTS.register("loli_area_execution", () -> new SlashArts(entity -> {
       if (entity instanceof Player player && !player.level().isClientSide) {
-         LoliBladeCombatLogic.handleAreaSlashArt(player);
+         LoliBladeCombatLogic.prepareCast(player);
       }
 
       return ModComboStates.LOLI_AREA_EXECUTION_STATE.getId();

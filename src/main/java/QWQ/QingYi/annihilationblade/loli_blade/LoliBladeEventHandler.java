@@ -4,6 +4,7 @@ import QWQ.QingYi.annihilationblade.loli_blade.logic.LoliBladeCombatLogic;
 import QWQ.QingYi.annihilationblade.loli_blade.logic.LoliBladeDefenseLogic;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -29,6 +30,13 @@ public final class LoliBladeEventHandler {
       LoliBladeDefenseLogic.onLivingHurt(event);
    }
 
+   @SubscribeEvent(priority = EventPriority.LOWEST)
+   public static void onLivingDamage(LivingDamageEvent event) {
+      if (!event.isCanceled()) {
+         LoliBladeCombatLogic.handleLivingDamage(event);
+      }
+   }
+
    @SubscribeEvent(priority = EventPriority.HIGHEST)
    public static void onLivingDeath(LivingDeathEvent event) {
       LoliBladeDefenseLogic.onLivingDeath(event);
@@ -50,10 +58,12 @@ public final class LoliBladeEventHandler {
    @SubscribeEvent
    public static void onPlayerLogout(PlayerLoggedOutEvent event) {
       LoliBladeDefenseLogic.clearPlayerState(event.getEntity());
+      LoliBladeCombatLogic.clearPlayerState(event.getEntity().getUUID());
    }
 
    @SubscribeEvent
    public static void onPlayerChangedDimension(PlayerChangedDimensionEvent event) {
       LoliBladeDefenseLogic.clearPlayerState(event.getEntity());
+      LoliBladeCombatLogic.clearPlayerState(event.getEntity().getUUID());
    }
 }
