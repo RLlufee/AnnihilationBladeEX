@@ -1,159 +1,363 @@
-# AnnihilationBladeEX 2.9.4-hotfix1
+<div align="center">
 
-湮灭之刃的 1.21.1 NeoForge 移植版，公开命名空间为 `annihilationbladeex`，当前版本为 `2.9.4-hotfix1`。
+# 🌌 拔刀剑：终焉藏刀阁
+### *SlashBlade: Finale Blade Sanctum*
 
-## 环境
+<p align="center">
+  <b>撕裂虚空，执掌法则；八荒破灭，终焉归墟。</b><br>
+  <i>融合高维视效、深度机制与多元战斗链路的 SlashBlade 1.21.1 NeoForge 扩展模组</i>
+</p>
 
-- Minecraft `1.21.1`
-- NeoForge `21.1.228`
-- Java `21`
-- SlashBlade Resharped `2.1.9-1.21.1`
-- Jupiter `2.3.7-1.21.1-neoforge`
-- 本地依赖：`libs/SlashBlade_Resharped-1.21.1/SlashBladeResharped-2.1.9-1.21.1.jar`
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-2ea44f?style=for-the-badge&logo=minecraft&logoColor=white)](https://www.minecraft.net/)
+[![NeoForge](https://img.shields.io/badge/NeoForge-21.1.228-orange?style=for-the-badge&logo=neoforge&logoColor=white)](https://neoforged.net/)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://adoptium.net/)
+[![Version](https://img.shields.io/badge/Version-2.9.4--hotfix1-8e44ad?style=for-the-badge&logo=semver&logoColor=white)](#)
+[![Mod ID](https://img.shields.io/badge/Mod_ID-annihilationbladeex-0984E3?style=for-the-badge&logo=codefactor&logoColor=white)](#)
+[![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge&logo=gnu&logoColor=white)](./LICENSE)
+[![Author](https://img.shields.io/badge/Author-青衣__璃-FF7675?style=for-the-badge)](#)
 
-## 内容
+<br>
 
-- 主刀：`annihilationbladeex:annihilation_blade`
-- 血狱：`annihilationbladeex:blood_prison`
-- 湮灭核心：右键生成同一把 canonical 湮灭之刃
-- Slash Art：`annihilationbladeex:spatial_fracture`
-- Special Effects：
-  - `annihilationbladeex:dankong`
-  - `annihilationbladeex:world_rift`
-  - `annihilationbladeex:terminus_echo`
-  - `annihilationbladeex:void_dominion`
-  - `annihilationbladeex:causality_collapse`
-  - `annihilationbladeex:starless_judgement`
-  - `annihilationbladeex:phantom_judgement`
-  - `annihilationbladeex:abyssal_decree`
+[📖 模组概览](#-模组概览) • [✨ 核心特性](#-核心特性) • [📋 环境依赖](#-环境与依赖) • [⚔️ 命名刀图鉴](#️-命名刀图鉴) • [🔮 专属 SA](#-sa-slash-art-专属战技) • [🌀 特效 SE](#-se-special-effect-特效体系) • [🎮 操作快捷键](#-控制与快捷键说明) • [⚙️ 配置体系](#️-配置文件体系-jupiter-integration) • [🎨 OBJ 制作](#-拔刀剑-obj-模型制作指南) • [🛠️ 源码构建](#️-构建与编译指南) • [💖 赞助支持](#-赞助与支持)
 
-`Phantom Judgement` 使用 40 格索敌范围，触发后生成受限幻影剑雨；剑雨击杀目标后会在地面短暂保留，用于提示击杀来源，同时降低服务器实体与粒子峰值。
+</div>
 
-湮灭之刃位于背包、主手或副手时，客户端会以光照贴图提供无药水图标的夜视级照明；该效果不写入玩家的药水状态。
+---
 
-所有普攻、SA 与 SE 的目标判定统一遵循 SlashBlade 的 `pvp_enable` 与 `friendly_enable` 配置，默认不会伤及玩家、宠物和非敌对单位。
+## 📖 模组概览
 
-裂界会在湮灭之刃伤害生效 5 tick 后，以受击位置为中心处决周围所有合法目标，并继续连锁。连锁次数和以初始攻击者为中心的最大连锁范围可在 common config 的 `annihilation_blade.world_rift.chain_count` 与 `chain_range` 调整。
+**拔刀剑：终焉藏刀阁** (*SlashBlade: Finale Blade Sanctum*) 是一款基于 *SlashBlade / SlashBlade Resharped* 的 1.21.1 NeoForge 拔刀剑扩展模组。
 
-## 构建
+本模组围绕 **“终焉、裂界、坍缩、审判、血狱、宇宙法则、混沌魔龙、萝莉法则”** 八大核心主题构建，提供了 **5 把机制独特的顶级命名刀**、完整严谨的 **SA / SE 战斗链路**、支持 Jupiter 配置系统的 **低风险参数调节**，以及兼具极佳视觉冲击力与流畅实战体验的 **动态渲染与控制体系**。
 
-PowerShell 下使用 UTF-8 与 Java 21：
+> [!NOTE]
+> 当前 README 对应版本 **`2.9.4-hotfix1-1.21.1-neoforge`**。本版本已全面适配 **SlashBlade Resharped 2.1.9+**（19 参 `BladeStateData`）与 NeoForge 21.1 渲染/数据组件体系，修复了附魔运行时整份覆盖缺陷，补齐了萝莉刀与魔龙夜陨旗舰级 Tooltip 重绘体系。
 
-```powershell
-$OutputEncoding=[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false)
-$env:JAVA_HOME='C:\Program Files\Zulu\zulu-21'
-$env:JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8'
-.\gradlew.bat --no-daemon build --console=plain
+---
+
+## ✨ 核心特性
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        🌌 终 焉 藏 刀 阁  特 性 矩 阵                   │
+├───────────────────┬───────────────────┬────────────────────────────────┤
+│ 🗡️ 5 大顶级命名刀  │ 🌀 7 大专属 SA     │ ⚡ 24 项注册 SE 体系           │
+│ 湮灭/血狱/星空/魔龙/萝莉│ 空间裂界/绝对坍缩/神陨│ 终焉/血狱/宇宙/魔龙/萝莉法则    │
+├───────────────────┼───────────────────┼────────────────────────────────┤
+│ 🎨 旗舰级 Tooltip  │ ⚙️ Jupiter 双配置  │ 🛡️ 萝莉高维守护体系            │
+│ 黑洞/六芒星/全息芯片/色差│ 权威服务端 + 客户端视效│ 主人唯一绑定 / 兜底契约重建     │
+└───────────────────┴───────────────────┴────────────────────────────────┘
 ```
 
-产物位于 `build/libs/`，文件名应包含版本 `2.9.4-hotfix1`。
+- 🗡️ **5 把机制与定位鲜明的顶级命名刀**：湮灭之刃·终焉、魔刀·血狱、最终兵器·无尽星空、魔龙夜陨、萝莉刀「萝莉(。>︿<   。)」。
+- 🌀 **7 大专属 SA（Slash Art）**：`空间破碎`、`炼狱·杀戮`、`绝对湮灭圈`、`夜陨次元斩`、`鳞之卫`、`神陨！！！`（神陨·宇宙夜陨降临）、`萝莉审判·Ciallo～(∠・ω< )⌒☆`。
+- ⚡ **24 项注册 SE（Special Effect）**：涵盖终焉系 (8)、血狱系 (3)、宇宙法则系 (4)、魔龙系 (8) 与萝莉裁断系 (1)。
+- 🎀 **萝莉刀服务端高压防护与契约机制**：主人唯一绑定、原生 SE/SA 主动处决、命中节流音效、多维死锁防护、兜底重建（Theseus Guard）与可选高压对抗项。
+- ⚙️ **Jupiter JSON 权威配置**：提供 `common.json`（服务端权威控制）与 `client.json`（客户端 Tooltip 视效开关），所有数值均附带安全边界防护。
+- 🎨 **旗舰级专属 Tooltip 重绘系统**：湮灭之刃、无尽星空与魔龙夜陨均拥有专属 HUD/Tooltip 面板（流光黑洞、六芒星公转、谱线文字、3x3 龙威权能全效果芯片组、交互式鼠标聚光灯追踪与色差故障错位），支持一键开关回退原版样式。
+- 🎮 **人性化按键控制与动作栏反馈**：支持断空闪现模式按键切换（默认 <kbd>Left Ctrl</kbd>）、魔龙夜陨三形态切换（默认 <kbd>Z</kbd>）、无尽星空 AI 删除切换（默认 <kbd>I</kbd>），且攻击判定完美兼容 SlashBlade 原生友伤与 PVP 规则。
 
-## Changelog
-### 2.9.4-hotfix1 — 修复 SlashBlade Resharped 2.1.9 运行时崩溃（NoSuchMethodError）
-- **崩溃现象**：进入世界后按 E 打开创造模式物品栏即崩溃，`java.lang.NoSuchMethodError: mods.flammpfeil.slashblade.capability.slashblade.BladeStateData.<init>(...)`（18 参描述符），抛出点位于 `AnnihilationBladeDefinitions.applyRuntimeStats`，调用链为 `ModCreativeTabs` → `createFromLookup` → `applyRuntimeStats`。报告来自 FCL（Android）启动器玩家，其运行环境为 SlashBlade Resharped `2.1.9-1.21.1`。
-- **根因**：工程编译依赖仍为 `libs/SlashBladeResharped-2.0.7-1.21.1.jar`（18 参构造），而 `neoforge.mods.toml` 中 `slashblade` 依赖 `versionRange="[2.0.7-1.21.1,)"` 未设上界，放行了 2.1.9。2.1.9 在 `BladeStateData` record 第 10 个分量位置新增 `Optional<List<SwordType>> defaultSwordTypes`（`SwordType` 为 2.1.x 全新枚举，2.0.7 中不存在该类），构造函数由 18 参变为 19 参，按 2.0.7 编译出的 18 参 `invokespecial` 在 2.1.9 运行时无法解析。
-- **修复**：
-  - `build.gradle` 的 `implementation` 与 `localRuntime` 切换为官方 Jar `libs/SlashBlade_Resharped-1.21.1/SlashBladeResharped-2.1.9-1.21.1.jar`（2.0.7 旧 Jar 予以保留，未删除，不再参与构建）。
-  - 在 `AnnihilationBladeDefinitions`、`BloodPrisonDefinitions`、`NightfallDragonDefinitions`、`InfinityStellarisDefinitions`、`LoliBladeDefinitions` 五处 `new BladeStateData(...)` 中，于 `defaultBewitched` 与 `destructable` 之间补入 `Optional.empty()`，与 2.1.9 字段顺序对齐。取空是为保持 2.0.7 时期的既有行为——彼时尚无 `defaultSwordTypes` 字段，五把刀均不声明默认剑类型，`SwordType.from()` 的自动判定不受影响。
-  - 删除 `assets/annihilationbladeex/models/item/annihilation_blade.json` 与 `nightfall_dragon.json` 中无效的 `overrides` 块：谓词 `"slashblade:user": "exist"` 的值类型为字符串，触发 `JsonSyntaxException: Expected slashblade:user to be a Float`，导致两把刀模型加载失败（物品显示缺失模型）；且该谓词在 SlashBlade 2.1.9（`ClientHandler`）与本模组客户端注册（`AnnihilationBladeEXClient`）中均恒返回 0，仅用于 `BladeModel.user` 渲染副作用，引用的 `slashblade:eproudsoul` 模型在 2.1.9 中亦不存在，整块为历史遗留死代码。
-- **依赖下限收紧**：`neoforge.mods.toml` 中 `slashblade` 的 `versionRange` 由 `[2.0.7-1.21.1,)` 提升为 `[2.1.9-1.21.1,)`，避免低版本 SlashBlade 环境下加载后复现同一 `NoSuchMethodError`。
-- **跨版本兼容性核查**：已逐一核实以下 API 在 2.1.9 中均兼容，无需额外改动——`BladeStateAccess` 全系方法（`of`/`getData`/`getDataOrDefault`/`setData`/`updateData`/`ensureRuntimeComponent`）、`SlashBladeDataComponents.BLADE_STATE_DATA`、`CarryType.NINJA`、`SlashBlade.getSlashBladeDefinitionRegistry` 的 `Level` 与 `HolderLookup.Provider` 两种重载、`SlashBladeDefinition.REGISTRY_KEY` 与 `getBlade` 两种重载、`SpecialEffect(int, boolean, boolean)`、`TargetSelector.test`、`SlashBladeTEISR` 与 `BladeModel` 构造器及 `BladeModel.user` 字段、`ComboState.Builder`/`motionLoc`/`TimeLineTickAction.getBuilder()`/`DefaultResources.ExMotionLocation`、`RegistryEvents` 实体常量；`EntityAbstractSummonedSwordMixin` 依赖的 `inGround`/`inBlockState` 字段与 `tick` 在 2.1.9 中均在（崩溃日志显示游戏已进入 gameplay，`required=true` 的 Mixin 全部应用成功）。
-- **验证方式**：`./gradlew.bat --no-daemon build --offline --console=plain` 构建通过（仅 2 处与本问题无关的 `EventBusSubscriber#bus` 弃用警告）；反汇编产物确认 5 处 `BladeStateData.<init>` 描述符均为 19 参 `(Ljava/lang/String;FIIIZZLnet/minecraft/resources/ResourceLocation;ZLjava/util/Optional;ZLnet/minecraft/resources/ResourceLocation;Lmods/flammpfeil/slashblade/client/renderer/CarryType;IZLnet/minecraft/world/phys/Vec3;Ljava/util/Optional;Ljava/util/Optional;Ljava/util/List;)V`，与官方 2.1.9 Jar 的规范构造器逐一比对一致；Jar 内 `neoforge.mods.toml` 的 `version="2.9.4-hotfix1"` 与 `slashblade` 下限 `[2.1.9-1.21.1,)` 均已生效。
-- **部署提醒**：玩家需将 SlashBlade Resharped 同步升级至 `2.1.9-1.21.1` 或更高；旧版 Jar 与本产物 `mod_id` 相同，**不可同时放入 mods 目录**。
+---
 
-### 2.9.4-1.21.1-neoforge — 附魔问题修复
-- 用户已审查附魔修复，版本更新为 `2.9.4-1.21.1-neoforge`。
-- 默认附魔仅在创建时赋予；终焉、血狱、无尽星空、萝莉之刃和魔龙夜陨的 Tick、攻击、SA、绑定巡检及形态切换保留玩家当前附魔。
-- 新刀创建兜底使用注册表初始化默认附魔；无尽星空创造栏使用注册表创建。
-- 目标分支为 `1.21.1-neoforge`。由于 `2.9.4` Tag 已用于 Forge 版，NeoForge 版使用独立 Tag `2.9.4-1.21.1-neoforge`；README 本地维护，不加入自动推送。
-- 本次按用户确认完整同步工程：包含此前未上传的萝莉之刃与魔龙 Tooltip，清理旧移植重复文件，升级并纳入构建必需的 SlashBlade Resharped `2.0.7-1.21.1` 依赖，修复 `BladeStateData` 构造兼容性。
-- 发布工作区基于远程 `1.21.1-neoforge` 创建，Java 21 完整构建通过；Jar 内版本、完整读取和 SHA-256 校验通过。保留原始工作区已有暂存内容，仅在独立工作区提交发布代码。
-- 发布完成：提交 `95e28773e6427fd990d1278f1baa5d571a987838` 已推送到 `1.21.1-neoforge`，Tag 为 `2.9.4-1.21.1-neoforge`，正式 Release 地址为 https://github.com/RLlufee/AnnihilationBladeEX/releases/tag/2.9.4-1.21.1-neoforge ，附件为 `slashblade-finale-blade-sanctum-2.9.4-1.21.1-neoforge.jar`。GitHub 附件 SHA-256 与本地一致：`b35721394c17c924beca4817fece65e4235920f2858f3808ffd4237da4466ad1`；分支 Ahead/Behind 为 0/0，README 未提交。
+## 📋 环境与依赖
 
-### 2026-10-10 修复运行时默认附魔被补回
-- NeoForge 1.21.1 未整份覆盖命名刀模板，但终焉、血狱、无尽星空、魔龙夜陨和萝莉之刃的维护流程反复调用 `stack.enchant(..., 10)`，导致删除或降低的默认附魔在 20 tick 刷新、攻击、SA 准备、绑定巡检或形态切换时被补回。
-- 拆分新武器创建与已有武器维护：默认附魔由命名刀数据包初始化，代码兜底仅在有注册表上下文的新刀创建时赋予；维护、攻击与形态切换保留玩家当前附魔组件。
-- 修复终焉、血狱、魔龙夜陨在数据包定义缺失时未使用世界注册表的创建兜底；无尽星空创造栏改为使用注册表创建，避免移除运行时补齐后新刀缺少默认附魔。
-- 保留身份、模型、SA/SE、形态、成长数据和防折断维护；修复已通过用户审查，发布版本见上方 2.9.4 记录。
-- 验证：Java 21 下 `./gradlew.bat --no-daemon build --console=plain` 构建成功；反汇编确认五把刀的维护入口、萝莉刀绑定及魔龙形态切换调用链不再调用附魔初始化，最终 Jar 中五份命名刀默认附魔定义完整。未进行游戏内实测。
-- 构建环境排错：备份并重新生成 NeoForm 中引用旧 `C:/Users/VOS_User/.gradle` 路径的 `listLibraries` 缓存，下载缺失的 Jupiter 依赖；未改动项目构建配置。审查差异与验证记录位于 `.codex_backup/enchantment-review-20261010-231012/`。
+| 需求项目 | 推荐 / 要求版本 | 依赖类型 | 说明 |
+| :--- | :--- | :---: | :--- |
+| **Minecraft** | `1.21.1` | 运行基石 | 目标游戏基准版本 |
+| **NeoForge** | `21.1.228` 或更高 | 加载器 | 官方推荐稳定性版本 |
+| **Java (JDK/JRE)** | `21` | 运行时 | 推荐采用 OpenJDK / Eclipse Temurin / Zulu 21 |
+| **SlashBlade Resharped** | `[2.1.9-1.21.1,)` | **核心前置** | 拔刀剑核心支持（已适配 19 参 `BladeStateData`） |
+| **Jupiter** | `2.3.7-1.21.1-neoforge` | **必需前置** | 驱动 JSON 配置加载、校验边界与网络同步 |
+| **JEI (Just Enough Items)** | 最新兼容版 | *可选联动* | 提供命名刀、SA、SE 图鉴与合成公式检索 |
 
-### 2026-09-12 修复 SlashBlade Resharped 2.0.7 运行时崩溃（NoSuchMethodError）
-- **崩溃现象**：进入世界后按 E 打开创造模式物品栏即崩溃，根因行为 `java.lang.NoSuchMethodError: mods.flammpfeil.slashblade.capability.slashblade.BladeStateData.<init>(...)`，抛出点位于 `AnnihilationBladeDefinitions.applyStats`，调用链为 `ModCreativeTabs` → `createFromLookup` → `applyStats`。
-- **根因**：工程编译依赖是 `libs/SlashBladeResharped-2.0.3-1.21.1.jar`（17 参构造），而实际运行环境加载的是 `SlashBladeResharped-2.0.7-1.21.1.jar`。2.0.7 在 `BladeStateData` record 的第 10 个分量位置新增了 `boolean destructable`，构造函数由 17 参变为 18 参，导致按 2.0.3 编译出的 17 参 `invokespecial` 在运行时无法解析。
-- **修复**：
-  - `build.gradle` 与 `libs/` 的编译依赖同步升级为 `SlashBladeResharped-2.0.7-1.21.1.jar`（2.0.3 旧 Jar 予以保留，未删除）。
-  - 在 `AnnihilationBladeDefinitions`、`BloodPrisonDefinitions`、`InfinityStellarisDefinitions`、`LoliBladeDefinitions`、`NightfallDragonDefinitions` 五处 `new BladeStateData(...)` 中，于 `defaultBewitched` 与 `comboRoot` 之间补入 `destructable = false`，与 2.0.7 字段顺序对齐。取 `false` 是为保持 2.0.3 时期的既有行为——这些刀均为 `UNBREAKABLE` 且 `broken = false`，不应在断裂时销毁物品（2.0.7 的 `ItemSlashBlade#damageItem` 仅在 `isBroken() && isDestructable()` 时才 `stack.shrink(1)`）。
-- **依赖下限收紧**：`neoforge.mods.toml` 中 `slashblade` 的 `versionRange` 由 `[2.0.3-1.21.1,)` 提升为 `[2.0.7-1.21.1,)`，避免在 2.0.3 环境下加载后复现同一 `NoSuchMethodError`。
-- **跨版本兼容性核查**：对 2.0.3 与 2.0.7 两个 Jar 做了全量公共 API 逐类比对（各 383 个类）。除大量新增成员外，2.0.7 仅移除/变更了 5 项：`BladeStateData` 17 参构造、`AttackManager.getEnchantmentBonus(LivingEntity, Entity)`、`ItemSlashBlade.getName(ItemStack)`、JEI 分类的 `getBooleanText(boolean)`、`BladestandEvents.proudSoulEnchantmentProbabilityCheck(ProudSoulEnchantmentEvent)`，以及 `MoveCommandMessage#command()` 返回类型由 `int` 改为 `EnumSet<InputCommand>`。以上均未被本工程引用，故无需额外改动。`EntityAbstractSummonedSwordMixin` 所依赖的 `inGround` / `inBlockState` 字段及 `tick` 内的 `equals` 调用在 2.0.7 中位置未变，Mixin 依然有效。
-- **验证方式**：`./gradlew.bat build --offline` 构建通过（仅 2 处与本问题无关的 `EventBusSubscriber#bus` 弃用警告）；并反汇编新产物逐一确认 5 处 `BladeStateData.<init>` 描述符均为 18 参，与 2.0.7 运行时 Jar 完全一致。
-- **部署提醒**：测试实例 `1.21.1-NeoForge_21.1.250拔刀剑测试/mods/` 中目前仍放着旧命名的 `annihilationbladeex-2.9.2-1.21.1-neoforge.jar`；本次构建产物名为 `slashblade：finale-blade-sanctum-2.9.2-1.21.1-neoforge.jar`。两者 `mod_id` 相同，**不可同时放入 mods 目录**，否则会因重复 mod ID 启动失败，需先移除旧 Jar 再放入新产物。
+---
 
-### 2026-09-06 产出构建产物命名对齐
-- 修复 `build.gradle` 中冗余的 `base { archivesName = mod_id }` 覆盖配置，使其正常生效 `gradle.properties` 中的 `mod_archive_name`。
-- 构建产物 Jar 包名称与 1.20.1 Forge 原版对齐，由 `annihilationbladeex-2.9.2-1.21.1-neoforge.jar` 统一为 `slashblade：finale-blade-sanctum-2.9.2-1.21.1-neoforge.jar`。
+## ⚔️ 命名刀图鉴
 
-### 2026-09-06 v2.9.2 魔龙夜陨 Tooltip 视觉强化与萝莉刀机制同步
-- **魔龙夜陨旗舰级 Tooltip 渲染器移植**：将 1.20.1 旗舰级 Tooltip 视觉渲染完整移植至 1.21.1 NeoForge，包含动态 3x3 龙威权能全效果芯片组（9 核心龙术芯片：龙威领域、魔血寄生、逆鳞捕杀、外神伤痕、龙神躯、逆鳞守、万龙刃阵、破界斩、绝对领域）、交互式鼠标聚光灯追踪、全息激光扫描线、蜂窝科技矩阵背景、龙瞳能量核心、神陨形态色差故障错位（Chromatic Aberration Glitch Shift）以及双重逆向旋转龙威魔法阵。
-- **NeoForge 1.21.1 渲染管线适配**：全面适配 `Tesselator.getInstance().begin(Mode.QUADS, ...)` / `BufferUploader.drawWithShader(builder.buildOrThrow())` 渲染流、`DataComponents.ENCHANTMENTS` 附魔映射与 `BladeStateAccess` 数据读取。
-- **Tooltip 事件与配置接入**：新增 `NightfallDragonTooltipEvents` 响应客户端 `RenderTooltipEvent.Pre`，并在 `ModConfig.ClientTooltips` 中新增 `enableNightfallDragonRenderer` 开关配置。
-- **萝莉之刃音效触发与处决链路重构**：将原先仅在 SA 空放时的音效，重构为当玩家手持萝莉之刃时，其释放的任何攻击（普通近战斩击、拔刀刀光与幻影剑、SE 扇形处决与 SA 全域处决）对合法目标造成任何伤害时播放 `loli_success` 音效，并加入同一 Tick 多目标防爆音节流防护。
-- **萝莉之刃 SA 触发修复与生命周期状态清理**：在 `ModComboStates` 中为 `LOLI_AREA_EXECUTION_STATE` 补全 `TimeLineTickAction`（在动作第 8 tick 执行广域处决），`ModSlashArts` 改为调用 `prepareCast(player)`，并在登出与切换维度事件中补充清理战斗冷却与节流状态。
-- **多语言补全与版本迭代**：在 `zh_cn`、`en_us`、`zh_hk`、`zh_tw` 中补齐魔龙夜陨 Tooltip 全部形态标题、副标题、形态印记与 9 大龙威权能芯片翻译；`gradle.properties` 与模组工程版本正式升级至 `2.9.2-1.21.1-neoforge`。
-### 2026-08-29 Loli Blade 移植补齐
-- 将 1.20.1 Forge 版 `loli_blade` 功能块补入 NeoForge 1.21.1：包含定义、战斗处决、防御保护、主人绑定、Theseus 兜底守护、原生 SE 扇形处决与 SA 范围处决。
-- 新增 `ModSounds` 并注册 `annihilationbladeex:loli_success`，补齐 Loli Blade 模型、贴图、音效、JEI blade_desc、named_blade 与合成配方资源。
-- 将 Loli Blade 的运行数据改为 1.21.1 DataComponent / SlashBladeDataComponents 写法，保留目标工程 `annihilationbladeex` 命名空间、Java 21 与 NeoForge 21.1.228 构建体系。
-- 合并四个语言文件中的 Loli Blade、Slash Art、Special Effect、音效字幕与 Jupiter common config 文案；资源扫描已清理旧 `annihilationblade:` / `forge:` 引用。
-- 验证命令：`./gradlew.bat compileJava --stacktrace`、`./gradlew.bat processResources --stacktrace` 与 `./gradlew.bat build --stacktrace` 已通过；仍建议进游戏实测模型显示、SA/SE 触发、玩家防御与音效播放。
+<details open>
+<summary><b>1. 湮灭之刃 · 终焉 <code>annihilationbladeex:annihilation_blade</code></b></summary>
+<br>
 
-### 2026-08-23 魔龙夜陨第三态 SA 与 Jupiter 配置修复
-- 修正 `nightfall_dragon.json` 默认命名刀定义：新刀回到封印态 `nightfall_judgement_cut` 与封印态 SE，避免未写入形态标签时直接携带终焉态 SA/SE 混合配置。
-- 补回第三态压制链路：NeoForge 版在 `LivingIncomingDamageEvent` 中恢复“被压制实体不能造成伤害”的分支，保持 1.20.1 终焉态世界撕裂/结界压制行为。
-- 将配置系统从 NeoForge `ModConfigSpec` 迁回 Jupiter `AutoInitConfigContainer`，接入 common/server 与 client JSON 配置、Jupiter 配置界面以及 Tooltip 渲染开关。
-- 新增 Jupiter Modrinth 依赖与 `neoforge.mods.toml` 必需前置声明，配置读取统一改为 `getValue()`，并补齐四个语言文件的配置标题与字段名。
+> *「撕裂虚空，终焉裁决。万物因果，尽归寂灭。」*
 
-### 2026-08-23 魔龙刀旋转光环同步
-- 将 1.20.1 Forge 版魔龙刀物品视角的 `item_dragon_halo_luminous` 旋转光环渲染逻辑同步到 1.21.1 NeoForge 事件链，保持 `nightfall_dragon_halo.png` 发光光环按源版持续旋转与脉冲缩放。
-- 收敛 NeoForge 目标工程此前对 `halo` 渲染节点的额外取消逻辑，改回源版“所有 `item_` 节点叠加旋转光环”的行为，避免打乱 SlashBlade 的默认模型节点处理顺序。
-- 修正光环可见但不旋转的问题：对 `item_dragon_halo_luminous` 分组单独替换默认静态渲染 pass，并按 OBJ 中心点执行旋转与脉冲缩放，避免固定光环覆盖动态层。
+- **数据包定义**：`src/main/resources/data/annihilationbladeex/slashblade/named_blades/annihilation_blade.json`
 
-### 2026-08-23 魔龙刀模型修复
-- 补齐 `assets/annihilationbladeex/models/item/nightfall_dragon.json`，让 `annihilationbladeex:nightfall_dragon` 走 SlashBlade 的 `builtin/entity` 物品渲染路径。
-- 为 `annihilationbladeex:nightfall_dragon` 注册 SlashBlade 客户端物品属性、`SlashBladeTEISR` 自定义渲染器与 `BladeModel` 烘焙包装，并将客户端注册类显式挂到 NeoForge MOD 事件总线，修复进游戏后魔龙刀物品图标显示紫黑缺失纹理、手持时被渲染成巨大紫黑面片的问题。
+| 属性维度 | 参数数值 | 属性维度 | 参数数值 |
+| :--- | :--- | :--- | :--- |
+| **基础攻击力** | `50.0` (高额爆发) | **最大耐久值** | `2000` |
+| **绑定 SA** | `spatial_fracture` (空间破碎·万象裂隙) | **挂载 SE 数量** | `8` 项终焉系完整效果 |
+| **核心被动能力** | 绝对庇护、虚空飞行、终焉处决、永昼视界 | **专属快捷键** | <kbd>Left Ctrl</kbd> 切换断空 / <kbd>Shift</kbd> 刹车 |
 
-### 2026-08-23 迁移收尾
-- 清理目标工程残留的 1.20.1 Forge `META-INF/mods.toml`，打包时仅保留 NeoForge 模板生成的 `META-INF/neoforge.mods.toml`。
-- 将资源包描述统一为 `annihilationbladeex resources`，避免继续暴露旧命名空间描述。
-- 补齐 `zh_hk` 与 `zh_tw` 的 `cosmic_nightfall_descent` Slash Art 本地化，并修正四个语言文件中魔龙夜陨 JEI 描述仍写 `slashblade:none` 的旧内容。
-- 明确 `sa_susanoo` / `sasukes-susanoo-advanced` 属于已废弃资源，本次迁移不会恢复。
+> [!TIP]
+> **核心战斗机制**：
+> - **永昼视界**：置于背包、主手或副手时，客户端以光照贴图提供夜视级无药水图标照明，杜绝污染玩家常规状态。
+> - **因果裂界连锁**：伤害生效 5 tick 后，在受击中心拉开裂隙并对范围目标执行终焉处决；连锁次数与中心扩散半径均可在配置项 `annihilation_blade.world_rift` 灵活调节。
 
-### 2026-08-14 崩溃修复
-- 修复加载旧存档中的 `slashblade:spiral_swords` 等拔刀剑投射物时，`inGround=true` 但 `inBlockState` 缺失所导致的服务端实体 tick 空指针崩溃。
-- 在 SlashBlade 读取落地方块状态前按实体当前位置补全缺失状态，已有“进存档即崩”的问题实体无需手动删除，其他正常投射物逻辑不受影响。
-- 追加 `inBlockState.equals(...)` 调用前的兜底修复，覆盖同一 tick 内先写入 `inGround`、尚未写入 `inBlockState` 就进入方块检测分支的 2.0.4 崩溃路径。
-- 将上述兜底从调用前注入改为直接重定向 `Object.equals` 调用，避免 SlashBlade 2.0.4 在空 receiver 上先抛出 NPE。
-- 为湮灭之刃持有者的 SlashBlade 召唤剑命中追加“幻影回响”机制：不修改命名刀纸面伤害和召唤剑基础伤害，命中后对主目标施加终末标记并在下一 tick 兜底执行，同时牵引附近少量合法目标并播放归墟连线视觉。
-- 将 1.20.1 Forge 的无尽星空合成机制迁移到 1.21.1：保留血狱作为核心材料以及击杀数、耀魂值和锻造等级要求，并将自定义刀材料字段改为 SlashBlade Resharped 2.0.3 的 `items` 数组格式，修复配方数据加载失败。
+</details>
 
-### v2.7.2
-- **无尽星空 (Infinity Stellaris) 移植适配**：
-  - 迁移了 `infinity_stellaris.obj` 模型贴图以及 GUI 资源。
-  - 对 1.21.1 目标工程的 `zh_cn.json`、`zh_tw.json`、`zh_hk.json` 及 `en_us.json` 进行了非破坏性追加，将无尽星空的全部翻译改写为 `annihilationbladeex` 命名空间并合并。
-  - 对 `NamedBladeStacks` 数据配置进行适配，新增 `creativeGroup` 和 `item` 组件定义，契合 1.21.1 命名刀规范。
-  - 新建 `ModEntities.java` 注册实体，在主类注册其总线。
-  - 在 `ModSlashArts`、`ModSpecialEffects`、`ModComboStates`、`ModConfig` 中，合入了无尽星空对应的 `vacuum_decay_collapse` SA、四个特效、绝对湮灭圈状态及对应 Config 配置。
-  - 重构了 `InfinityStellarisDefinitions.java`，完全采用 1.21.1 的 `BladeStateData` 组件和 `Enchantment` Holder 模式对无尽星空基础属性和附魔进行运行时绑定。
-  - 重写了 `InfinityStellarisTooltipRenderer.java`，完成了 Tesselator begin/buildOrThrow 及 VertexBuilder 格式在 1.21 渲染系统中的重构。
-  - 修复并适配了 `CurvatureRuptureLogic.java` 与 `InfinityStellarisLogic.java` 中的 `PlayerTickEvent.Post` 等事件总线签名。
-  - 在 `EntropyDissolutionLogic.java` 与 `GammaThunderburstLogic.java` 中，将事件监听更改为兼容 1.21 取消机制的 `LivingIncomingDamageEvent`。
+<br>
 
-### 1.20.1 Forge 到 1.21.1 NeoForge 完整移植 Changlog
-- **网络层重构 (Network API)**：
-  - 将 1.20.1 Forge 的 `InfinityStellarisAiErasurePacket` 转换为 1.21.1 NeoForge `CustomPacketPayload` 协议标准，通过 `StreamCodec.composite` 和 `PayloadRegistrar` 完成注册与多线程安全调度。
-- **客户端按键与交互 (Client Event & KeyBinding)**：
-  - 移植 `InfinityStellarisAiErasureKeyHandler`，适配 1.21.1 的 `ClientTickEvent.Post` 与 `RegisterKeyMappingsEvent` 客户端按键绑定。
-- **逻辑与机制完善 (Logic & Restorations)**：
-  - 恢复并升级 `CurvatureRuptureLogic` 中的 AI 擦除开关与生物 AI 恢复/还原机制 (`releasePlayer` 与 `restoreMob`)，修复了周围 Mob 无条件永久卡 AI 的缺陷。
-- **资源与本地化合并 (Resources & Localization)**：
-  - 将 1.20.1 的全套语言文件（`zh_cn`, `en_us`, `zh_hk`, `zh_tw`）及无尽星空拔刀剑仪式配方 JSON (`annihilationbladeex.infinity_stellaris.json`) 完整合并并转换为 `annihilationbladeex` 命名空间规范。
+<details open>
+<summary><b>2. 魔刀 · 血狱 <code>annihilationbladeex:blood_prison</code></b></summary>
+<br>
+
+> *「以血养刃，危机与狂暴交织的嗜血之刀。」*
+
+- **数据包定义**：`src/main/resources/data/annihilationbladeex/slashblade/named_blades/blood_prison.json`
+
+| 属性维度 | 参数数值 | 属性维度 | 参数数值 |
+| :--- | :--- | :--- | :--- |
+| **基础攻击力** | `16.0` | **最大耐久值** | `2400` |
+| **绑定 SA** | `infernal_slaughter` (炼狱·杀戮) | **专属挂载 SE** | `blood_leech` / `spirit_shield` / `phantom_mark` / `wither_edge` |
+| **战斗机制** | 濒危灵盾、嗜血续航、幻影印记引爆 | **数值平衡** | 核心机制紧凑封装于源码层，兼顾生存与爆发 |
+
+> [!NOTE]
+> **血色战斗循环**：围绕低生命风险加成、百分比吸血续航、濒危强效护盾与幻影剑雨爆发展开，专为高压攻坚与长时间近战肉搏打造。
+
+</details>
+
+<br>
+
+<details open>
+<summary><b>3. 最终兵器 · 无尽星空 <code>annihilationbladeex:infinity_stellaris</code></b></summary>
+<br>
+
+> *「超越常规概念、掌控宇宙法则的终局兵器。」*
+
+- **数据包定义**：`src/main/resources/data/annihilationbladeex/slashblade/named_blades/infinity_stellaris.json`
+
+| 属性维度 | 参数数值 | 属性维度 | 参数数值 |
+| :--- | :--- | :--- | :--- |
+| **基础攻击力** | `1,000,000.0` (百万恒星级) | **最大耐久值** | `2,147,483,647` (无限近极限) |
+| **绑定 SA** | `vacuum_decay_collapse` (绝对湮灭圈) | **专属挂载 SE** | 熵增蚀解、曲率撕裂、伽马霆暴、宇宙弦切 |
+| **核心生存被动** | 无敌、飞行、死亡拦截、/kill 级防御、坠落保护、永昼视界 | **专属快捷键** | <kbd>I</kbd> 开关曲率 AI 锁死 |
+
+> [!IMPORTANT]
+> **终局仪式合成**：
+> 需要 4 枚湮灭核心、1 枚龙蛋、2 座信标、1 枚下界之星，并献祭一把达到 **`5000` 杀敌**、**`25000` 耀魂**、**`50` 精炼** 的魔刀·血狱方可唤醒。
+> 
+> **星空专属特性**：
+> - 拥有专属流光黑洞与六芒星高阶 Tooltip 重绘视效（可在 `client.json` 一键切换）。
+> - 按 <kbd>I</kbd> 键可开关 **曲率撕裂 (Curvature Rupture)**，开启后将周围 25 格内符合 PVP/友伤判定的合法目标完全冻结 AI。
+
+</details>
+
+<br>
+
+<details open>
+<summary><b>4. 魔龙夜陨 <code>annihilationbladeex:nightfall_dragon</code></b></summary>
+<br>
+
+> *「融合混沌魔龙之力，随战斗节奏切换姿态的多元拔刀。」*
+
+- **数据包定义**：`src/main/resources/data/annihilationbladeex/slashblade/named_blades/nightfall_dragon.json`
+
+| 属性维度 | 参数数值 | 属性维度 | 参数数值 |
+| :--- | :--- | :--- | :--- |
+| **基础攻击力** | `22.0` (随形态升阶) | **最大耐久值** | `2400` |
+| **形态切换键** | <kbd>Z</kbd> 键 (主/副手持有状态循环切换) | **视效支持** | 全息激光扫描、3x3 权能芯片、色差故障 |
+
+#### 🔄 三大形态切换状态机：
+
+```mermaid
+graph LR
+    A["【形态一】封印 · 淬血<br>SA: 夜陨次元斩 · 黯星轮舞<br>SE: 魔血寄生 / 外神伤痕"] -->|"按 Z 键切换"| B["【形态二】觉醒 · 龙魂复苏<br>SA: 鳞之卫 · 魔龙剑环<br>SE: 龙威重域 / 逆鳞剑阵"]
+    B -->|"按 Z 键切换"| C["【形态三】终焉 · 神陨夜陨<br>SA: 神陨！！！(宇宙降临)<br>SE: 创世神体 / 虚空结界 / 灭世剑阵"]
+    C -->|"按 Z 键切换"| A
+```
+
+- **【形态一：封印 · 淬血】**：挂载 `demonic_blood_parasite` 与 `outer_god_scar`。命中无上限叠加魔血印记，施加凋零 V、失明并追加目标 5% 最大生命魔法伤害与真实伤害；SA【夜陨次元斩】以玩家为中心扫描 20 格目标生成 20 连高阶次元斩。
+- **【形态二：觉醒 · 龙魂复苏】**：继承形态一，追加 `dragon_pressure_domain` 与 `reverse_scale_hunt`。获得速度 III、力量 III、夜视 III 与伤害吸收 III；SA【鳞之卫】召唤 16 柄直立魔龙幻影剑环绕升空重砸，造成 500% 面板 + 10% 最大生命范围重创并引发展幅震屏。
+- **【形态三：终焉 · 神陨夜陨】**：继承龙威与魔血，挂载 `dragon_god_body`、`absolute_annihilation_domain`、`myriad_dragon_blade_storm` 与 `world_cleaving_slash`。常驻创世神体兜底与最高 200 点创世龙盾，普通挥刀追加 20 柄灭世龙刃与 72 格撕裂苍穹剑气；SA【神陨！！！】锁定 120 格焦点产生 72 格强力黑洞漩涡，轰炸 15 轮夜陨星雨，内核坍缩释放全屏冲击波并以紫霄落雷处决半血目标。
+
+</details>
+
+<br>
+
+<details open>
+<summary><b>5. 萝莉刀 「萝莉(。>︿<   。)」 <code>annihilationbladeex:loli_blade</code></b></summary>
+<br>
+
+> *「高维法则附庸，自带可爱外表与绝对防御/处决契约的特别拔刀。」*
+
+- **数据包定义**：`src/main/resources/data/annihilationbladeex/slashblade/named_blades/loli_blade.json`
+
+| 属性维度 | 参数数值 | 属性维度 | 参数数值 |
+| :--- | :--- | :--- | :--- |
+| **基础攻击力** | `4.0` (高维法则常数) | **最大耐久值** | `1000` |
+| **绑定 SA** | `loli_area_execution` (萝莉审判·Ciallo～) | **绑定 SE** | `loli_facing_execution` (萝莉斩·Ciallo～) |
+| **原生满配附魔** | 耐久 X、抢夺 X、多重射击 X、力量 X、灵魂疾行 X、摔落缓冲 X、保护 X、击退 X、经验修补 X |
+
+> [!WARNING]
+> **高维契约与绝对防御体系**：
+> 1. **主人契约绑定**：首次进入玩家背包自动绑定 UUID，非主人手持完全失去法能。
+> 2. **主动处决与专属音效**：手持挥刀触发 48 格扇形 SE 处决，释放 SA 触发 128 格广域服务端全清处决；每次造成伤害播放专属 `loli_success` 音效（内置防爆音高频节流）。
+> 3. **多维守卫 (Theseus Guard & Mixin)**：拦截所有伤害来源、非自然死亡、硬移除指令与虚空坠落；实体被非法代码破坏时将在 3 tick 内以同等身份重新构建。
+> 4. **高压对抗配置**：可在 `common.json` 自由配置是否开启 `force_death` 兜底与清空背包等深度对抗项。
+
+</details>
+
+---
+
+## 🔮 SA (Slash Art) 专属战技
+
+| SA 战技名称 | 注册标识 (Registry ID) | 适配武器 | 机制简析与视觉演出 |
+| :--- | :--- | :---: | :--- |
+| **空间破碎** | `annihilationbladeex:spatial_fracture` | 湮灭之刃 | 以视线落点为锚撕开万象裂隙，扫描广域敌对目标逐一处决并铺设高密度因果裂纹。 |
+| **炼狱 · 杀戮** | `annihilationbladeex:infernal_slaughter` | 魔刀·血狱 | 展开猩红血狱领域，领域内全速穿梭追猎敌对单位，附带血色覆盖与粒子爆发。 |
+| **绝对湮灭圈** | `annihilationbladeex:vacuum_decay_collapse` | 无尽星空 | 展开 `128×128` 正方绝对湮灭圈持续 5 秒，入圈合法目标直接热寂处决且压制掉落物与方块破坏。 |
+| **夜陨次元斩** | `annihilationbladeex:nightfall_judgement_cut` | 魔龙 (形态一) | 锁定 20 格内合法目标，每 5 tick 在敌人脚下或随机补位点引爆次元斩，累计 20 连斩。 |
+| **鳞之卫** | `annihilationbladeex:scale_guard` | 魔龙 (形态二) | 召唤 16 柄直立魔龙幻影剑环绕旋转，外展 5 格后升空重砸，造成 500% 面板+10% 最大生命伤害与剧烈震屏。 |
+| **神陨！！！** | `annihilationbladeex:cosmic_nightfall_descent` | 魔龙 (形态三) | 锁定 120 格焦点展开 72 格黑洞漩涡，轰炸 15 轮夜陨星雨，伴随坍缩冲击波与 24 道落雷处决半血目标。 |
+| **萝莉审判** | `annihilationbladeex:loli_area_execution` | 萝莉刀 | 伴随 `Ciallo～(∠・ω< )⌒☆`，以持刀者为中心展开 128 格无死角服务端全清处决并播放音效。 |
+
+---
+
+## 🌀 SE (Special Effect) 特效体系
+
+模组共内建 **24 项系统化注册 SE**，按法则类别归整如下：
+
+| 分类标牌 | SE 注册标识 | 中文正式名称 | 运行机制与实战表现 |
+| :---: | :--- | :--- | :--- |
+| <kbd>终焉系</kbd> | `dankong` | 断空 · 瞬狱终闪 | 目标间高速闪现斩杀；支持按住 <kbd>Shift</kbd> 刹车返回，按 <kbd>Left Ctrl</kbd> 切换开关 |
+| <kbd>终焉系</kbd> | `world_rift` | 裂界 · 因果伤痕 | 命中后在受击点生成拉扯裂隙，触发范围二次处决并支持连锁扩散 |
+| <kbd>终焉系</kbd> | `terminus_echo` | 归墟回响 · 终焉余律 | 沿朝向释放多波交替推进的虚空切割带，连续撕裂前方敌群 |
+| <kbd>终焉系</kbd> | `void_dominion` | 虚无权域 · 万象湮灭 | 展开前方广域投影，分批次将区域内敌对目标纳入终焉判定逐个抹除 |
+| <kbd>终焉系</kbd> | `causality_collapse`| 因果坍缩 · 连锁抹消 | 寻找最近目标建立因果锚点与连接斩线，触发高密连锁爆破 |
+| <kbd>终焉系</kbd> | `starless_judgement`| 星寂裁决 · 断天终判 | 沿视线方向释放宽幅星寂裁决波，按投影判定扫过路径目标执行终判 |
+| <kbd>终焉系</kbd> | `phantom_judgement` | 幻影审判 · 九剑星轨 | 环绕幻影剑锁定敌群，随后降下密集剑雨集中审判，地面保留剑体标记 |
+| <kbd>终焉系</kbd> | `abyssal_decree` | 归墟天诏 · 星冕敕裁 | 在玩家头顶构筑王权星冕，自上而下逐次降下毁灭敕裁光束 |
+| <kbd>血狱系</kbd> | `blood_leech` | 嗜血 · 噬血 | 造成伤害时按比例汲取生命，在高压近身搏杀中提供强力续航 |
+| <kbd>血狱系</kbd> | `spirit_shield` | 源流 · 灵盾 | 生命值低于濒危阈值时强行构筑灵盾抵御重创，并赋予抗性提升 |
+| <kbd>血狱系</kbd> | `phantom_mark` | 幻影 · 印记 | 连续命中叠加印记，叠满层数后召唤幻影剑雨爆发撕裂目标 |
+| <kbd>宇宙系</kbd> | `entropy_dissolution`| 熵增蚀解 | 命中追加 10% 最大生命扣除，满 10 层直接触发热寂归零抹除非玩家实体 |
+| <kbd>宇宙系</kbd> | `curvature_rupture` | 曲率撕裂 | 按 <kbd>I</kbd> 键切换；手持时将周围 25 格内合法目标的 AI 彻底锁死 |
+| <kbd>宇宙系</kbd> | `gamma_thunderburst`| 伽马霆暴 | 伤害触发持刀者周围 128 格内连续 3 tick 随机降下彩色伽马闪电 |
+| <kbd>宇宙系</kbd> | `cosmic_string_cut` | 宇宙弦切 | 挥刀触发局部 5x5x5 星线，切断 128 格立方内所有合法目标 |
+| <kbd>魔龙系</kbd> | `demonic_blood_parasite`| 魔血寄生 · 黯焰印记 | 叠加魔血印记，施加凋零 V、失明与 5% 最大生命真伤，满 20 层爆发落剑 |
+| <kbd>魔龙系</kbd> | `outer_god_scar` | 外神伤痕 (虚空撕裂) | 封印形态挥刀生成暗紫虚空裂隙与追猎幻影剑 |
+| <kbd>魔龙系</kbd> | `dragon_pressure_domain`| 龙威重域 · 诸神余压 | 觉醒形态常驻赋予速度 III、力量 III、夜视 III 与伤害吸收 III |
+| <kbd>魔龙系</kbd> | `reverse_scale_hunt`| 逆鳞剑阵 · 燃魂追猎 | 觉醒形态挥刀扫出金紫逆鳞剑阵，挥刀期间获得抗性提升 III 庇护 |
+| <kbd>魔龙系</kbd> | `dragon_god_body` | 终焉神像 · 创世神体 | 背包常驻提供死锁兜底、飞行、免疫负面、伤害反弹与最高 200 点创世龙盾 |
+| <kbd>魔龙系</kbd> | `absolute_annihilation_domain`| 终焉结界 · 虚空湮灭 | 每秒扫描 64 格内合法目标，剥离护盾与冻结 AI 并处决半血目标 |
+| <kbd>魔龙系</kbd> | `myriad_dragon_blade_storm`| 万刃龙魂 · 灭世剑阵 | 普通挥刀追加 20 柄暗金/星空紫灭世龙刃自动追猎 96 格内目标 |
+| <kbd>魔龙系</kbd> | `world_cleaving_slash`| 灭界龙威 · 撕裂苍穹 | 挥刀施放 72 格撕裂型虚空剑气并附带同源紫霄闪电 |
+| <kbd>萝莉系</kbd> | `loli_facing_execution`| 萝莉斩 · Ciallo～ | 接管原生挥刀 SE 事件，沿视线执行 48 格扇形高压服务端处决 |
+
+---
+
+## 🎮 控制与快捷键说明
+
+模组内置了完善且人性化的热键与动作栏即时反馈系统：
+
+| 控制按键 | 适用武器 | 操作类型 | 机制说明与 HUD 反馈 |
+| :---: | :---: | :---: | :--- |
+| <kbd>Shift</kbd> (按住) | 湮灭之刃 | 紧急制动 | 防误触与强制刹车：按住时拒绝开启新的断空序列；闪现途中按住则立即刹车并回溯至起点。 |
+| <kbd>Left Ctrl</kbd> | 湮灭之刃 | 状态切换 | **断空闪现开关**：自由切换开启/关闭闪现，屏幕动作栏显示提示（`当前闪现：开/关`）。 |
+| <kbd>Z</kbd> | 魔龙夜陨 | 循环切换 | **形态切换**：在【封印】➔【觉醒】➔【终焉】三态间循环切换，动作栏实时显示当前形态名称。 |
+| <kbd>I</kbd> | 无尽星空 | 状态切换 | **曲率 AI 锁死开关**：开启后将周围 25 格目标 AI 完全挂起，动作栏提示开闭状态。 |
+
+> [!TIP]
+> **目标合法性判定安全准则**：  
+> 所有普通攻击、SA 战技与 SE 特效的目标选取判定均深度遵循 SlashBlade 原生 `pvp_enable` 与 `friendly_enable` 规范，默认情况下绝不误伤玩家自身、同伴驯服宠物与无害友好生物。
+
+---
+
+## ⚙️ 配置文件体系 (Jupiter Integration)
+
+模组采用权威高效的 **Jupiter** 配置框架。在首次启动后，将在 `.minecraft/config/annihilationbladeex/` 路径下生成两份规范化 JSON 配置：
+
+```
+config/annihilationbladeex/
+├── common.json   # [服务端权威] 涵盖范围、冷却、粒子步长、连锁数与高压对抗开关
+└── client.json   # [客户端视效] 涵盖三大命名刀专属 Tooltip/HUD 渲染开关
+```
+
+### 1. 服务端核心配置 (`common.json`)
+- 包含搜索距离、领域半径、粒子密度步长、判定冷却 Tick、最大连锁层级、幻影剑数量等。
+- 所有浮点与整型数值均配置了严苛的硬边界校验（`Min` / `Max`），彻底杜绝数据溢出崩服。
+- 包含萝莉刀 `force_death` 兜底处决与高压背包对抗安全开关。
+
+### 2. 客户端视效配置 (`client.json`)
+```json
+{
+  "client_tooltips": {
+    "enable_annihilation_blade_renderer": true,
+    "enable_infinity_stellaris_renderer": true,
+    "enable_nightfall_dragon_renderer": true
+  }
+}
+```
+- **一键回退机制**：当关闭自定义 Tooltip 渲染器时，将丝滑回退至原版物品提示，保证对各类高分辨率背包、Item Zoom、JEI 或 HUD 模组的无缝兼容。
+
+---
+
+## 🎨 拔刀剑 OBJ 模型制作指南
+
+本章节整理自 MC 百科《适用于“拔刀剑：重锋”的拔刀剑 obj 模型制作教程》，便于附属开发与自制刀剑资产对接。
+
+### 标准分组命名规范 (Groups)
+
+在导出或制作适用于 SlashBlade Resharped 的 OBJ 模型时，必须规范以下材质组名：
+
+| 模型分组 (Group Name) | 呈现形态与生效视角 |
+| :--- | :--- |
+| `sheath` | 佩戴在玩家腰间或背部的刀鞘模型（第三人称） |
+| `blade` | 正常手持时所展现的完整刀身模型（第三人称） |
+| `blade_damaged` | 耐久耗尽后的断刀刀身模型（第三人称） |
+| `blade_fragment` | 拔刀断裂时飞出并插在地面的断刃碎片 |
+| `effect` | 蓄力释放 SA 或长按时的刀身/刀鞘发光特效层 |
+| `item_blade` | 物品栏图标、GUI 面板与快捷栏视角的完整刀形态 |
+| `item_damaged` | 物品栏中的断刀图标形态 |
+| `blade_luminous` / `sheath_luminous` | *[本项目扩展]* 满光能量流动层渲染分组 |
+
+> [!TIP]
+> **Blender 建模注意事项**：
+> 1. 导入官方基准模型后，**切勿平移、旋转或缩放基准坐标原点**，必须严格以基准为标尺进行对齐。
+> 2. 导出 OBJ 时，务必勾选 `Write Groups` (写入组)，且全部面片必须确保为 **三角面 (Triangulate Faces)**。
+
+---
+
+## 🛠️ 构建与编译指南
+
+本项目使用 **Java 21** 与 Gradle 体系进行编译。推荐使用 PowerShell：
+
+```powershell
+# 1. 设置控制台 UTF-8 编码与 JDK 21 路径
+$OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
+$env:JAVA_HOME = 'C:\Program Files\Zulu\zulu-21'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+$env:JAVA_TOOL_OPTIONS = '-Dfile.encoding=UTF-8'
+
+# 2. 执行编译与打包构建
+.\gradlew.bat --no-daemon clean build --console=plain
+```
+
+构建成功后产物输出路径：
+```
+build/libs/slashblade：finale-blade-sanctum-2.9.4-hotfix1-1.21.1-neoforge.jar
+```
+
+---
+
+## 💖 赞助与支持
+
+<div align="center">
+
+<img src="./money.png" width="320" alt="赞助二维码" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+
+<br>
+
+> **制作不易，如果觉得模组好玩，欢迎支持作者买杯咖啡！**  
+> ⚠️ **温馨提示**：若自身经济拮据请**绝对不要**赞助，照顾好自己的生活最重要！祝君安好！
+
+</div>
+
+---
+
+## 📝 版本更新要点 (1.21.1 NeoForge)
+
+- **`2.9.4-hotfix1`**：全面适配 SlashBlade Resharped `2.1.9-1.21.1`，解决 19 参 `BladeStateData` record 引发的 `NoSuchMethodError` 创造栏崩溃；清除无效的旧 override 谓词死代码；更新重锋前置到 `[2.1.9-1.21.1,)`版本。
+- **`2.9.4-1.21.1-neoforge`**：附魔机制重构修复，默认附魔仅在命名刀创建时初始化，彻底解决周期性刷新与形态切换时覆盖/补回玩家已有附魔的问题。
+- **`2.9.2`**：魔龙夜陨旗舰级 Tooltip 渲染移植，具备全息激光扫描线、3x3 龙威权能芯片矩阵、交互式鼠标聚光灯追踪与色差故障错位视效；萝莉刀处决链路与节流音效落地。
+- **`2.7.2 ~ 2.8.0`**：无尽星空宇宙法则全系（SA/SE、彩色伽马霆暴、黑洞视界、AI 冻结切换）与终局仪式合成落地。
