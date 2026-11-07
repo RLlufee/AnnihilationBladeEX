@@ -14,7 +14,7 @@ import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationVisual
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
-import java.awt.Color;
+import net.minecraft.util.Mth;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -172,7 +172,7 @@ public class ModEventHandler {
 
       for (int i = 0; i < rawText.length(); i++) {
          float hue = ((float)(time % 3000L) / 3000.0F + i * 0.08F) % 1.0F;
-         int rgb = Color.HSBtoRGB(hue, 1.0F, 1.0F);
+         int rgb = Mth.hsvToRgb(hue, 1.0F, 1.0F);
          rainbowText.append(Component.literal(String.valueOf(rawText.charAt(i))).withStyle(style -> style.withColor(rgb)));
       }
 
