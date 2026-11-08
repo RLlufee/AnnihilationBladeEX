@@ -453,7 +453,7 @@ public final class TerminusTooltipRenderer {
       );
       graphics.renderItem(stack, x + 12, y + 13);
       int infoY = y + 86;
-      drawTag(graphics, font, x + 12, infoY, "SA", Component.translatable("slashblade.slash_art.annihilationblade.spatial_fracture"), -1723133073, -648484865);
+      drawTag(graphics, font, x + 12, infoY, "SA", Component.translatable("slash_art.annihilationblade.spatial_fracture"), -1723133073, -648484865);
       drawTag(graphics, font, x + 12, infoY + 15, "AUTH", Component.translatable("item.annihilationblade.passive"), -1721877998, -385887379);
       drawTag(graphics, font, x + 12, infoY + 30, "DMG", Component.translatable("item.annihilationblade.infinite_damage"), -1723594168, -640598785);
       int statsY = infoY + 45;
