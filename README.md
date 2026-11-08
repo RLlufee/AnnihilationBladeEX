@@ -1,6 +1,7 @@
 <div align="center">
 
 # 拔刀剑：终焉藏刀阁
+
 ### *SlashBlade: Finale Blade Sanctum*
 
 <p align="center">
