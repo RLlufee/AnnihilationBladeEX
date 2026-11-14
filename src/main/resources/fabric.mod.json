@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "annihilationbladeex",
+	"version": "${version}",
+	"name": "SlashBlade: Finale Blade Sanctum",
+	"description": "Port of Annihilation Blade (SlashBlade: Finale Blade Sanctum) for Fabric 26.1.2 and SlashBlade: Refabricated.",
+	"authors": [
+		"青衣_璃"
+	],
+	"contact": {},
+	"license": "GPL-3.0",
+	"icon": "assets/annihilationbladeex/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"qwq.qingyi.annihilationblade.AnnihilationBladeex"
+		],
+		"client": [
+			"qwq.qingyi.annihilationblade.client.AnnihilationBladeexClient"
+		]
+	},
+	"mixins": [
+		"annihilationbladeex.mixins.json",
+		{
+			"config": "annihilationbladeex.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*",
+		"slashblade": ">=26.1.2-1.5.1",
+		"forgeconfigapiport": ">=26.1.4"
+	}
+}

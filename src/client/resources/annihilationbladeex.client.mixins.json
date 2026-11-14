@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "qwq.qingyi.annihilationblade.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "AbstractContainerScreenMixin",
+    "CameraMixin",
+    "GuiGraphicsExtractorMixin",
+    "LightmapRenderStateExtractorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

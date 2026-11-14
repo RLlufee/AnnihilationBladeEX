@@ -1,0 +1,31 @@
+{
+  "type": "slashblade:shaped_blade",
+  "blade": "annihilationbladeex:nightfall_dragon",
+  "category": "equipment",
+  "key": {
+    "B": {
+      "fabric:type": "slashblade:blade",
+      "items": "slashblade:slashblade",
+      "request": {
+        "name": "annihilationbladeex:blood_prison",
+        "kill": 2000,
+        "proud_soul": 12000,
+        "refine": 35
+      }
+    },
+    "C": "minecraft:crying_obsidian",
+    "D": "minecraft:dragon_head",
+    "N": "minecraft:nether_star",
+    "P": "slashblade:proudsoul_crystal"
+  },
+  "pattern": [
+    "CPC",
+    "NBN",
+    "CDC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "slashblade:slashblade"
+  },
+  "show_notification": true
+}

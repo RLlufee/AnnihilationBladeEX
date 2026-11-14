@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": "annihilationbladeex:annihilation_fragment"
+  },
+  "result": {
+    "id": "annihilationbladeex:annihilation_core",
+    "count": 1
+  }
+}
