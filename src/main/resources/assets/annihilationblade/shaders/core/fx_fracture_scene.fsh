@@ -1,6 +1,7 @@
 #version 150
 
 #moj_import <annihilationblade:fx_common.glsl>
+#moj_import <annihilationblade:fx_space.glsl>
 
 // 空间破碎 · 场景通道：碎片折射、虚空碎片、裂缝暗隙、黑洞透镜与事件视界、冲击波折射。
 uniform sampler2D Sampler0; // 场景颜色
@@ -22,17 +23,6 @@ vec2 projectUv(vec3 p, out float w) {
     vec4 clip = ViewProj * vec4(p, 1.0);
     w = clip.w;
     return clip.xy / max(clip.w, 1.0e-4) * 0.5 + 0.5;
-}
-
-// 碎片背后的「虚空」：深紫星云 + 青色暗流 + 星点。
-vec3 voidSky(vec3 rd, vec3 cell) {
-    float n = fxFbm3(rd * 3.0 + cell * 0.37 + vec3(0.0, 0.0, FxTime * 0.03));
-    vec3 nebula = mix(vec3(0.015, 0.0, 0.04), vec3(0.24, 0.05, 0.42), smoothstep(0.35, 0.85, n));
-    nebula += vec3(0.04, 0.22, 0.38) * smoothstep(0.62, 0.95, fxFbm3(rd * 6.0 - cell));
-    vec3 sp = rd * 180.0;
-    float star = fxHash13(floor(sp));
-    float starMask = smoothstep(0.985, 1.0, star) * (1.0 - smoothstep(0.0, 0.45, length(fract(sp) - 0.5)));
-    return nebula + vec3(starMask) * 1.4;
 }
 
 void main() {
@@ -69,8 +59,7 @@ void main() {
     // 黑洞引力透镜：越靠近事件视界，光线越向中心弯折
     float coreR = Shock.w;
     if (coreR > 0.0 && centerAhead && tc - radius < sceneT) {
-        float lens = coreR * coreR / max(dRay * dRay, coreR * coreR * 0.25);
-        offset += (cuv - uv) * clamp(lens * 0.55, 0.0, 0.85);
+        offset += fxLensOffset(uv, cuv, dRay, coreR);
     }
 
     // 碎裂场：射线进入球体处的 3D Voronoi 单元即「碎片」
@@ -101,7 +90,7 @@ void main() {
     if (fieldMask > 0.0) {
         color = mix(color, color * vec3(0.78, 0.72, 1.05) + vec3(0.02, 0.0, 0.04), 0.45 * fieldMask);
         float isVoid = 1.0 - smoothstep(Extra.y - 0.05, Extra.y, vor.z);
-        color = mix(color, voidSky(rd, cell), isVoid * fieldMask);
+        color = mix(color, fxVoidSky(rd, cell, FxTime), isVoid * fieldMask);
         float crack = 1.0 - smoothstep(0.0, 0.07, vor.y);
         color *= 1.0 - crack * 0.8 * fieldMask;
         color *= 1.0 + (fxHash13(cell + 5.0) - 0.5) * 0.25 * fieldMask;
@@ -109,13 +98,7 @@ void main() {
 
     // 事件视界：纯黑核心与外围暗晕
     if (coreR > 0.0 && centerAhead) {
-        vec2 coreHit = fxSphere(rd, center, coreR);
-        if (coreHit.y > 0.0 && max(coreHit.x, 0.0) < sceneT) {
-            color *= smoothstep(coreR * 0.9, coreR * 1.02, dRay);
-        } else if (tc - coreR < sceneT) {
-            float halo = exp(-(dRay - coreR) / (coreR * 0.6));
-            color *= 1.0 - 0.6 * halo;
-        }
+        color = fxEventHorizon(color, rd, center, coreR, dRay, tc, sceneT);
     }
 
     fragColor = vec4(color, 1.0);

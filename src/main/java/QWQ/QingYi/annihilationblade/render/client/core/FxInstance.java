@@ -16,10 +16,38 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public abstract class FxInstance {
    protected int age;
-   protected final int lifetime;
+   protected int lifetime;
+   private int handle = -1;
 
    protected FxInstance(int lifetime) {
       this.lifetime = Math.max(1, lifetime);
+   }
+
+   // ───────────── 持续特效（FxSustainPacket）钩子 ─────────────
+
+   /** 由调度器调用：绑定服务端句柄，并跳到服务端已运行的时间点（中途进入范围的玩家）。 */
+   public final void bindSustained(int handle, int elapsed, int duration) {
+      this.handle = handle;
+      this.age = Math.max(0, elapsed);
+      this.onSustainedStart(duration);
+   }
+
+   public final int handle() {
+      return this.handle;
+   }
+
+   /** 子类据服务端给定的持续时间设置自身 lifetime（通常为 duration + 收尾动画长度）。 */
+   protected void onSustainedStart(int duration) {
+      this.lifetime = Math.max(this.lifetime, duration);
+   }
+
+   /** 服务端更新了位置/半径等参数。 */
+   public void onSustainedUpdate(net.minecraft.client.multiplayer.ClientLevel level, QWQ.QingYi.annihilationblade.render.network.FxEventPacket event) {
+   }
+
+   /** 服务端提前结束；默认立即结束，子类可改为播放收尾动画。 */
+   public void onSustainedStop() {
+      this.lifetime = Math.min(this.lifetime, this.age + 1);
    }
 
    /** 世界坐标焦点，用于距离剔除。 */

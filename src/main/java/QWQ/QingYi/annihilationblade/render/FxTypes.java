@@ -8,6 +8,8 @@ package QWQ.QingYi.annihilationblade.render;
 public final class FxTypes {
    /** 湮灭之刃 SA「空间破碎」。 */
    public static final int SPATIAL_FRACTURE = 1;
+   /** 无尽星空 SA「真空衰变·坍缩」（持续特效）。 */
+   public static final int VACUUM_DECAY = 2;
 
    private FxTypes() {
    }

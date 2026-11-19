@@ -31,7 +31,22 @@ public final class FxGeometry {
       /** 程序化法阵，params: x=旋转(弧度), y=随机种子, z=变体(0 处决六芒星 / 1 主法阵), w=展开进度。 */
       RUNE(2),
       /** 发光环带，params: x=环半径(0..1), y=环宽, z=虚线段数(0 为实线), w=虚线流动速度。 */
-      RING(3);
+      RING(3),
+      /**
+       * 湍流能量光束（用 ribbon 绘制），白热核心 + 噪声扰动的烟壳 + 边缘光。
+       * params: x=沿光束噪声频率, y=流动速度, z=湍流强度, w=边缘光强度。
+       */
+      BEAM(4),
+      /**
+       * 极光帷幕墙（用 quad 绘制，uv.x 沿墙，uv.y 竖直）：上涌的光带 + 扫描线 + 网格。
+       * params: x=随机种子, y=网格/扫描线强度, z=升起进度(0..1), w=崩解进度(0..1)。
+       */
+      CURTAIN(5),
+      /**
+       * 吸积盘（用 quad 绘制）：差速旋转的噪声光带、内缘白热、多普勒增亮。
+       * params: x=内径(0..1), y=旋转速度, z=随机种子, w=多普勒强度。
+       */
+      DISK(6);
 
       final float id;
 
@@ -46,6 +61,7 @@ public final class FxGeometry {
    private float emission;
    private float softness;
    private final float[] params = new float[4];
+   private final float[] occluder = new float[4];
    private int drawCalls;
 
    public FxGeometry(FxFrame frame) {
@@ -58,6 +74,23 @@ public final class FxGeometry {
 
    public int drawCalls() {
       return this.drawCalls;
+   }
+
+   /**
+    * 设置遮挡球（例如黑洞事件视界）：之后的批次中位于球体背后的片元会被平滑剔除。
+    * 对后续所有批次生效，直到 {@link #clearOccluder()}；每个特效实例绘制结束后管线会自动清除。
+    */
+   public void occluder(Vector3f center, float radius) {
+      this.end();
+      this.occluder[0] = center.x;
+      this.occluder[1] = center.y;
+      this.occluder[2] = center.z;
+      this.occluder[3] = Math.max(0.0F, radius);
+   }
+
+   public void clearOccluder() {
+      this.end();
+      this.occluder[3] = 0.0F;
    }
 
    /**
@@ -97,6 +130,7 @@ public final class FxGeometry {
       shader.safeGetUniform("FxSoft").set(this.softness);
       shader.safeGetUniform("FxParams").set(this.params[0], this.params[1], this.params[2], this.params[3]);
       shader.safeGetUniform("FxTime").set(this.frame.time);
+      shader.safeGetUniform("FxOccluder").set(this.occluder[0], this.occluder[1], this.occluder[2], this.occluder[3]);
       RenderSystem.setShader(() -> shader);
       BufferUploader.drawWithShader(rendered);
       this.drawCalls++;

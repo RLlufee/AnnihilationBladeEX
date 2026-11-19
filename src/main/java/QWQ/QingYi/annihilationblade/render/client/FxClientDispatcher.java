@@ -2,6 +2,8 @@ package QWQ.QingYi.annihilationblade.render.client;
 
 import QWQ.QingYi.annihilationblade.Annihilationblade;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.SpatialFractureFx;
+import QWQ.QingYi.annihilationblade.infinity_stellaris.client.fx.VacuumDecayFx;
+import QWQ.QingYi.annihilationblade.render.network.FxSustainPacket;
 import QWQ.QingYi.annihilationblade.render.FxTypes;
 import QWQ.QingYi.annihilationblade.render.client.core.FxInstance;
 import QWQ.QingYi.annihilationblade.render.client.core.FxManager;
@@ -22,21 +24,61 @@ public final class FxClientDispatcher {
 
    static {
       FACTORIES.put(FxTypes.SPATIAL_FRACTURE, SpatialFractureFx::new);
+      FACTORIES.put(FxTypes.VACUUM_DECAY, VacuumDecayFx::new);
    }
 
    private FxClientDispatcher() {
    }
 
    public static void handle(FxEventPacket packet) {
+      FxInstance instance = create(packet);
+      if (instance != null) {
+         FxManager.add(instance);
+      }
+   }
+
+   public static void handleSustain(FxSustainPacket packet) {
       ClientLevel level = Minecraft.getInstance().level;
       if (level == null) {
          return;
       }
+      switch (packet.action()) {
+         case FxSustainPacket.START -> {
+            if (packet.event() == null) {
+               return;
+            }
+            FxInstance instance = create(packet.event());
+            if (instance != null) {
+               instance.bindSustained(packet.handle(), packet.elapsed(), packet.duration());
+               FxManager.add(instance);
+            }
+         }
+         case FxSustainPacket.UPDATE -> {
+            FxInstance instance = FxManager.sustained(packet.handle());
+            if (instance != null && packet.event() != null) {
+               instance.onSustainedUpdate(level, packet.event());
+            }
+         }
+         case FxSustainPacket.STOP -> {
+            FxInstance instance = FxManager.sustained(packet.handle());
+            if (instance != null) {
+               instance.onSustainedStop();
+            }
+         }
+         default -> Annihilationblade.LOGGER.warn("[AnnihilationBlade FX] Unknown sustain action {}", packet.action());
+      }
+   }
+
+   private static FxInstance create(FxEventPacket packet) {
+      ClientLevel level = Minecraft.getInstance().level;
+      if (level == null) {
+         return null;
+      }
       BiFunction<ClientLevel, FxEventPacket, FxInstance> factory = FACTORIES.get(packet.type());
       if (factory == null) {
          Annihilationblade.LOGGER.warn("[AnnihilationBlade FX] Unknown effect type {}", packet.type());
-         return;
+         return null;
       }
-      FxManager.add(factory.apply(level, packet));
+      return factory.apply(level, packet);
    }
 }

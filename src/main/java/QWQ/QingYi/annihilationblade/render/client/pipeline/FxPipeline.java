@@ -187,7 +187,7 @@ public final class FxPipeline {
          FxGeometry geometry = new FxGeometry(frame);
          for (FxInstance instance : instances) {
             instance.renderGeometry(geometry, frame);
-            geometry.end();
+            geometry.clearOccluder();
          }
          modelView.setIdentity();
          RenderSystem.applyModelViewMatrix();

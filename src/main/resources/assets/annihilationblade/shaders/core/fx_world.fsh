@@ -10,10 +10,12 @@ uniform float FxEmission;
 uniform float FxSoft;
 uniform float FxTime;
 uniform vec4 FxParams;
+uniform vec4 FxOccluder; // xyz = 遮挡球心（相对相机），w = 半径；w <= 0 表示无遮挡
 
 in vec4 vertexColor;
 in vec2 texCoord0;
 in float viewDistance;
+in vec3 relativePos;
 
 out vec4 fragColor;
 
@@ -31,6 +33,26 @@ float depthMask() {
         return diff > -(0.03 + viewDistance * 0.002) ? 1.0 : 0.0;
     }
     return clamp(diff / FxSoft, 0.0, 1.0);
+}
+
+// 遮挡球（黑洞事件视界）：位于球体背后的片元按视线与球心的最近距离平滑剔除。
+float occluderMask() {
+    if (FxOccluder.w <= 0.0) {
+        return 1.0;
+    }
+    float fragDist = length(relativePos);
+    vec3 rd = relativePos / max(fragDist, 1.0e-4);
+    float tc = dot(FxOccluder.xyz, rd);
+    if (tc <= 0.0) {
+        return 1.0;
+    }
+    float dRay = length(FxOccluder.xyz - rd * tc);
+    float r = FxOccluder.w;
+    float entry = tc - sqrt(max(r * r - dRay * dRay, 0.0));
+    if (fragDist <= entry) {
+        return 1.0;
+    }
+    return smoothstep(r * 0.96, r * 1.03, dRay);
 }
 
 vec2 rotate2(vec2 v, float a) {
@@ -189,8 +211,67 @@ vec3 styleRing(vec2 uv) {
     return vertexColor.rgb * ring + vec3(exp(-(d * d) / (width * width * 0.2)) * 0.5);
 }
 
+// 湍流光束：横截面 |uv.y| 视作半径，用两层流动噪声扰动半径，得到翻滚的烟壳与稳定的白热核心。
+vec3 styleBeam(vec2 uv) {
+    float y = abs(uv.y);
+    float flow = FxTime * FxParams.y;
+    float n1 = fxNoise3(vec3(uv.x * FxParams.x - flow, uv.y * 2.0, 1.7));
+    float n2 = fxNoise3(vec3(uv.x * FxParams.x * 2.3 - flow * 1.7 + 7.0, uv.y * 4.0, 4.3));
+    float turbulence = n1 * 0.65 + n2 * 0.35;
+    float radial = clamp(y + (turbulence - 0.5) * 0.45 * FxParams.z, 0.0, 1.0);
+    float core = pow(1.0 - radial, 6.0);
+    float hot = pow(1.0 - radial, 16.0);
+    float shell = pow(1.0 - radial, 1.6) * smoothstep(0.3, 0.8, turbulence);
+    float rim = exp(-abs(radial - 0.7) * 12.0) * FxParams.w;
+    float edge = 1.0 - smoothstep(0.86, 1.0, y);
+    float intensity = (core * 0.9 + shell * 0.6 + rim * 0.5) * edge;
+    return vertexColor.rgb * intensity + vec3(hot * 1.2 * edge);
+}
+
+// 极光帷幕：竖直光带自底部涌起，顶部随升起进度柔和截断；叠加横向扫描线与竖向网格。
+vec3 styleCurtain(vec2 uv) {
+    float h = uv.y * 0.5 + 0.5;
+    float rise = FxParams.z;
+    float topFade = 1.0 - smoothstep(rise - 0.1, rise, h);
+    if (topFade <= 0.0) {
+        return vec3(0.0);
+    }
+    float x = uv.x;
+    float seed = FxParams.x;
+    float bands = fxNoise3(vec3(x * 18.0, h * 1.5 - FxTime * 0.6, seed));
+    float bands2 = fxNoise3(vec3(x * 47.0 + 3.0, h * 3.0 - FxTime * 1.1, seed + 5.0));
+    float streak = pow(bands * 0.6 + bands2 * 0.4, 3.0) * 2.2;
+    float base = exp(-h * 5.0) * 1.2;
+    float crest = exp(-abs(h - rise) * 30.0) * 0.8 * step(rise, 0.995);
+    float scan = pow(0.5 + 0.5 * sin(h * 120.0 - FxTime * 8.0), 18.0) * 0.35 * FxParams.y;
+    float gx = abs(fract(x * 16.0) - 0.5);
+    float vline = (1.0 - smoothstep(0.02, 0.02 + fwidth(x * 16.0) * 1.5, gx)) * 0.25 * FxParams.y;
+    float ends = 1.0 - smoothstep(0.96, 1.0, abs(x));
+    float dissolve = FxParams.w > 0.0 ? smoothstep(FxParams.w - 0.15, FxParams.w + 0.15, fxNoise3(vec3(x * 9.0, h * 6.0, seed + 9.0)) * 0.8 + h * 0.2) : 1.0;
+    float intensity = (streak * (1.0 - h * 0.6) + base + crest + scan + vline) * topFade * ends * dissolve;
+    return mix(vertexColor.rgb, vec3(0.75, 0.6, 1.0), h * 0.7) * intensity;
+}
+
+// 吸积盘：按半径差速旋转的噪声光带，内缘白热，多普勒效应让一侧更亮。
+vec3 styleDisk(vec2 uv) {
+    float r = length(uv);
+    float inner = FxParams.x;
+    if (r > 1.0 || r < inner * 0.8) {
+        return vec3(0.0);
+    }
+    vec2 q = rotate2(uv, FxTime * FxParams.y / max(r, 0.15));
+    float bands = 0.55 + 0.45 * fxNoise3(vec3(q * 7.0, r * 12.0 + FxParams.z));
+    float fine = fxNoise3(vec3(q * 21.0, r * 30.0 + FxParams.z));
+    float profile = smoothstep(inner * 0.9, inner * 1.15, r) * pow(1.0 - smoothstep(inner, 1.0, r), 1.5);
+    float doppler = 1.0 + FxParams.w * sin(atan(uv.y, uv.x));
+    float hot = exp(-(r - inner) * 14.0);
+    vec3 inside = vec3(1.0, 0.85, 0.6);
+    vec3 tint = mix(inside, vertexColor.rgb, smoothstep(inner, 0.8, r));
+    return (tint * (bands * 0.8 + fine * 0.4) + vec3(1.0, 0.95, 0.9) * hot * 2.0) * profile * max(doppler, 0.1);
+}
+
 void main() {
-    float mask = depthMask();
+    float mask = depthMask() * occluderMask();
     if (mask <= 0.0 || vertexColor.a <= 0.0) {
         discard;
     }
@@ -201,8 +282,14 @@ void main() {
         color = styleRibbon(texCoord0);
     } else if (FxStyle < 2.5) {
         color = styleRune(texCoord0);
-    } else {
+    } else if (FxStyle < 3.5) {
         color = styleRing(texCoord0);
+    } else if (FxStyle < 4.5) {
+        color = styleBeam(texCoord0);
+    } else if (FxStyle < 5.5) {
+        color = styleCurtain(texCoord0);
+    } else {
+        color = styleDisk(texCoord0);
     }
     fragColor = vec4(max(color, vec3(0.0)) * vertexColor.a * FxEmission * mask, 1.0);
 }

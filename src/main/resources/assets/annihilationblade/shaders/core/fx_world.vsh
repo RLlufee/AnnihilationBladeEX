@@ -10,6 +10,7 @@ uniform mat4 ProjMat;
 out vec4 vertexColor;
 out vec2 texCoord0;
 out float viewDistance;
+out vec3 relativePos;
 
 void main() {
     vec4 viewPos = ModelViewMat * vec4(Position, 1.0);
@@ -17,4 +18,6 @@ void main() {
     vertexColor = Color;
     texCoord0 = UV0;
     viewDistance = -viewPos.z;
+    // 顶点本身就是相对相机的世界坐标（ModelViewMat 只含视图旋转）
+    relativePos = Position;
 }

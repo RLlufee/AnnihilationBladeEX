@@ -15,4 +15,8 @@ final class FxClientBridge {
    static void dispatch(FxEventPacket packet) {
       FxClientDispatcher.handle(packet);
    }
+
+   static void dispatchSustain(FxSustainPacket packet) {
+      FxClientDispatcher.handleSustain(packet);
+   }
 }

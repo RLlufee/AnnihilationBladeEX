@@ -35,6 +35,8 @@ import org.joml.Matrix4f;
 public final class FxManager {
    private static final int MAX_ACTIVE = 32;
    private static final List<FxInstance> ACTIVE = new ArrayList<>();
+   private static final it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<FxInstance> SUSTAINED = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<>();
+   private static ClientLevel lastLevel;
    private static final FxScreenState SCREEN = new FxScreenState();
    private static final Matrix4f VIEW = new Matrix4f();
    private static final Matrix4f PROJECTION = new Matrix4f();
@@ -45,10 +47,35 @@ public final class FxManager {
    }
 
    public static void add(FxInstance instance) {
+      ClientLevel level = Minecraft.getInstance().level;
+      if (level != lastLevel) {
+         // 新世界的第一个特效包可能早于本 tick 的世界切换检测到达，先清理旧世界再加入
+         lastLevel = level;
+         clear();
+      }
       while (ACTIVE.size() >= MAX_ACTIVE) {
-         ACTIVE.remove(0).onRemoved();
+         remove(ACTIVE.remove(0));
       }
       ACTIVE.add(instance);
+      if (instance.handle() >= 0) {
+         FxInstance previous = SUSTAINED.put(instance.handle(), instance);
+         if (previous != null && previous != instance) {
+            ACTIVE.remove(previous);
+            previous.onRemoved();
+         }
+      }
+   }
+
+   /** 持续特效：按句柄查找（UPDATE / STOP 使用）。 */
+   public static FxInstance sustained(int handle) {
+      return SUSTAINED.get(handle);
+   }
+
+   private static void remove(FxInstance instance) {
+      if (instance.handle() >= 0) {
+         SUSTAINED.remove(instance.handle(), instance);
+      }
+      instance.onRemoved();
    }
 
    public static void clear() {
@@ -56,6 +83,7 @@ public final class FxManager {
          instance.onRemoved();
       }
       ACTIVE.clear();
+      SUSTAINED.clear();
       shake = 0.0F;
    }
 
@@ -66,13 +94,14 @@ public final class FxManager {
       }
       Minecraft minecraft = Minecraft.getInstance();
       ClientLevel level = minecraft.level;
-      if (level == null) {
+      if (level != lastLevel) {
+         // 换维度/重进世界：旧世界的特效全部作废
+         lastLevel = level;
          if (!ACTIVE.isEmpty()) {
             clear();
          }
-         return;
       }
-      if (minecraft.isPaused() || ACTIVE.isEmpty()) {
+      if (level == null || minecraft.isPaused() || ACTIVE.isEmpty()) {
          return;
       }
       boolean rendererActive = FxPipeline.INSTANCE.active();
@@ -84,11 +113,12 @@ public final class FxManager {
          } catch (RuntimeException exception) {
             Annihilationblade.LOGGER.error("[AnnihilationBlade FX] Effect tick failed, removing {}", instance.getClass().getSimpleName(), exception);
             iterator.remove();
+            remove(instance);
             continue;
          }
          if (instance.finished()) {
             iterator.remove();
-            instance.onRemoved();
+            remove(instance);
          }
       }
    }

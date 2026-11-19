@@ -35,6 +35,8 @@ public final class FxShaders {
    @Nullable public static ShaderInstance composite;
    @Nullable public static ShaderInstance fractureScene;
    @Nullable public static ShaderInstance fractureVolume;
+   @Nullable public static ShaderInstance vacuumScene;
+   @Nullable public static ShaderInstance vacuumVolume;
 
    private static int failures;
 
@@ -51,6 +53,8 @@ public final class FxShaders {
       register(event, "fx_composite", DefaultVertexFormat.POSITION, shader -> composite = shader);
       register(event, "fx_fracture_scene", DefaultVertexFormat.POSITION, shader -> fractureScene = shader);
       register(event, "fx_fracture_volume", DefaultVertexFormat.POSITION, shader -> fractureVolume = shader);
+      register(event, "fx_vacuum_scene", DefaultVertexFormat.POSITION, shader -> vacuumScene = shader);
+      register(event, "fx_vacuum_volume", DefaultVertexFormat.POSITION, shader -> vacuumVolume = shader);
       if (failures == 0) {
          Annihilationblade.LOGGER.info("[AnnihilationBlade FX] All renderer shaders registered.");
       }

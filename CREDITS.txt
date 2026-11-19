@@ -76,6 +76,9 @@ for this mod. Its design was informed by the following projects:
       shader-pack composite and skip the shadow pass; additive/screen FX blending ideas.
   * Fantasy Ending by Luoee (MIT License)
       In-level render task dispatching, beam/sphere/trail primitive ideas.
+  * UsefulMagic by CooStack (GPL-3.0)
+      Sustained, server-synchronised render effects ("server render entity" idea);
+      layered turbulent beam and shield/barrier shading ideas. No code or shaders were copied.
   * The Shooting Star (Demo) by rimuru.dev (All Rights Reserved)
       Architecture reference only (depth snapshot, FX-only HDR bloom chain, screen
       composite with flash / aberration / radial blur). No code or shaders were copied.
