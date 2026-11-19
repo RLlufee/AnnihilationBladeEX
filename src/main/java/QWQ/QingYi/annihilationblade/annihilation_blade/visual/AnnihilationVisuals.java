@@ -282,35 +282,6 @@ public final class AnnihilationVisuals {
       }
    }
 
-   public static void spawnBloodPrisonDash(ServerLevel level, Vec3 start, Vec3 end, RandomSource random) {
-      Vec3 direction = safeNormalize(end.subtract(start), Z_AXIS);
-      Vec3 right = safeNormalize(direction.cross(UP), X_AXIS);
-      spawnLine(level, start, end, ParticleTypes.DRAGON_BREATH, 18, 0.025);
-      spawnLine(level, start.add(right.scale(0.62)), end.add(right.scale(-0.4)), ParticleTypes.CRIMSON_SPORE, 14, 0.02);
-      spawnLine(level, start.add(right.scale(-0.62)), end.add(right.scale(0.4)), ParticleTypes.ELECTRIC_SPARK, 10, 0.014);
-
-      for (int i = 0; i < 3; i++) {
-         Vec3 mid = start.lerp(end, 0.25 + random.nextDouble() * 0.55);
-         Vec3 slash = right.scale(0.6 + random.nextDouble() * 0.75).add(0.0, random.nextDouble() * 0.7 - 0.25, 0.0);
-         spawnLine(level, mid.subtract(slash), mid.add(slash), ParticleTypes.DAMAGE_INDICATOR, 5, 0.012);
-      }
-
-      level.sendParticles(ParticleTypes.CRIMSON_SPORE, end.x, end.y, end.z, 34, 0.45, 0.34, 0.45, 0.08);
-   }
-
-   public static void spawnBloodPrisonDomainPulse(ServerLevel level, Vec3 center, double radius) {
-      Vec3 foot = center.add(0.0, 0.08, 0.0);
-      spawnRing(level, foot, X_AXIS, Z_AXIS, radius, ParticleTypes.DRAGON_BREATH, 64, 0.004);
-      spawnRing(level, foot.add(0.0, 0.04, 0.0), X_AXIS, Z_AXIS, radius * 0.72, ParticleTypes.CRIMSON_SPORE, 42, 0.006);
-      spawnRing(level, foot.add(0.0, 0.08, 0.0), X_AXIS, Z_AXIS, radius * 0.38, ParticleTypes.DRIPPING_LAVA, 22, 0.002);
-
-      for (int i = 0; i < 4; i++) {
-         double angle = (Math.PI * 2) * i / 4.0 + (Math.PI / 4);
-         Vec3 edge = foot.add(Math.cos(angle) * radius, 0.08, Math.sin(angle) * radius);
-         spawnLine(level, foot, edge, i % 2 == 0 ? ParticleTypes.CRIMSON_SPORE : ParticleTypes.ELECTRIC_SPARK, 12, 0.008);
-      }
-   }
-
    private static void spawnRing(ServerLevel level, Vec3 center, Vec3 axisA, Vec3 axisB, double radius, ParticleOptions particle, int points, double jitter) {
       Vec3 a = safeNormalize(axisA, X_AXIS);
       Vec3 b = safeNormalize(axisB, Z_AXIS);

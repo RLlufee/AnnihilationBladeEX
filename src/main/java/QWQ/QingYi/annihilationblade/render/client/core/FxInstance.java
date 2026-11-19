@@ -45,6 +45,16 @@ public abstract class FxInstance {
    public void onSustainedUpdate(net.minecraft.client.multiplayer.ClientLevel level, QWQ.QingYi.annihilationblade.render.network.FxEventPacket event) {
    }
 
+   /** 常驻类特效（光环等）续命：只要条件持续成立就不断调用，条件消失后自然走完剩余寿命淡出。 */
+   public void extendLife(int ticks) {
+      this.lifetime = Math.max(this.lifetime, this.age + Math.max(1, ticks));
+   }
+
+   /** 剩余寿命（tick），常驻特效用于淡出。 */
+   public int remainingTicks() {
+      return Math.max(0, this.lifetime - this.age);
+   }
+
    /** 服务端提前结束；默认立即结束，子类可改为播放收尾动画。 */
    public void onSustainedStop() {
       this.lifetime = Math.min(this.lifetime, this.age + 1);

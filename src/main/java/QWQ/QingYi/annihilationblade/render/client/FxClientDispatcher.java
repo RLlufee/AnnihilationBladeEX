@@ -2,6 +2,9 @@ package QWQ.QingYi.annihilationblade.render.client;
 
 import QWQ.QingYi.annihilationblade.Annihilationblade;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.SpatialFractureFx;
+import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodBurstFx;
+import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodDashFx;
+import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodDomainFx;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.client.fx.VacuumDecayFx;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.client.fx.CosmicDescentFx;
 import QWQ.QingYi.annihilationblade.render.network.FxSustainPacket;
@@ -27,6 +30,9 @@ public final class FxClientDispatcher {
       FACTORIES.put(FxTypes.SPATIAL_FRACTURE, SpatialFractureFx::new);
       FACTORIES.put(FxTypes.VACUUM_DECAY, VacuumDecayFx::new);
       FACTORIES.put(FxTypes.COSMIC_DESCENT, CosmicDescentFx::new);
+      FACTORIES.put(FxTypes.BLOOD_DOMAIN, BloodDomainFx::new);
+      FACTORIES.put(FxTypes.BLOOD_DASH, BloodDashFx::new);
+      FACTORIES.put(FxTypes.BLOOD_BURST, BloodBurstFx::new);
    }
 
    private FxClientDispatcher() {

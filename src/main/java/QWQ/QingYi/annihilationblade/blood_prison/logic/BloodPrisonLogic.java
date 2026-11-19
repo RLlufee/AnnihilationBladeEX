@@ -1,10 +1,13 @@
 package QWQ.QingYi.annihilationblade.blood_prison.logic;
 
-import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationVisuals;
 import QWQ.QingYi.annihilationblade.blood_prison.BloodPrisonDefinitions;
 import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.network.ModNetwork;
+import QWQ.QingYi.annihilationblade.render.FxEvents;
+import QWQ.QingYi.annihilationblade.render.FxSustained;
+import QWQ.QingYi.annihilationblade.render.FxTypes;
+import QWQ.QingYi.annihilationblade.render.network.FxEventPacket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -158,10 +161,25 @@ public final class BloodPrisonLogic {
          double visualScale = config.visualScale.getValue();
 
          BloodPrisonDefinitions.ensureStats(player.getMainHandItem(), level);
-         DOMAINS.put(player.getUUID(),
-               new BloodPrisonLogic.Domain(player.position(), level.getGameTime() + durationTicks));
 
-         // 给客户端发送自定义包，同步结界圈渲染
+         // 领域视觉（血之囚笼、血色世界、血雨、脉冲）由客户端 BloodDomainFx 绘制
+         int fxHandle = FxSustained.start(level, new FxEventPacket(
+               FxTypes.BLOOD_DOMAIN,
+               player.position(),
+               player.getLookAngle(),
+               (float) radius,
+               (float) visualScale,
+               config.pulseIntervalTicks.getValue(),
+               player.getRandom().nextLong(),
+               player.getId(),
+               new int[0]), durationTicks);
+         BloodPrisonLogic.Domain previous = DOMAINS.put(player.getUUID(),
+               new BloodPrisonLogic.Domain(player.position(), level.getGameTime() + durationTicks, fxHandle));
+         if (previous != null) {
+            FxSustained.stop(previous.fxHandle);
+         }
+
+         // 给客户端发送自定义包，同步施法者的血色屏幕叠层
          if (player instanceof ServerPlayer serverPlayer) {
             ModNetwork.sendBloodPrisonDomain(serverPlayer, durationTicks);
          }
@@ -170,11 +188,6 @@ public final class BloodPrisonLogic {
                SoundSource.PLAYERS, 1.4F, 0.55F);
          level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WITHER_SPAWN,
                SoundSource.PLAYERS, 0.55F, 1.45F);
-         level.sendParticles(ParticleTypes.DRAGON_BREATH, player.getX(), player.getY() + 0.15, player.getZ(),
-               visualCount(120, visualScale), radius * 0.3, 0.15 * visualScale, radius * 0.3, 0.03);
-         level.sendParticles(ParticleTypes.CRIMSON_SPORE, player.getX(), player.getY() + 0.2, player.getZ(),
-               visualCount(180, visualScale), radius * 0.8, 0.25 * visualScale, radius * 0.8, 0.08);
-         AnnihilationVisuals.spawnBloodPrisonDomainPulse(level, player.position(), radius * visualScale);
       }
    }
 
@@ -370,36 +383,8 @@ public final class BloodPrisonLogic {
             // 结界正常结束，将结界内造成的总伤害 20% 反哺治疗给玩家
             player.heal(domain.damageDealt * 0.2F);
             removeDomain(player);
-         } else {
-            ModConfig.Domain config = ModConfig.COMMON.bloodPrison.domain;
-            double radius = config.radius.getValue();
-            double visualScale = config.visualScale.getValue();
-            if (level.getGameTime() % config.borderIntervalTicks.getValue() == 0L) {
-               for (double offset = -radius; offset <= radius; offset += 2.0) {
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + offset, domain.center.y + 0.1,
-                        domain.center.z - radius, 1, 0.0, 0.0, 0.0, 0.0);
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + offset, domain.center.y + 0.1,
-                        domain.center.z + radius, 1, 0.0, 0.0, 0.0, 0.0);
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x - radius, domain.center.y + 0.1,
-                        domain.center.z + offset, 1, 0.0, 0.0, 0.0, 0.0);
-                  level.sendParticles(ParticleTypes.DRAGON_BREATH, domain.center.x + radius, domain.center.y + 0.1,
-                        domain.center.z + offset, 1, 0.0, 0.0, 0.0, 0.0);
-               }
-
-               level.sendParticles(ParticleTypes.CRIMSON_SPORE, domain.center.x, domain.center.y + 0.15,
-                     domain.center.z, visualCount(18, visualScale), radius * 0.65, 0.05 * visualScale, radius * 0.65,
-                     0.015);
-            }
-
-            if (level.getGameTime() % config.playerAuraIntervalTicks.getValue() == 0L) {
-               level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY() + 1.0, player.getZ(),
-                     visualCount(8, visualScale), 1.2 * visualScale, 0.5 * visualScale, 1.2 * visualScale, 0.05);
-            }
-
-            if (level.getGameTime() % config.pulseIntervalTicks.getValue() == 0L) {
-               AnnihilationVisuals.spawnBloodPrisonDomainPulse(level, domain.center, radius * visualScale);
-            }
          }
+         // 领域持续期间的边界、血气与脉冲视觉均由客户端 BloodDomainFx 绘制，服务端不再每 tick 发送粒子
       }
    }
 
@@ -429,12 +414,9 @@ public final class BloodPrisonLogic {
 
             level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP,
                   SoundSource.PLAYERS, 1.0F, 0.75F);
-            level.sendParticles(ParticleTypes.SWEEP_ATTACK, target.getX(), target.getY() + target.getBbHeight() * 0.55,
-                  target.getZ(), 3, 0.45, 0.45, 0.45, 0.0);
-            level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() * 0.55,
-                  target.getZ(), 24, 0.75, 0.75, 0.75, 0.12);
             Vec3 hit = target.position().add(0.0, target.getBbHeight() * 0.58, 0.0);
-            AnnihilationVisuals.spawnBloodPrisonDash(level, from, hit, player.getRandom());
+            FxEvents.send(level, new FxEventPacket(FxTypes.BLOOD_DASH, from, hit.subtract(from), 1.0F, 1.0F, 0,
+                  player.getRandom().nextLong(), player.getId(), new int[0]));
          }
       }
    }
@@ -448,17 +430,18 @@ public final class BloodPrisonLogic {
       double visualScale = config.visualScale.getValue();
       Vec3 center = target.position().add(0.0, target.getBbHeight() * 0.55, 0.0);
 
-      // 围绕目标 360 度圆环发射剑阵
+      // 围绕目标 360 度圆环发射剑阵（剑阵引线与命中爆发由客户端 BloodBurstFx 绘制，起点算法与此处一致）
       for (int i = 0; i < swordCount; i++) {
          double angle = (Math.PI * 2) * i / swordCount;
          Vec3 start = center.add(Math.cos(angle) * 4.0 * visualScale, (3.0 + i % 3) * visualScale,
                Math.sin(angle) * 4.0 * visualScale);
-         AnnihilationVisuals.spawnSlashBridge(level, start, center, 0.55 * visualScale, player.getRandom());
          spawnPhantomSword(level, player, start, center, i);
       }
 
-      AnnihilationVisuals.spawnBloodPrisonBurst(level, center,
-            Math.max(1.2, target.getBbWidth() * config.burstRadiusScale.getValue()) * visualScale, player.getRandom());
+      float burstRadius = (float) (Math.max(1.2, target.getBbWidth() * config.burstRadiusScale.getValue()) * visualScale);
+      int delay = Math.min(255, config.swordDelayTicks.getValue());
+      FxEvents.send(level, new FxEventPacket(FxTypes.BLOOD_BURST, center, Vec3.ZERO, burstRadius, (float) visualScale,
+            Math.min(255, swordCount) | delay << 8, player.getRandom().nextLong(), player.getId(), new int[0]));
       level.playSound(null, center.x, center.y, center.z, SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 0.75F,
             1.7F);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.0F,
@@ -483,8 +466,13 @@ public final class BloodPrisonLogic {
    }
 
    private static void removeDomain(Player player) {
-      if (DOMAINS.remove(player.getUUID()) != null && player instanceof ServerPlayer serverPlayer) {
-         ModNetwork.sendBloodPrisonDomain(serverPlayer, 0);
+      BloodPrisonLogic.Domain removed = DOMAINS.remove(player.getUUID());
+      if (removed != null) {
+         // 提前结束（死亡/离线/换维度）时通知客户端收起囚笼；正常到期时该句柄已自然结束，调用无副作用
+         FxSustained.stop(removed.fxHandle);
+         if (player instanceof ServerPlayer serverPlayer) {
+            ModNetwork.sendBloodPrisonDomain(serverPlayer, 0);
+         }
       }
    }
 
@@ -524,11 +512,13 @@ public final class BloodPrisonLogic {
    private static final class Domain {
       private final Vec3 center;
       private final long expiresAt;
+      private final int fxHandle;
       private float damageDealt;
 
-      private Domain(Vec3 center, long expiresAt) {
+      private Domain(Vec3 center, long expiresAt, int fxHandle) {
          this.center = center;
          this.expiresAt = expiresAt;
+         this.fxHandle = fxHandle;
       }
    }
 

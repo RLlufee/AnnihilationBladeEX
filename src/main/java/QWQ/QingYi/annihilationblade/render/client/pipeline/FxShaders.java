@@ -39,6 +39,8 @@ public final class FxShaders {
    @Nullable public static ShaderInstance vacuumVolume;
    @Nullable public static ShaderInstance descentScene;
    @Nullable public static ShaderInstance descentVolume;
+   @Nullable public static ShaderInstance bloodScene;
+   @Nullable public static ShaderInstance bloodVolume;
 
    private static int failures;
 
@@ -59,6 +61,8 @@ public final class FxShaders {
       register(event, "fx_vacuum_volume", DefaultVertexFormat.POSITION, shader -> vacuumVolume = shader);
       register(event, "fx_descent_scene", DefaultVertexFormat.POSITION, shader -> descentScene = shader);
       register(event, "fx_descent_volume", DefaultVertexFormat.POSITION, shader -> descentVolume = shader);
+      register(event, "fx_blood_scene", DefaultVertexFormat.POSITION, shader -> bloodScene = shader);
+      register(event, "fx_blood_volume", DefaultVertexFormat.POSITION, shader -> bloodVolume = shader);
       if (failures == 0) {
          Annihilationblade.LOGGER.info("[AnnihilationBlade FX] All renderer shaders registered.");
       }

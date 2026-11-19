@@ -3,7 +3,6 @@ package QWQ.QingYi.annihilationblade.nightfall_dragon.visual;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
@@ -13,7 +12,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 public final class NightfallDragonFinalVisuals {
@@ -22,37 +20,6 @@ public final class NightfallDragonFinalVisuals {
    private static final Map<ResourceKey<Level>, ParticleBudget> PARTICLE_BUDGETS = new HashMap<>();
 
    private NightfallDragonFinalVisuals() {
-   }
-
-   public static void spawnGodBodyAura(ServerLevel level, Player player) {
-      Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.58, 0.0);
-      int age = player.tickCount;
-      if (age % 20 == 0) {
-         sendParticles(level, ParticleTypes.DRAGON_BREATH, center.x, center.y, center.z, 10, 0.85, 0.65, 0.85, 0.025);
-         sendParticles(level, ParticleTypes.END_ROD, center.x, center.y + 0.18, center.z, 5, 0.55, 0.45, 0.55, 0.012);
-         spawnFootHalo(level, player.position(), age);
-      }
-   }
-
-   public static void spawnDomainFrame(ServerLevel level, Vec3 center, int age) {
-      double radius = 64.0;
-      double y = center.y + 0.15 + Math.sin(age * 0.18) * 0.25;
-      BlockParticleOption obsidian = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.CRYING_OBSIDIAN.defaultBlockState());
-      for (int i = 0; i < 48; i++) {
-         double angle = Math.PI * 2.0 * i / 48.0;
-         double x = center.x + Math.cos(angle) * radius;
-         double z = center.z + Math.sin(angle) * radius;
-         spawnParticle(level, obsidian, x, y, z, 1, 0.04);
-         if (i % 3 == 0) {
-            spawnParticle(level, ParticleTypes.REVERSE_PORTAL, x, y + 0.2, z, 1, 0.12);
-         }
-      }
-
-      sendParticles(level, ParticleTypes.SQUID_INK, center.x, center.y + 0.8, center.z, 60, 12.0, 4.0, 12.0, 0.08);
-      sendParticles(level, ParticleTypes.DRAGON_BREATH, center.x, center.y + 0.8, center.z, 60, 18.0, 5.0, 18.0, 0.12);
-      if (age % 40 == 0) {
-         level.playSound(null, center.x, center.y, center.z, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.PLAYERS, 1.6F, 0.45F);
-      }
    }
 
    public static void spawnPiercingBladeWave(ServerLevel level, Player player, Vec3 start, Vec3 end) {
@@ -106,16 +73,6 @@ public final class NightfallDragonFinalVisuals {
       sendParticles(level, ParticleTypes.DRAGON_BREATH, center.x, center.y, center.z, 60, 1.4, 1.0, 1.4, 0.16);
       sendParticles(level, ParticleTypes.END_ROD, center.x, center.y, center.z, 40, 1.0, 0.8, 1.0, 0.1);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.WITHER_DEATH, SoundSource.PLAYERS, 1.2F, 0.75F);
-   }
-
-   private static void spawnFootHalo(ServerLevel level, Vec3 footPos, int age) {
-      double radius = 1.85 + Math.sin(age * 0.15) * 0.15;
-      for (int i = 0; i < 8; i++) {
-         double angle = Math.PI * 2.0 * i / 8.0 + age * 0.03;
-         double x = footPos.x + Math.cos(angle) * radius;
-         double z = footPos.z + Math.sin(angle) * radius;
-         sendParticles(level, ParticleTypes.DRAGON_BREATH, x, footPos.y + 0.05, z, 1, 0.01, 0.01, 0.01, 0.005);
-      }
    }
 
    private static void spawnLine(ServerLevel level, Vec3 start, Vec3 end, ParticleOptions particle, int samples) {

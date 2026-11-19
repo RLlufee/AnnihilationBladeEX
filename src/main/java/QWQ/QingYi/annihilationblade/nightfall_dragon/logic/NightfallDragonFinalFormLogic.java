@@ -290,9 +290,7 @@ public final class NightfallDragonFinalFormLogic {
       restoreBearer(player);
       clampCreationShield(player);
       removeHarmfulEffects(player);
-      if (player.level() instanceof ServerLevel level) {
-         NightfallDragonFinalVisuals.spawnGodBodyAura(level, player);
-      }
+      // 龙神之躯光环由客户端 NightfallAuraFx 根据手持状态自行绘制，服务端不再每 tick 发送粒子
 
       // 赋予飞行权限
       if (!player.isCreative() && !player.isSpectator() && !player.getAbilities().mayfly) {
@@ -411,7 +409,10 @@ public final class NightfallDragonFinalFormLogic {
     */
    private static void activateDomain(ServerLevel level, Player player) {
       Vec3 center = player.position();
-      NightfallDragonFinalVisuals.spawnDomainFrame(level, center, player.tickCount);
+      // 结界环由客户端 NightfallAuraFx 绘制；此处仅保留每 2 秒一次的律动音效
+      if (player.tickCount % 40 == 0) {
+         level.playSound(null, center.x, center.y, center.z, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.PLAYERS, 1.6F, 0.45F);
+      }
       List<LivingEntity> targets = SpecialEffectSupport
             .limit(SpecialEffectSupport.radialTargets(level, player, center, getDomainRadius()), getDomainMaxTargets());
       Set<UUID> activeMobs = new HashSet<>();

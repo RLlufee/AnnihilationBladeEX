@@ -1,0 +1,16 @@
+{
+  "vertex": "annihilationblade:fx_screen",
+  "fragment": "annihilationblade:fx_blood_scene",
+  "attributes": ["Position"],
+  "samplers": [
+    { "name": "Sampler0" },
+    { "name": "Sampler1" }
+  ],
+  "uniforms": [
+    { "name": "InvProj", "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "InvView", "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "Zone", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] },
+    { "name": "ZoneExtra", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] },
+    { "name": "FxTime", "type": "float", "count": 1, "values": [0.0] }
+  ]
+}
