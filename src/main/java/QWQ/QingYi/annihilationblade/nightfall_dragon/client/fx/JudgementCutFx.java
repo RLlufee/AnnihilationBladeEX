@@ -19,19 +19,20 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3f;
 
 /**
- * 夜陨次元斩 · 单次切痕：在 SlashBlade 原生次元斩球体之上，叠加
+ * 夜陨次元斩 · 单次切痕：
  * <ul>
- *   <li>7 道以 0.5 tick 间隔依次划过的交错细斩线（白热核心 + 刀色外晕）；</li>
- *   <li>虚空光核脉冲与向外迸散的空间裂片；</li>
- *   <li>自天而降的紫电（取代原先纯视觉的伽马雷电实体）；</li>
- *   <li>暴击斩（每第 3 斩）额外的地面冲击环与色差。</li>
+ *   <li>预乘 Alpha 暗部层切出 3D 实心黑紫空间断层刀弧（高对比鬼泣式暗芯）；</li>
+ *   <li>HDR 层叠加 3D 定向曲面刀光弧、交错白热细斩线与 3D 立体空间碎晶；</li>
+ *   <li>暴击斩（每第 3 斩）追加 3D 倾斜锁环、破空冲击锥与瞬时向心速度线。</li>
  * </ul>
  */
 @OnlyIn(Dist.CLIENT)
 public final class JudgementCutFx extends FxInstance {
    private static final int LINES = 7;
+   private static final int ARCS = 4;
    private static final float[] WHITE = {1.0F, 0.95F, 1.0F};
    private static final float[] VOID = {0.69F, 0.15F, 1.0F};
+   private static final float[] DARK_CUT = {0.06F, 0.01F, 0.14F};
 
    private final Vec3 ground;
    private final Vec3 center;
@@ -40,6 +41,7 @@ public final class JudgementCutFx extends FxInstance {
    private final float[] tint;
    private final Vec3[] lineStarts = new Vec3[LINES];
    private final Vec3[] lineEnds = new Vec3[LINES];
+   private final SlashArcData[] arcs = new SlashArcData[ARCS];
    private final List<Shard> shards = new ArrayList<>();
    private final RandomSource random;
    private FxLightningBolt bolt;
@@ -61,9 +63,19 @@ public final class JudgementCutFx extends FxInstance {
          this.lineStarts[i] = mid.subtract(half);
          this.lineEnds[i] = mid.add(half);
       }
-      for (int i = 0; i < (this.critical ? 18 : 10); i++) {
-         Vector3f v = FxMath.randomUnit(this.random).mul(0.3F + this.random.nextFloat() * 0.5F);
-         this.shards.add(new Shard(this.center, v, 8 + this.random.nextInt(8), i % 3 == 0 ? WHITE : this.tint));
+      for (int i = 0; i < ARCS; i++) {
+         Vector3f normal = FxMath.randomUnit(this.random);
+         Vector3f u = FxMath.perpendicular(normal).normalize();
+         Vector3f v = new Vector3f(normal).cross(u).normalize();
+         float startAngle = this.random.nextFloat() * FxMath.TAU;
+         float span = (float)(Math.PI * (0.95 + this.random.nextDouble() * 0.55));
+         float outerR = this.radius * (0.85F + this.random.nextFloat() * 0.45F) * (this.critical ? 1.25F : 1.0F);
+         float innerR = outerR * (0.58F + this.random.nextFloat() * 0.14F);
+         this.arcs[i] = new SlashArcData(u, v, innerR, outerR, startAngle, startAngle + span, i * 0.7F);
+      }
+      for (int i = 0; i < (this.critical ? 20 : 12); i++) {
+         Vector3f v = FxMath.randomUnit(this.random).mul(0.28F + this.random.nextFloat() * 0.48F);
+         this.shards.add(new Shard(this.center, v, 10 + this.random.nextInt(8), i % 3 == 0 ? WHITE : this.tint, this.random.nextFloat() * FxMath.TAU));
       }
       this.bolt = new FxLightningBolt(this.ground.x, this.ground.z, this.ground.y + 26.0 + this.random.nextDouble() * 10.0, this.ground.y, this.random.nextLong(), 0, VOID);
    }
@@ -71,6 +83,11 @@ public final class JudgementCutFx extends FxInstance {
    @Override
    public Vec3 focus() {
       return this.center;
+   }
+
+   @Override
+   public boolean hasBody() {
+      return true;
    }
 
    @Override
@@ -95,16 +112,59 @@ public final class JudgementCutFx extends FxInstance {
       }
    }
 
+   // ───────────────────────────── 暗黑空间切口层（预乘 Alpha）─────────────────────────────
+
+   @Override
+   public void renderBody(FxGeometry b, FxFrame frame) {
+      float a = this.age(frame.partialTick);
+      float fade = 1.0F - FxMath.window(a, 10.0F, 18.0F);
+      if (fade <= 0.01F) {
+         return;
+      }
+      Vector3f c = frame.rel(this.center);
+      for (SlashArcData arc : this.arcs) {
+         float t = a - arc.delay;
+         if (t <= 0.0F) {
+            continue;
+         }
+         float head = FxMath.easeOutCubic(Math.min(1.0F, t / 2.2F));
+         float tail = FxMath.easeInCubic(FxMath.window(t, 4.5F, 14.0F));
+         if (tail >= head) {
+            continue;
+         }
+         b.begin(Style.SLASH_ARC, 0.35F, 0.25F, 7.0F, 0.85F, head, tail);
+         b.slashArc(c, arc.u, arc.v, arc.innerR * 0.92F, arc.outerR * 1.04F, arc.startAngle, arc.endAngle, 16, DARK_CUT[0], DARK_CUT[1], DARK_CUT[2], fade * 0.92F);
+      }
+      b.end();
+   }
+
+   // ───────────────────────────── HDR 发光层 ─────────────────────────────
+
    @Override
    public void renderGeometry(FxGeometry g, FxFrame frame) {
       float a = this.age(frame.partialTick);
       float fade = 1.0F - FxMath.window(a, 10.0F, 18.0F);
+      Vector3f c = frame.rel(this.center);
 
-      // 1. 交错细斩线：每道在 1 tick 内划过，依次相隔 0.5 tick
-      if (fade > 0.0F) {
-         g.begin(Style.RIBBON, 3.0F, 0.3F, 3.0F, 5.0F, 8.0F, 0.8F);
-         this.drawLines(g, frame, a, fade, 0.22F, this.tint);
-         g.begin(Style.RIBBON, 11.0F, 0.3F, 10.0F, 7.0F, 12.0F, 0.2F);
+      // 1. 3D 定向曲面刀光弧（贴在暗黑切口之上的锋利亮刃 + 能量残影）
+      if (fade > 0.01F) {
+         for (SlashArcData arc : this.arcs) {
+            float t = a - arc.delay;
+            if (t <= 0.0F) {
+               continue;
+            }
+            float head = FxMath.easeOutCubic(Math.min(1.0F, t / 2.0F));
+            float tail = FxMath.easeInCubic(FxMath.window(t, 4.0F, 13.5F));
+            if (tail >= head) {
+               continue;
+            }
+            g.begin(Style.SLASH_ARC, 5.2F + (this.critical ? 2.8F : 0.0F), 0.3F, 9.5F, 0.9F, head, tail);
+            g.slashArc(c, arc.u, arc.v, arc.innerR, arc.outerR, arc.startAngle, arc.endAngle, 16, this.tint[0], this.tint[1], this.tint[2], fade);
+         }
+         // 交错白热细斩线：每道在 1 tick 内划过，营造高密次元斩切感
+         g.begin(Style.RIBBON, 2.8F, 0.3F, 3.0F, 5.0F, 8.0F, 0.8F);
+         this.drawLines(g, frame, a, fade, 0.20F, this.tint);
+         g.begin(Style.RIBBON, 11.5F, 0.3F, 10.0F, 7.0F, 12.0F, 0.2F);
          this.drawLines(g, frame, a, fade, 0.055F, WHITE);
          g.end();
       }
@@ -112,18 +172,20 @@ public final class JudgementCutFx extends FxInstance {
       // 2. 虚空光核脉冲
       float pulse = 1.0F - FxMath.window(a, 0.0F, 8.0F);
       if (pulse > 0.0F) {
-         g.begin(Style.GLOW, 4.0F + (this.critical ? 4.0F : 0.0F), 0.4F, 5.0F, 2.0F, this.critical ? 1.2F : 0.5F, 0.0F);
-         g.billboard(frame.rel(this.center), this.radius * (0.6F + 0.5F * (1.0F - pulse)), a * 0.2F, this.tint[0], this.tint[1], this.tint[2], pulse * pulse);
+         g.begin(Style.GLOW, 4.2F + (this.critical ? 4.2F : 0.0F), 0.4F, 5.0F, 2.0F, this.critical ? 1.4F : 0.6F, 0.0F);
+         g.billboard(c, this.radius * (0.65F + 0.55F * (1.0F - pulse)), a * 0.2F, this.tint[0], this.tint[1], this.tint[2], pulse * pulse);
          g.end();
       }
 
-      // 3. 暴击：地面冲击环
+      // 3. 暴击斩专属：3D 倾斜锁环（torus）+ 3D 破空冲击锥（SHOCK_CONE）
       if (this.critical) {
-         float t = FxMath.window(a, 0.0F, 10.0F);
+         float t = FxMath.window(a, 0.0F, 11.0F);
          if (t < 1.0F) {
-            float r = this.radius * 2.2F * FxMath.easeOutCubic(t);
-            g.begin(Style.RING, 5.0F * (1.0F - t), 0.0F, 0.94F, 0.05F, 0.0F, 0.0F);
-            g.quad(frame.rel(this.ground.add(0.0, 0.08, 0.0)), new Vector3f(r, 0.0F, 0.0F), new Vector3f(0.0F, 0.0F, r), this.tint[0], this.tint[1], this.tint[2], 1.0F - t);
+            float ease = FxMath.easeOutCubic(t);
+            g.begin(Style.SHOCK_CONE, 5.5F * (1.0F - t), 0.4F, ease, 3.8F, 0.95F, 0.9F);
+            g.cylinder(frame.rel(this.ground.add(0.0, 0.1, 0.0)), frame.rel(this.ground.add(0.0, 1.8 + 4.2 * ease, 0.0)), 0.45F + 0.8F * ease, this.radius * (1.2F + 1.6F * ease), 18, a * 0.2F, this.tint[0], this.tint[1], this.tint[2], 1.0F - t);
+            g.begin(Style.RIBBON, 6.0F * (1.0F - t), 0.3F, 6.0F, 8.0F, 10.0F, 0.5F);
+            g.torus(c, new Vector3f(0.35F, 0.9F, -0.25F), this.radius * (0.75F + 1.15F * ease), 0.14F * (1.0F - t * 0.6F), 24, 5, a * 0.25F, WHITE[0], WHITE[1], WHITE[2], 1.0F - t);
             g.end();
          }
       }
@@ -137,14 +199,22 @@ public final class JudgementCutFx extends FxInstance {
          g.end();
       }
 
-      // 5. 空间裂片
-      g.begin(Style.RIBBON, 5.0F, 0.0F, 6.0F, 0.0F, 0.0F, 0.5F);
+      // 5. 3D 立体空间碎晶（棱镜菱片，随飞行旋转闪光）
+      g.begin(Style.GLOW, 6.0F, 0.0F, 2.0F, 1.0F, 0.0F, 0.0F);
       for (Shard shard : this.shards) {
          if (shard.life <= 0) {
             continue;
          }
          Vec3 p = shard.position(frame.partialTick);
-         g.streak(frame.rel(p), frame.rel(p.subtract(shard.vx * 2.2, shard.vy * 2.2, shard.vz * 2.2)), 0.05F, shard.color[0], shard.color[1], shard.color[2], (float)shard.life / shard.maxLife);
+         Vector3f rel = frame.rel(p);
+         float lifeAlpha = (float)shard.life / shard.maxLife;
+         float spin = shard.phase + a * 0.5F;
+         float cs = (float)Math.cos(spin);
+         float sn = (float)Math.sin(spin);
+         Vector3f u = new Vector3f(cs * 0.22F, sn * 0.14F, -sn * 0.18F);
+         Vector3f v = new Vector3f(-sn * 0.12F, cs * 0.20F, cs * 0.14F);
+         Vector3f n = new Vector3f(u).cross(v).normalize();
+         g.shard(rel, u, v, n, 0.06F, shard.color[0], shard.color[1], shard.color[2], lifeAlpha);
       }
       g.end();
    }
@@ -168,9 +238,14 @@ public final class JudgementCutFx extends FxInstance {
       }
       float a = this.age(frame.partialTick);
       double distance = frame.camera.distanceTo(this.center);
-      if (a < 4.0F && distance < 32.0) {
-         screen.addAberration(0.35F * (1.0F - a / 4.0F) * (float)(1.0 - distance / 32.0));
+      if (a < 5.0F && distance < 32.0) {
+         float k = (1.0F - a / 5.0F) * (float)(1.0 - distance / 32.0);
+         screen.addAberration(0.4F * k);
+         screen.addDashBlur(0.45F * k, frame.screenUv(this.center));
       }
+   }
+
+   private record SlashArcData(Vector3f u, Vector3f v, float innerR, float outerR, float startAngle, float endAngle, float delay) {
    }
 
    private static final class Shard {
@@ -186,8 +261,9 @@ public final class JudgementCutFx extends FxInstance {
       int life;
       final int maxLife;
       final float[] color;
+      final float phase;
 
-      Shard(Vec3 origin, Vector3f velocity, int life, float[] color) {
+      Shard(Vec3 origin, Vector3f velocity, int life, float[] color, float phase) {
          this.x = this.px = origin.x;
          this.y = this.py = origin.y;
          this.z = this.pz = origin.z;
@@ -197,6 +273,7 @@ public final class JudgementCutFx extends FxInstance {
          this.life = life;
          this.maxLife = life;
          this.color = color;
+         this.phase = phase;
       }
 
       void tick() {
@@ -206,9 +283,9 @@ public final class JudgementCutFx extends FxInstance {
          this.x += this.vx;
          this.y += this.vy;
          this.z += this.vz;
-         this.vx *= 0.82;
-         this.vy *= 0.82;
-         this.vz *= 0.82;
+         this.vx *= 0.84;
+         this.vy *= 0.84;
+         this.vz *= 0.84;
          this.life--;
       }
 

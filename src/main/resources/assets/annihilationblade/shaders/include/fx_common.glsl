@@ -128,13 +128,52 @@ vec3 fxViewRay(vec2 uv, mat4 invProj, mat4 invView) {
     return normalize((invView * vec4(v.xyz, 0.0)).xyz);
 }
 
-// 原始深度 → 相机到场景表面的欧氏距离；天空返回极大值。
+// 原始深度 → 相机到场景表面的欧氏距离；天空返回极大值（兼容光影包 0.9999 深度）。
 float fxSceneDistance(float depth, vec2 uv, mat4 invProj) {
-    if (depth >= 1.0) {
+    if (depth >= 0.9999) {
         return 1.0e6;
     }
     vec4 v = invProj * vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
     return length(v.xyz / v.w);
+}
+
+// Interleaved Gradient Noise：用于体积光线步进抖动，比白噪声噪点细腻一个量级。
+float fxIGN(vec2 pixel, float time) {
+    vec2 p = pixel + vec2(fract(time * 13.37) * 59.0, fract(time * 7.19) * 37.0);
+    return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
+}
+
+// 8x8 Bayer 有序抖动：消除 8-bit 输出在大面积渐变处的色带断层。
+float fxBayer2(vec2 p) {
+    p = floor(p);
+    return fract(p.x * 0.5 + p.y * p.y * 0.75);
+}
+
+float fxBayer4(vec2 p) {
+    return fxBayer2(p * 0.5) * 0.25 + fxBayer2(p);
+}
+
+float fxBayer8(vec2 p) {
+    return fxBayer4(p * 0.5) * 0.25 + fxBayer2(p);
+}
+
+vec3 fxDither8(vec3 color, vec2 fragCoord) {
+    float threshold = fxBayer8(fragCoord) - 0.5;
+    return clamp(color + vec3(threshold / 255.0), vec3(0.0), vec3(1.0));
+}
+
+// 带前景深度防穿帮校验的折射偏移：避免近处前景方块被吸进远处黑洞或冲击波。
+vec2 fxSafeRefractUv(vec2 baseUv, vec2 offset, float effectT, sampler2D depthTex, mat4 invProj) {
+    if (dot(offset, offset) < 1.0e-8) {
+        return baseUv;
+    }
+    vec2 target = clamp(baseUv + offset, vec2(0.001), vec2(0.999));
+    float targetDepth = texture(depthTex, target).r;
+    float targetT = fxSceneDistance(targetDepth, target, invProj);
+    if (targetT < effectT - 0.5) {
+        return baseUv;
+    }
+    return target;
 }
 
 // 射线（起点为相机原点）与球求交，返回 (tNear, tFar)；未命中返回 (-1, -1)。

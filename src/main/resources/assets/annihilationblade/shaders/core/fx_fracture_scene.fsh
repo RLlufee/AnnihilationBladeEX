@@ -85,7 +85,9 @@ void main() {
         }
     }
 
-    vec3 color = texture(Sampler0, clamp(uv + offset, vec2(0.001), vec2(0.999))).rgb;
+    float refractT = max(tc - radius, 0.0);
+    vec2 sampleUv = fxSafeRefractUv(uv, offset, refractT, Sampler1, InvProj);
+    vec3 color = texture(Sampler0, sampleUv).rgb;
 
     if (fieldMask > 0.0) {
         color = mix(color, color * vec3(0.78, 0.72, 1.05) + vec3(0.02, 0.0, 0.04), 0.45 * fieldMask);

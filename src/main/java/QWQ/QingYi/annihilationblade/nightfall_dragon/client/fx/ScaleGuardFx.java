@@ -199,7 +199,53 @@ public final class ScaleGuardFx extends FxInstance {
       }
    }
 
-   // ───────────────────────────── 网格层 ─────────────────────────────
+   // ───────────────────────────── 本体/暗部层（预乘 Alpha）─────────────────────────────
+
+   @Override
+   public boolean hasBody() {
+      return true;
+   }
+
+   @Override
+   public void renderBody(FxGeometry b, FxFrame frame) {
+      float a = this.age(frame.partialTick);
+      Vec3 feet = this.casterFeet(frame);
+      Vec3 center = this.center();
+
+      // 1. 龙鳞能量护盾半透明本体膜（平滑解析法线 + 三维呼吸波浪形变，盾内自动减透防挡视线）
+      float shieldAlpha = FxMath.window(a, 2.0F, 12.0F) * (1.0F - FxMath.window(a, HOLD_END, HOLD_END + 2.0F));
+      if (shieldAlpha > 0.01F) {
+         float expand = this.lockedCenter != null ? (float)smooth((a - ORBIT_TICKS + 1.0) / EXPAND_TICKS) : 0.0F;
+         float radius = FxMath.lerp((float)ORBIT_R + 0.5F, (float)EXPANDED_R + 0.5F, expand);
+         Vec3 shieldCenter = center.subtract(0.0, HEIGHT - 1.0, 0.0);
+         Vector3f sc = frame.rel(shieldCenter);
+         float crack = FxMath.window(a, EXPAND_END, HOLD_END) * 0.75F;
+         float spin = a * (0.02F + 0.04F * (float)Math.min(1.0, a / ORBIT_TICKS));
+         boolean inside = frame.camera.distanceTo(shieldCenter) < radius;
+         b.geoCenter(sc);
+         b.begin(Style.SHIELD, 0.9F, 0.6F, 10.0F, crack, a * 0.5F, 0.9F);
+         b.deformedSphere(sc, radius, 22, 34, spin, 0.018F + 0.028F * crack, 1.3F, a * 0.22F, SWORD[0], SWORD[1], SWORD[2], shieldAlpha * (inside ? 0.34F : 0.72F));
+         b.clearGeoCenter();
+      }
+
+      // 2. 16 剑升空与重砸的 3D 暗紫翻滚烟柱外壳
+      if (a >= HOLD_END && a < IMPACT && this.lockedCenter != null) {
+         boolean slam = a >= RISE_END;
+         b.begin(Style.PLASMA_BEAM, 0.85F, 0.4F, 1.5F, slam ? 4.5F : -2.6F, 0.0F, 0.4F);
+         for (int i = 0; i < this.swords; i++) {
+            Vec3 s = this.swordPos(i, a, feet);
+            Vec3 tail = slam ? s.add(0.0, 7.5, 0.0) : this.swordPos(i, HOLD_END, feet);
+            if (tail.distanceToSqr(s) < 0.04) {
+               continue;
+            }
+            float r = slam ? 0.65F : 0.42F;
+            b.cylinder(frame.rel(s), frame.rel(tail), r, r * 0.45F, 8, a * 0.2F + i, SWORD[0], SWORD[1], SWORD[2], 0.68F);
+         }
+         b.end();
+      }
+   }
+
+   // ───────────────────────────── 网格 HDR 发光层 ─────────────────────────────
 
    @Override
    public void renderGeometry(FxGeometry g, FxFrame frame) {
@@ -213,26 +259,44 @@ public final class ScaleGuardFx extends FxInstance {
          float expand = (float)smooth((a - ORBIT_TICKS) / EXPAND_TICKS);
          float r = (float)FxMath.lerp((float)ORBIT_R + 1.2F, (float)EXPANDED_R + 1.2F, this.lockedCenter != null ? expand : 0.0F);
          Vec3 groundAt = (this.lockedCenter != null ? this.lockedCenter.subtract(0.0, HEIGHT, 0.0) : feet).add(0.0, 0.06, 0.0);
-         g.begin(Style.RUNE, 2.6F, 0.0F, a * 0.06F, 9.0F, 1.0F, FxMath.easeOutCubic(FxMath.window(a, 0.0F, 10.0F)));
+         g.begin(Style.RUNE, 2.4F, 0.0F, a * 0.06F, 9.0F, 1.0F, FxMath.easeOutCubic(FxMath.window(a, 0.0F, 10.0F)));
          g.quad(frame.rel(groundAt), new Vector3f(r, 0.0F, 0.0F), new Vector3f(0.0F, 0.0F, r), SWORD[0], SWORD[1], SWORD[2], circleAlpha);
          g.end();
       }
 
-      // 2. 龙鳞护盾
+      // 2. 龙鳞能量护盾高光外层（平滑解析法线 + 波浪形变 + 交织能量丝线 + 双重菲涅尔硬边）
       float shieldAlpha = FxMath.window(a, 2.0F, 12.0F) * (1.0F - FxMath.window(a, HOLD_END, HOLD_END + 2.0F));
       if (shieldAlpha > 0.0F) {
          float expand = this.lockedCenter != null ? (float)smooth((a - ORBIT_TICKS + 1.0) / EXPAND_TICKS) : 0.0F;
          float radius = FxMath.lerp((float)ORBIT_R + 0.5F, (float)EXPANDED_R + 0.5F, expand);
          Vec3 shieldCenter = center.subtract(0.0, HEIGHT - 1.0, 0.0);
-         float crack = FxMath.window(a, EXPAND_END, HOLD_END) * 0.7F;
+         Vector3f sc = frame.rel(shieldCenter);
+         float crack = FxMath.window(a, EXPAND_END, HOLD_END) * 0.75F;
          float spin = a * (0.02F + 0.04F * (float)Math.min(1.0, a / ORBIT_TICKS));
          boolean inside = frame.camera.distanceTo(shieldCenter) < radius;
-         g.begin(Style.SHIELD, 1.5F + 2.5F * crack, 0.6F, 10.0F, crack, a * 0.5F, 0.8F);
-         g.sphere(frame.rel(shieldCenter), radius, 20, 32, spin, SWORD[0], SWORD[1], SWORD[2], shieldAlpha * (inside ? 0.55F : 1.0F));
-         g.end();
+         g.geoCenter(sc);
+         g.begin(Style.SHIELD, 1.6F + 2.6F * crack, 0.6F, 10.0F, crack, a * 0.5F, 1.05F);
+         g.deformedSphere(sc, radius * 1.012F, 22, 34, spin, 0.018F + 0.028F * crack, 1.3F, a * 0.22F, PINK[0], PINK[1], PINK[2], shieldAlpha * (inside ? 0.45F : 0.95F));
+         g.clearGeoCenter();
       }
 
-      // 3. 剑光拖尾（同一阶段内回溯采样，避免跨越第 40 tick 的位置跳变）
+      // 3. 绕旋期 3D 定向水平刀弧尾流 + 16 剑流光拖尾
+      if (a < ORBIT_TICKS) {
+         float spinProgress = Math.min(1.0F, a / ORBIT_TICKS);
+         float arcAlpha = FxMath.window(a, 2.0F, 10.0F) * (1.0F - FxMath.window(a, ORBIT_TICKS - 4.0F, ORBIT_TICKS));
+         if (arcAlpha > 0.01F) {
+            Vector3f orbitCenter = frame.rel(feet.add(0.0, HEIGHT, 0.0));
+            Vector3f u = new Vector3f(1.0F, 0.0F, 0.0F);
+            Vector3f v = new Vector3f(0.0F, 0.0F, 1.0F);
+            float sweepAngle = (float)Math.toRadians(a * (ORBIT_SPEED_START_DEGREES + ORBIT_SPEED_ACCEL_DEGREES * spinProgress));
+            g.begin(Style.SLASH_ARC, 3.2F + 2.0F * spinProgress, 0.3F, 6.0F, 0.8F, 1.0F, 0.0F);
+            for (int k = 0; k < 4; k++) {
+               float ang = sweepAngle + k * (float)(Math.PI * 0.5);
+               g.slashArc(orbitCenter, u, v, (float)ORBIT_R - 0.85F, (float)ORBIT_R + 0.35F, ang - 1.25F, ang, 14, SWORD[0], SWORD[1], SWORD[2], arcAlpha * 0.72F);
+            }
+            g.end();
+         }
+      }
       if (a < IMPACT) {
          g.begin(Style.RIBBON, 4.0F, 0.3F, 6.0F, 4.0F, 8.0F, 0.6F);
          for (int i = 0; i < this.swords; i++) {
@@ -258,66 +322,77 @@ public final class ScaleGuardFx extends FxInstance {
          g.end();
       }
 
-      // 4. 悬停能量丝
+      // 4. 悬停能量丝 + 立体聚焦星环（torus）
       float threads = FxMath.window(a, EXPAND_END, EXPAND_END + 3.0F) * (1.0F - FxMath.window(a, HOLD_END, HOLD_END + 3.0F));
       if (threads > 0.0F && this.lockedCenter != null) {
          Vector3f c = frame.rel(this.lockedCenter);
-         g.begin(Style.RIBBON, 4.0F, 0.3F, 7.0F, 10.0F, 14.0F, 0.4F);
+         g.begin(Style.RIBBON, 4.2F, 0.3F, 7.0F, 10.0F, 14.0F, 0.45F);
          for (int i = 0; i < this.swords; i++) {
             Vector3f s = frame.rel(this.swordPos(i, a, feet));
             float pulse = 0.6F + 0.4F * (float)Math.sin(a * 1.3F + i);
             g.ribbon(List.of(s, new Vector3f(s).lerp(c, 0.5F), c), new float[]{0.06F, 0.04F, 0.02F}, new float[]{threads * pulse, threads * pulse, threads * 0.4F}, PINK[0], PINK[1], PINK[2]);
          }
+         g.torus(c, new Vector3f(0.0F, 1.0F, 0.0F), (float)EXPANDED_R, 0.16F, 32, 5, a * 0.15F, PINK[0], PINK[1], PINK[2], threads * 0.85F);
          g.end();
       }
 
-      // 5. 升空光柱 / 下劈光痕
+      // 5. 升空 3D 圆柱光柱 / 下劈 3D 嵌套冲柱
       if (a >= HOLD_END && a < IMPACT && this.lockedCenter != null) {
          boolean slam = a >= RISE_END;
-         g.begin(Style.BEAM, slam ? 8.0F : 4.0F, 0.3F, 6.0F, 3.0F, 0.8F, 0.6F);
+         g.begin(Style.PLASMA_BEAM, slam ? 8.5F : 4.5F, 0.3F, 1.6F, slam ? 5.2F : -3.0F, 0.0F, 0.3F);
          for (int i = 0; i < this.swords; i++) {
             Vec3 s = this.swordPos(i, a, feet);
-            Vec3 tail = slam ? s.add(0.0, 7.0, 0.0) : this.swordPos(i, HOLD_END, feet);
+            Vec3 tail = slam ? s.add(0.0, 7.5, 0.0) : this.swordPos(i, HOLD_END, feet);
             if (tail.distanceToSqr(s) < 0.04) {
                continue;
             }
-            List<Vector3f> column = List.of(frame.rel(s), frame.rel(s.lerp(tail, 0.5)), frame.rel(tail));
-            float w = slam ? 0.55F : 0.35F;
-            g.ribbon(column, new float[]{w, w * 0.7F, 0.05F}, new float[]{1.0F, 0.7F, 0.0F}, slam ? WHITE[0] : SWORD[0], slam ? WHITE[1] : SWORD[1], slam ? WHITE[2] : SWORD[2]);
+            float r = slam ? 0.46F : 0.30F;
+            g.cylinder(frame.rel(s), frame.rel(tail), r, r * 0.25F, 8, -a * 0.25F + i, slam ? WHITE[0] : SWORD[0], slam ? WHITE[1] : SWORD[1], slam ? WHITE[2] : SWORD[2], 1.0F);
          }
          g.end();
       }
 
-      // 6. 落地：闪光、冲击环、龙纹印 + 中心总冲击波
+      // 6. 落地：16 道 3D 喇叭形粉紫气浪冲击锥 + 中心 3D 立体总环浪 + 龙纹印 + 闪光
       float t = (a - IMPACT) / 12.0F;
       if (t >= 0.0F && t < 1.0F && this.lockedCenter != null) {
          float fade = (1.0F - t) * (1.0F - t);
+         float ease = FxMath.easeOutCubic(t);
+         g.begin(Style.SHOCK_CONE, 5.2F, 0.4F, ease, 3.6F, 0.9F, 0.95F);
+         for (int i = 0; i < this.swords; i++) {
+            Vec3 p = this.impactPoint(i);
+            float baseR = 0.35F + 0.9F * ease;
+            float topR = (float)(IMPACT_RADIUS * SWORD_SIZE_SCALE) * (0.45F + 0.75F * ease);
+            g.cylinder(frame.rel(p.add(0.0, 0.05, 0.0)), frame.rel(p.add(0.0, 1.5 + 4.5 * ease, 0.0)), baseR, topR, 12, a * 0.2F + i, SWORD[0], SWORD[1], SWORD[2], 1.0F - t);
+         }
          g.begin(Style.GLOW, 8.0F, 0.4F, 5.0F, 2.2F, 1.0F, 0.0F);
          for (int i = 0; i < this.swords; i++) {
-            g.billboard(frame.rel(this.impactPoint(i).add(0.0, 0.8, 0.0)), 3.0F + 3.5F * t, 0.0F, PINK[0], PINK[1], PINK[2], fade);
+            g.billboard(frame.rel(this.impactPoint(i).add(0.0, 0.8, 0.0)), 2.8F + 3.2F * t, 0.0F, PINK[0], PINK[1], PINK[2], fade);
          }
-         g.begin(Style.RING, 4.5F, 0.0F, 0.94F, 0.05F, 0.0F, 0.0F);
-         for (int i = 0; i < this.swords; i++) {
-            float r = (float)(IMPACT_RADIUS * SWORD_SIZE_SCALE) * FxMath.easeOutCubic(t);
-            g.quad(frame.rel(this.impactPoint(i).add(0.0, 0.08, 0.0)), new Vector3f(r, 0.0F, 0.0F), new Vector3f(0.0F, 0.0F, r), SWORD[0], SWORD[1], SWORD[2], 1.0F - t);
-         }
-         g.begin(Style.RUNE, 4.0F, 0.0F, a * 0.1F, 3.0F, 0.0F, FxMath.easeOutCubic(Math.min(1.0F, t * 5.0F)));
+         g.begin(Style.RUNE, 3.8F, 0.0F, a * 0.1F, 3.0F, 0.0F, FxMath.easeOutCubic(Math.min(1.0F, t * 5.0F)));
          for (int i = 0; i < this.swords; i++) {
             g.quad(frame.rel(this.impactPoint(i).add(0.0, 0.1, 0.0)), new Vector3f(2.6F, 0.0F, 0.0F), new Vector3f(0.0F, 0.0F, 2.6F), PINK[0], PINK[1], PINK[2], 1.0F - t);
          }
-         Vec3 groundCenter = this.lockedCenter.subtract(0.0, HEIGHT - 0.1, 0.0);
-         float big = (float)(EXPANDED_R * 2.0) * FxMath.easeOutCubic(t);
-         g.begin(Style.RING, 6.0F * (1.0F - t), 0.0F, 0.95F, 0.035F, 0.0F, 0.0F);
-         g.quad(frame.rel(groundCenter), new Vector3f(big, 0.0F, 0.0F), new Vector3f(0.0F, 0.0F, big), WHITE[0], WHITE[1], WHITE[2], 1.0F - t);
+         Vec3 groundCenter = this.lockedCenter.subtract(0.0, HEIGHT - 0.35, 0.0);
+         float big = (float)(EXPANDED_R * 2.1) * ease;
+         g.begin(Style.RIBBON, 6.2F * (1.0F - t), 0.4F, 5.5F, 6.0F, 8.0F, 0.5F);
+         g.torus(frame.rel(groundCenter), new Vector3f(0.0F, 1.0F, 0.0F), big, 0.32F * (1.0F - t * 0.5F), 32, 6, a * 0.15F, WHITE[0], WHITE[1], WHITE[2], 1.0F - t);
          g.end();
       }
 
-      // 7. 鳞片碎屑 / 落地碎屑
+      // 7. 3D 立体旋转紫晶鳞片碎屑（取代平面细线）
       if (!this.shards.isEmpty()) {
-         g.begin(Style.RIBBON, 5.0F, 0.0F, 6.0F, 0.0F, 0.0F, 0.5F);
+         g.begin(Style.GLOW, 5.5F, 0.0F, 1.8F, 1.0F, 0.0F, 0.0F);
          for (Shard shard : this.shards) {
             Vec3 p = shard.position(frame.partialTick);
-            g.streak(frame.rel(p), frame.rel(p.subtract(shard.vx * 2.0, shard.vy * 2.0, shard.vz * 2.0)), 0.06F, shard.color[0], shard.color[1], shard.color[2], (float)shard.life / shard.maxLife);
+            Vector3f rel = frame.rel(p);
+            float lifeAlpha = (float)shard.life / shard.maxLife;
+            float spin = a * 0.45F + shard.maxLife * 1.7F;
+            float c = (float)Math.cos(spin);
+            float s = (float)Math.sin(spin);
+            Vector3f u = new Vector3f(c * 0.30F, s * 0.18F, -s * 0.24F);
+            Vector3f v = new Vector3f(-s * 0.16F, c * 0.24F, c * 0.18F);
+            Vector3f n = new Vector3f(u).cross(v).normalize();
+            g.shard(rel, u, v, n, 0.08F, shard.color[0], shard.color[1], shard.color[2], lifeAlpha);
          }
          g.end();
       }
@@ -343,9 +418,9 @@ public final class ScaleGuardFx extends FxInstance {
       if (a >= IMPACT && this.lockedCenter != null) {
          float t = a - IMPACT;
          float flash = Math.max(0.0F, 1.0F - t / 6.0F);
-         screen.addFlash(0xF0B8FF, 0.35F * flash * flash * att);
+         screen.addFlash(0xF0B8FF, 0.35F * flash * flash * att, 0.65F);
          screen.addAberration(0.9F * Math.max(0.0F, 1.0F - t / 10.0F) * att);
-         screen.addZoomBlur(0.35F * Math.max(0.0F, 1.0F - t / 8.0F) * att, frame.screenUv(this.lockedCenter));
+         screen.addDashBlur(0.55F * Math.max(0.0F, 1.0F - t / 8.0F) * att, frame.screenUv(this.lockedCenter));
          float kick = t < 2.0F ? t / 2.0F : 1.0F - FxMath.easeInOutSine(FxMath.window(t, 2.0F, 10.0F));
          screen.addFovKick(0.06F * kick * att);
       }

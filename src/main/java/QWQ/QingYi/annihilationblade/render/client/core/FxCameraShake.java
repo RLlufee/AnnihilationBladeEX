@@ -67,6 +67,10 @@ public final class FxCameraShake {
    /** 视野冲击（FOV 扩张/收缩），力度同样受震动倍率约束。 */
    @SubscribeEvent
    public static void onComputeFov(ViewportEvent.ComputeFov event) {
+      Minecraft minecraft = Minecraft.getInstance();
+      if (minecraft.player == null || minecraft.isPaused()) {
+         return;
+      }
       float kick = FxManager.fovKick();
       if (Math.abs(kick) < 1.0E-4F || !event.usedConfiguredFov()) {
          return;

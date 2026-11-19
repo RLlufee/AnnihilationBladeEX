@@ -45,7 +45,7 @@ void main() {
     float depth = texture(Sampler1, uv).r;
     vec3 rd = fxViewRay(uv, InvProj, InvView);
     float sceneT = fxSceneDistance(depth, uv, InvProj);
-    bool sky = depth >= 1.0;
+    bool sky = depth >= 0.9999;
     float strength = ZoneExtra.z * (1.0 - Bubble.w);
     // 导数必须在一致控制流中求取，因此在任何分支之前计算表面点与法线
     vec3 surface = rd * min(sceneT, 4096.0);
@@ -90,7 +90,9 @@ void main() {
         }
     }
 
-    vec3 color = texture(Sampler0, clamp(uv + offset, vec2(0.001), vec2(0.999))).rgb;
+    float refractT = max(min(tcZone - Bubble.x, tc - Core.w), 0.0);
+    vec2 safeUv = fxSafeRefractUv(uv, offset, refractT, Sampler1, InvProj);
+    vec3 color = texture(Sampler0, safeUv).rgb;
 
     if (strength > 0.0) {
         if (!sky) {

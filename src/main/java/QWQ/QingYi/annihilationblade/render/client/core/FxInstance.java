@@ -76,6 +76,15 @@ public abstract class FxInstance {
    public void tickFallback(ClientLevel level) {
    }
 
+   /** 是否需要绘制预乘 Alpha 实体/暗部层（用于暗芯刀弧、深色烟壳、半透明能量膜等）。 */
+   public boolean hasBody() {
+      return false;
+   }
+
+   /** 绘制预乘 Alpha 实体/暗部层（位于场景之上、HDR 发光层之下，不直接进入泛光）。 */
+   public void renderBody(FxGeometry body, FxFrame frame) {
+   }
+
    /** 绘制网格类特效（写入 HDR 特效层）。 */
    public void renderGeometry(FxGeometry geometry, FxFrame frame) {
    }

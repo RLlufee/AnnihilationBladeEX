@@ -14,42 +14,46 @@ import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
 import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 
 /**
- * 专属渲染管线。每帧（仅在有活跃特效时）执行：
+ * 专属渲染管线。每帧（仅在有可见特效时）执行：
  * <ol>
  *   <li>深度捕获：在 Fabulous 透明度后处理覆盖主深度之前，把场景深度复制到 R32F 纹理（AFTER_WEATHER）。</li>
- *   <li>网格特效层：法阵、刀光、闪电、辉光等写入 HDR（RGBA16F）特效层，片元内做软深度遮挡。</li>
+ *   <li>预乘 Alpha 本体/暗部层（按需）：绘制暗黑空间切口、深色烟壳、半透明能量膜，不直接进入全屏泛光。</li>
+ *   <li>网格 HDR 特效层：法阵、3D 刀光弧、3D 嵌套光柱、大气再入火壳、闪电等写入 RGBA16F 层。</li>
  *   <li>场景通道（B 档）：复制主画面后串行执行空间碎裂折射 / 黑洞透镜 / 冲击波扭曲。</li>
- *   <li>体积通道（B 档）：光线步进的体积裂隙辉光，低分辨率累积。</li>
- *   <li>泛光：仅对特效层 + 体积层做 6 级降采样/升采样（不会让整个场景发灰发白）。</li>
- *   <li>合成：场景 + 特效 + 泛光，叠加闪白、色差、径向模糊、暗角、去色，写回主画面。</li>
+ *   <li>体积通道（B 档）：IGN 抖动光线步进的体积裂隙与雾效，低分辨率累积。</li>
+ *   <li>泛光：仅对 HDR 特效层 + 体积层做带 Soft-Knee 阈值与 Karis Average 的 6 级降/升采样。</li>
+ *   <li>合成：场景 + 本体暗部层 + 线性空间 HDR 发光与泛光，同步施加径向/速度线模糊、色差、过曝爆闪、冲击帧与 Bayer8 消色带。</li>
  * </ol>
- * 整个流程在 AFTER_LEVEL 执行：位于 LevelRenderer.renderLevel 返回之后（即光影包完成合成之后）、手部渲染之前，
- * 因此天然兼容延迟绘制，且不会影响第一人称手持物。
- * <p>
- * 架构参考：the-shooting-star-demo（仅参考思路，代码为自行实现）、ArcaneVortex / fantasy_ending（MIT，Luoee）。
+ * 整个流程在 AFTER_LEVEL 执行，天然兼容光影包且不影响第一人称手持物。
  */
 @OnlyIn(Dist.CLIENT)
 public final class FxPipeline {
    public static final FxPipeline INSTANCE = new FxPipeline();
    private static final int BLOOM_LEVELS = 6;
+   private static final Matrix4f IDENTITY = new Matrix4f();
+   private static final ResourceLocation FLOW_NOISE = ResourceLocation.fromNamespaceAndPath(Annihilationblade.MODID, "textures/fx/fx_flow_noise.png");
 
    private final FxTarget depth = new FxTarget(FxTarget.Format.R32F);
+   private final FxTarget body = new FxTarget(FxTarget.Format.RGBA16F);
    private final FxTarget fx = new FxTarget(FxTarget.Format.RGBA16F);
    private final FxTarget volume = new FxTarget(FxTarget.Format.RGBA16F);
    private final FxTarget sceneA = new FxTarget(FxTarget.Format.RGBA8);
@@ -57,6 +61,7 @@ public final class FxPipeline {
    private final FxTarget[] bloomDown = new FxTarget[BLOOM_LEVELS];
    private final FxTarget[] bloomUp = new FxTarget[BLOOM_LEVELS];
 
+   private VertexBuffer fullscreenVbo;
    private boolean depthCaptured;
    private boolean failed;
    private boolean loggedFailure;
@@ -104,7 +109,7 @@ public final class FxPipeline {
    }
 
    /**
-    * 复制当前主深度。会恢复调用前的帧缓冲绑定与视口（Fabulous 下此时绑定的是天气目标）。
+    * 复制当前主深度。会完整恢复调用前的帧缓冲绑定、混合因子与视口（Fabulous 下此时绑定的是天气目标）。
     */
    public void captureDepth() {
       ShaderInstance shader = FxShaders.depthCopy;
@@ -129,7 +134,7 @@ public final class FxPipeline {
          RenderSystem.depthMask(false);
          RenderSystem.disableCull();
          RenderSystem.setShaderTexture(0, main.getDepthTextureId());
-         fullscreen(shader);
+         this.fullscreen(shader);
          this.depthCaptured = true;
       } catch (Throwable throwable) {
          this.fail("depth capture", throwable);
@@ -162,7 +167,7 @@ public final class FxPipeline {
 
       ModConfig.ClientRenderer config = ModConfig.CLIENT.clientRenderer;
       StateGuard guard = StateGuard.capture();
-      int[] savedTextures = new int[4];
+      int[] savedTextures = new int[6];
       for (int i = 0; i < savedTextures.length; i++) {
          savedTextures[i] = RenderSystem.getShaderTexture(i);
       }
@@ -170,25 +175,55 @@ public final class FxPipeline {
       PoseStack modelView = RenderSystem.getModelViewStack();
       modelView.pushPose();
       try {
-         // 1. 网格特效层
+         RenderSystem.disableDepthTest();
+         RenderSystem.depthMask(false);
+         RenderSystem.disableCull();
+         RenderSystem.setShaderTexture(0, this.depth.texture());
+         RenderSystem.setShaderTexture(1, FLOW_NOISE);
+         RenderSystem.setProjectionMatrix(frame.projection, VertexSorting.DISTANCE_TO_ORIGIN);
+         modelView.setIdentity();
+         modelView.mulPoseMatrix(frame.view);
+         RenderSystem.applyModelViewMatrix();
+
+         // 0. 预乘 Alpha 本体/暗部层（按需启用：暗芯刀弧、深色烟壳、半透明护盾膜）
+         boolean anyBodyRequested = false;
+         for (FxInstance instance : instances) {
+            if (instance.hasBody()) {
+               anyBodyRequested = true;
+               break;
+            }
+         }
+         boolean hasBody = false;
+         if (anyBodyRequested) {
+            this.body.ensure(width, height);
+            this.body.clear();
+            this.body.bindWrite();
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ONE_MINUS_SRC_ALPHA);
+            FxGeometry bodyGeometry = new FxGeometry(frame, true);
+            for (FxInstance instance : instances) {
+               if (instance.hasBody()) {
+                  instance.renderBody(bodyGeometry, frame);
+                  bodyGeometry.clearOccluder();
+                  bodyGeometry.clearGeoCenter();
+               }
+            }
+            hasBody = bodyGeometry.drawCalls() > 0;
+         }
+
+         // 1. 网格 HDR 特效层
          this.fx.ensure(width, height);
          this.fx.clear();
          this.fx.bindWrite();
          RenderSystem.enableBlend();
          RenderSystem.blendFunc(SourceFactor.ONE, DestFactor.ONE);
-         RenderSystem.disableDepthTest();
-         RenderSystem.depthMask(false);
-         RenderSystem.disableCull();
-         RenderSystem.setShaderTexture(0, this.depth.texture());
-         RenderSystem.setProjectionMatrix(frame.projection, VertexSorting.DISTANCE_TO_ORIGIN);
-         modelView.setIdentity();
-         modelView.mulPoseMatrix(frame.view);
-         RenderSystem.applyModelViewMatrix();
-         FxGeometry geometry = new FxGeometry(frame);
+         FxGeometry geometry = new FxGeometry(frame, false);
          for (FxInstance instance : instances) {
             instance.renderGeometry(geometry, frame);
             geometry.clearOccluder();
+            geometry.clearGeoCenter();
          }
+         boolean hasGeometry = geometry.drawCalls() > 0;
          modelView.setIdentity();
          RenderSystem.applyModelViewMatrix();
 
@@ -207,26 +242,33 @@ public final class FxPipeline {
             }
          }
 
+         // 若所有层与屏幕效果都为空，直接退出，避免无谓的全屏 Blit 与合成
+         if (!hasBody && !hasGeometry && scenePasses.isEmpty() && volumePasses.isEmpty() && screen.idle()) {
+            return;
+         }
+
          // 3. 场景通道：复制主画面后串行处理
          this.sceneA.ensure(width, height);
-         this.sceneB.ensure(width, height);
          GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, main.frameBufferId);
          GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, this.sceneA.framebuffer());
          GlStateManager._glBlitFrameBuffer(0, 0, width, height, 0, 0, width, height, GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
          int sceneTexture = this.sceneA.texture();
-         boolean writeB = true;
-         RenderSystem.disableBlend();
-         for (FxPass pass : scenePasses) {
-            FxTarget out = writeB ? this.sceneB : this.sceneA;
-            out.bindWrite();
-            ShaderInstance shader = pass.shader().get();
-            RenderSystem.setShaderTexture(0, sceneTexture);
-            RenderSystem.setShaderTexture(1, this.depth.texture());
-            this.commonUniforms(shader, frame, out.width(), out.height());
-            pass.uniforms().accept(shader);
-            fullscreen(shader);
-            sceneTexture = out.texture();
-            writeB = !writeB;
+         if (!scenePasses.isEmpty()) {
+            this.sceneB.ensure(width, height);
+            boolean writeB = true;
+            RenderSystem.disableBlend();
+            for (FxPass pass : scenePasses) {
+               FxTarget out = writeB ? this.sceneB : this.sceneA;
+               out.bindWrite();
+               ShaderInstance shader = pass.shader().get();
+               RenderSystem.setShaderTexture(0, sceneTexture);
+               RenderSystem.setShaderTexture(1, this.depth.texture());
+               this.commonUniforms(shader, frame, out.width(), out.height());
+               pass.uniforms().accept(shader);
+               this.fullscreen(shader);
+               sceneTexture = out.texture();
+               writeB = !writeB;
+            }
          }
 
          // 4. 体积通道：加法累积
@@ -244,15 +286,15 @@ public final class FxPipeline {
                RenderSystem.setShaderTexture(1, this.depth.texture());
                this.commonUniforms(shader, frame, this.volume.width(), this.volume.height());
                pass.uniforms().accept(shader);
-               fullscreen(shader);
+               this.fullscreen(shader);
             }
             RenderSystem.disableBlend();
          }
 
-         // 5. 泛光
+         // 5. 泛光（仅当本帧存在 HDR 网格或体积发光时才执行，空层跳过整条泛光链）
          float bloomStrength = config.bloom.getValue() ? (float)(config.bloomStrength.getValue() * (1.0 + screen.bloomBoost)) : 0.0F;
          int bloomTexture = 0;
-         if (bloomStrength > 0.001F && FxShaders.bloomDown != null && FxShaders.bloomUp != null) {
+         if ((hasGeometry || hasVolume) && bloomStrength > 0.001F && FxShaders.bloomDown != null && FxShaders.bloomUp != null) {
             bloomTexture = this.bloom(width, height, hasVolume);
          }
 
@@ -264,20 +306,24 @@ public final class FxPipeline {
          RenderSystem.setShaderTexture(1, this.fx.texture());
          RenderSystem.setShaderTexture(2, hasVolume ? this.volume.texture() : this.fx.texture());
          RenderSystem.setShaderTexture(3, bloomTexture != 0 ? bloomTexture : this.fx.texture());
+         RenderSystem.setShaderTexture(4, hasBody ? this.body.texture() : this.fx.texture());
          this.commonUniforms(composite, frame, width, height);
          float flash = (float)(screen.flash * config.screenFlash.getValue());
+         composite.safeGetUniform("BodyWeight").set(hasBody ? 1.0F : 0.0F);
          composite.safeGetUniform("VolumeWeight").set(hasVolume ? 1.0F : 0.0F);
          composite.safeGetUniform("BloomStrength").set(bloomTexture != 0 ? bloomStrength : 0.0F);
          composite.safeGetUniform("Flash").set(screen.flashR, screen.flashG, screen.flashB, Math.min(1.0F, flash));
+         composite.safeGetUniform("FlashExtra").set(screen.flashBoost, 0.0F);
          composite.safeGetUniform("Aberration").set((float)(screen.aberration * config.chromaticAberration.getValue()));
          composite.safeGetUniform("ZoomBlur").set(screen.zoomBlur);
+         composite.safeGetUniform("DashBlur").set(screen.dashBlur);
          composite.safeGetUniform("Center").set(screen.centerX, screen.centerY);
          composite.safeGetUniform("Vignette").set(screen.vignetteR, screen.vignetteG, screen.vignetteB, screen.vignette);
          composite.safeGetUniform("Desaturate").set(screen.desaturate);
          // 冲击帧属于强闪烁画面，受「闪白强度」配置约束（设为 0 即关闭）
          float impact = (float)(screen.impactFrame * config.screenFlash.getValue());
          composite.safeGetUniform("ImpactFrame").set(Math.min(1.0F, impact), screen.impactInvert ? 1.0F : 0.0F);
-         fullscreen(composite);
+         this.fullscreen(composite);
       } catch (Throwable throwable) {
          this.fail("frame", throwable);
       } finally {
@@ -315,7 +361,7 @@ public final class FxPipeline {
          down.safeGetUniform("TexelSize").set(1.0F / sourceWidth, 1.0F / sourceHeight);
          down.safeGetUniform("Prefilter").set(i == 0 ? 1.0F : 0.0F);
          down.safeGetUniform("VolumeWeight").set(i == 0 && hasVolume ? 1.0F : 0.0F);
-         fullscreen(down);
+         this.fullscreen(down);
          source = target.texture();
          sourceWidth = w;
          sourceHeight = h;
@@ -335,7 +381,7 @@ public final class FxPipeline {
          RenderSystem.setShaderTexture(1, this.bloomDown[i].texture());
          up.safeGetUniform("TexelSize").set(1.0F / lowerWidth, 1.0F / lowerHeight);
          up.safeGetUniform("Radius").set(1.0F);
-         fullscreen(up);
+         this.fullscreen(up);
          lower = target.texture();
          lowerWidth = target.width();
          lowerHeight = target.height();
@@ -352,15 +398,28 @@ public final class FxPipeline {
       shader.safeGetUniform("Steps").set((float)this.volumeSteps());
    }
 
-   static void fullscreen(ShaderInstance shader) {
-      RenderSystem.setShader(() -> shader);
+   private void ensureFullscreenVbo() {
+      if (this.fullscreenVbo != null) {
+         return;
+      }
+      VertexBuffer vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
       BufferBuilder builder = Tesselator.getInstance().getBuilder();
-      builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION);
+      builder.begin(Mode.TRIANGLES, DefaultVertexFormat.POSITION);
+      // 单个全屏大三角形覆盖 [-1,1]x[-1,1]，零对角线辅助像素浪费且避免每 Pass 重新上传 VBO
       builder.vertex(-1.0, -1.0, 0.0).endVertex();
-      builder.vertex(1.0, -1.0, 0.0).endVertex();
-      builder.vertex(1.0, 1.0, 0.0).endVertex();
-      builder.vertex(-1.0, 1.0, 0.0).endVertex();
-      BufferUploader.drawWithShader(builder.end());
+      builder.vertex(3.0, -1.0, 0.0).endVertex();
+      builder.vertex(-1.0, 3.0, 0.0).endVertex();
+      vbo.bind();
+      vbo.upload(builder.end());
+      VertexBuffer.unbind();
+      this.fullscreenVbo = vbo;
+   }
+
+   private void fullscreen(ShaderInstance shader) {
+      this.ensureFullscreenVbo();
+      this.fullscreenVbo.bind();
+      this.fullscreenVbo.drawWithShader(IDENTITY, IDENTITY, shader);
+      VertexBuffer.unbind();
    }
 
    private void fail(String stage, Throwable throwable) {
@@ -371,9 +430,10 @@ public final class FxPipeline {
       }
    }
 
-   /** 释放全部离屏目标（断开世界时调用，节省显存）。 */
+   /** 释放全部离屏目标与静态全屏 VBO（断开世界时调用，节省显存）。 */
    public void release() {
       this.depth.destroy();
+      this.body.destroy();
       this.fx.destroy();
       this.volume.destroy();
       this.sceneA.destroy();
@@ -382,18 +442,32 @@ public final class FxPipeline {
          this.bloomDown[i].destroy();
          this.bloomUp[i].destroy();
       }
+      if (this.fullscreenVbo != null) {
+         RenderSystem.assertOnRenderThread();
+         this.fullscreenVbo.close();
+         this.fullscreenVbo = null;
+      }
    }
 
    /**
-    * 读取真实 GL 状态并在结束时通过 RenderSystem 恢复，保证原版状态缓存与真实状态一致。
+    * 读取真实 GL 状态（含分离混合因子）并在结束时通过 RenderSystem 恢复，保证原版状态缓存与真实状态一致。
     */
-   private record StateGuard(boolean blend, boolean depthTest, boolean cull, boolean depthMask) {
+   private record StateGuard(boolean blend, boolean depthTest, boolean cull, boolean depthMask, int srcRgb, int dstRgb, int srcAlpha, int dstAlpha) {
       static StateGuard capture() {
-         return new StateGuard(GL11.glIsEnabled(GL11.GL_BLEND), GL11.glIsEnabled(GL11.GL_DEPTH_TEST), GL11.glIsEnabled(GL11.GL_CULL_FACE), GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK));
+         return new StateGuard(
+            GL11.glIsEnabled(GL11.GL_BLEND),
+            GL11.glIsEnabled(GL11.GL_DEPTH_TEST),
+            GL11.glIsEnabled(GL11.GL_CULL_FACE),
+            GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK),
+            GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB),
+            GL11.glGetInteger(GL14.GL_BLEND_DST_RGB),
+            GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA),
+            GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA)
+         );
       }
 
       void restore() {
-         RenderSystem.defaultBlendFunc();
+         RenderSystem.blendFuncSeparate(this.srcRgb, this.dstRgb, this.srcAlpha, this.dstAlpha);
          if (this.blend) {
             RenderSystem.enableBlend();
          } else {

@@ -28,7 +28,7 @@ void main() {
     float strength = ZoneExtra.y;
 
     if (strength > 0.0) {
-        if (depth < 1.0) {
+        if (depth < 0.9999) {
             vec3 local = rd * sceneT - Zone.xyz;
             float field = fxBloodMask(local, Zone, ZoneExtra) * strength;
             if (field > 0.0) {

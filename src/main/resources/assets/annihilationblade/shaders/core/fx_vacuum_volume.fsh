@@ -77,7 +77,7 @@ void main() {
         if (t0 < t1) {
             int steps = int(clamp(Steps, 4.0, 48.0));
             float dt = (t1 - t0) / float(steps);
-            float jitter = fxHash12(gl_FragCoord.xy + fract(FxTime * 7.0) * 100.0);
+            float jitter = fxIGN(gl_FragCoord.xy, FxTime);
             vec3 fog = vec3(0.0);
             for (int i = 0; i < 48; i++) {
                 if (i >= steps) {
@@ -100,7 +100,7 @@ void main() {
         }
 
         // 3. 地表网格辉光
-        if (depth < 1.0) {
+        if (depth < 0.9999) {
             vec3 local = surface - zc;
             float field = zoneMask(local, Bubble.x) * strength;
             if (field > 0.0) {

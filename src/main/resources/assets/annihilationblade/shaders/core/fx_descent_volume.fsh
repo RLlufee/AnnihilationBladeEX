@@ -53,7 +53,7 @@ void main() {
         if (hit.y > 0.0 && t0 < t1) {
             int steps = int(clamp(Steps * 0.75, 4.0, 36.0));
             float dt = (t1 - t0) / float(steps);
-            float jitter = fxHash12(gl_FragCoord.xy + fract(FxTime * 7.0) * 100.0);
+            float jitter = fxIGN(gl_FragCoord.xy, FxTime);
             vec3 dust = vec3(0.0);
             for (int i = 0; i < 36; i++) {
                 if (i >= steps) {
@@ -73,7 +73,7 @@ void main() {
                 float k = clamp(r / radius, 0.0, 1.0);
                 dust += mix(GOLD, VIOLET, k) * arms * noise * vertical * radial * (1.0 + 2.0 * (1.0 - k));
             }
-            acc += dust * dt * 0.06 * Vortex.x;
+            acc += dust * dt * 0.036 * Vortex.x;
         }
     }
 

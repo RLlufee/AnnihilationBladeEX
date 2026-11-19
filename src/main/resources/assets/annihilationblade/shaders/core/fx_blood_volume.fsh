@@ -35,7 +35,7 @@ void main() {
         if (t0 < t1) {
             int steps = int(clamp(Steps * 0.6, 4.0, 24.0));
             float dt = (t1 - t0) / float(steps);
-            float jitter = fxHash12(gl_FragCoord.xy + fract(FxTime * 7.0) * 100.0);
+            float jitter = fxIGN(gl_FragCoord.xy, FxTime);
             vec3 mist = vec3(0.0);
             for (int i = 0; i < 24; i++) {
                 if (i >= steps) {
@@ -54,7 +54,7 @@ void main() {
         }
 
         // 2. 地表血脉辉光与脉冲光环
-        if (depth < 1.0) {
+        if (depth < 0.9999) {
             vec3 local = rd * sceneT - Zone.xyz;
             float field = fxBloodMask(local, Zone, ZoneExtra) * strength;
             if (field > 0.0) {

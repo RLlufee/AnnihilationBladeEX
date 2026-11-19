@@ -3,7 +3,8 @@
   "fragment": "annihilationblade:fx_world",
   "attributes": ["Position", "Color", "UV0"],
   "samplers": [
-    { "name": "Sampler0" }
+    { "name": "Sampler0" },
+    { "name": "Sampler1" }
   ],
   "uniforms": [
     { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
@@ -13,6 +14,8 @@
     { "name": "FxSoft", "type": "float", "count": 1, "values": [0.0] },
     { "name": "FxTime", "type": "float", "count": 1, "values": [0.0] },
     { "name": "FxParams", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] },
-    { "name": "FxOccluder", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] }
+    { "name": "FxOccluder", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] },
+    { "name": "FxGeoCenter", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] },
+    { "name": "FxBlendMode", "type": "float", "count": 1, "values": [0.0] }
   ]
 }

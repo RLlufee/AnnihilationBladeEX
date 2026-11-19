@@ -94,6 +94,16 @@ public final class FxManager {
       ACTIVE.clear();
       SUSTAINED.clear();
       shake = 0.0F;
+      fovKick = 0.0F;
+   }
+
+   private static boolean hasVisible(Vec3 cameraPos) {
+      for (FxInstance instance : ACTIVE) {
+         if (instance.focus().distanceTo(cameraPos) <= instance.cullDistance()) {
+            return true;
+         }
+      }
+      return false;
    }
 
    @SubscribeEvent
@@ -146,7 +156,7 @@ public final class FxManager {
             FxPipeline.INSTANCE.beginFrame();
          }
       } else if (stage == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
-         if (!ACTIVE.isEmpty() && matricesCaptured && !FxCompat.shadowPass() && FxPipeline.INSTANCE.active()) {
+         if (!ACTIVE.isEmpty() && matricesCaptured && !FxCompat.shadowPass() && FxPipeline.INSTANCE.active() && hasVisible(event.getCamera().getPosition())) {
             FxPipeline.INSTANCE.captureDepth();
          }
       } else if (stage == RenderLevelStageEvent.Stage.AFTER_LEVEL) {

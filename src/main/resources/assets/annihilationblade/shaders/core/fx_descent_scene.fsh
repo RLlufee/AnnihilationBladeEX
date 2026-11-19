@@ -70,10 +70,12 @@ void main() {
         }
     }
 
-    vec3 color = texture(Sampler0, clamp(sampleUv, vec2(0.001), vec2(0.999))).rgb;
+    float refractT = max(tc - max(Vortex.y, Star.w), 0.0);
+    vec2 safeUv = fxSafeRefractUv(uv, sampleUv - uv, refractT, Sampler1, InvProj);
+    vec3 color = texture(Sampler0, safeUv).rgb;
 
     // 夜幕降临：整片天空化为虚空星海，大地压暗并染上紫色，让发光特效成为画面唯一的光源
-    if (depth >= 1.0) {
+    if (depth >= 0.9999) {
         if (Night.y > 0.0) {
             vec3 night = fxVoidSky(rd, vec3(Vortex.w + 3.0), FxTime) * 1.2 + vec3(0.02, 0.0, 0.04);
             color = mix(color, night, Night.y);
