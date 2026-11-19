@@ -39,5 +39,6 @@ local_backups/
 
 # 个性化
 libs/
+doc/
 .backup/
 CHANGELOG.md
