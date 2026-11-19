@@ -19,6 +19,11 @@ in vec3 relativePos;
 
 out vec4 fragColor;
 
+// 所有导数须在 discard 之前求取（见 main），否则部分驱动下结果未定义。
+vec3 gFaceNormal = vec3(0.0, 1.0, 0.0);
+float gRadialWidth = 0.002;
+float gCurtainWidth = 0.01;
+
 float linearDepth(float depth) {
     float ndc = depth * 2.0 - 1.0;
     return ProjMat[3][2] / (ndc + ProjMat[2][2]);
@@ -70,6 +75,33 @@ float sdSegment(vec2 p, vec2 a, vec2 b) {
     vec2 ba = b - a;
     float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
     return length(pa - ba * h);
+}
+
+float dot2(vec2 v) {
+    return dot(v, v);
+}
+
+// 爱心 SDF（Inigo Quilez），心形底尖在原点，高约 1.06。
+float sdHeart(vec2 p) {
+    p.x = abs(p.x);
+    if (p.y + p.x > 1.0) {
+        return sqrt(dot2(p - vec2(0.25, 0.75))) - 0.35355339;
+    }
+    return sqrt(min(dot2(p - vec2(0.0, 1.0)), dot2(p - 0.5 * max(p.x + p.y, 0.0)))) * sign(p.x - p.y);
+}
+
+// 五角星 SDF（Inigo Quilez），r = 外径，rf = 内凹比例。
+float sdStar5(vec2 p, float r, float rf) {
+    const vec2 k1 = vec2(0.809016994375, -0.587785252292);
+    const vec2 k2 = vec2(-0.809016994375, -0.587785252292);
+    p.x = abs(p.x);
+    p -= 2.0 * max(dot(k1, p), 0.0) * k1;
+    p -= 2.0 * max(dot(k2, p), 0.0) * k2;
+    p.x = abs(p.x);
+    p.y -= r;
+    vec2 ba = rf * vec2(-k1.y, k1.x) - vec2(0.0, 1.0);
+    float h = clamp(dot(p, ba) / dot(ba, ba), 0.0, r);
+    return length(p - ba * h) * sign(p.y * ba.x - p.x * ba.y);
 }
 
 // 正 N 边形边界距离（外接圆半径 r），通过极坐标折叠到单个扇区。
@@ -143,7 +175,7 @@ vec3 styleRune(vec2 uv) {
     if (r > 1.0) {
         return vec3(0.0);
     }
-    float aa = max(fwidth(r) * 1.2, 0.0015);
+    float aa = max(gRadialWidth * 1.2, 0.0015);
     float rotation = FxParams.x;
     float seed = FxParams.y;
     float grand = step(0.5, FxParams.z);
@@ -152,7 +184,23 @@ vec3 styleRune(vec2 uv) {
 
     float lines = 0.0;
     float detail = 0.0;
-    if (grand > 0.5) {
+    if (FxParams.z > 1.5) {
+        // 变体 2：爱心法阵（萝莉审判）——双环 + 中央爱心 + 环绕的六颗小爱心 + 星芒刻度 + 符文带
+        lines += aaLine(r - 0.975, 0.007, aa) + aaLine(r - 0.91, 0.003, aa) + aaLine(r - 0.6, 0.003, aa);
+        vec2 hp = rotate2(uv, sin(rotation * 0.5) * 0.15) * 2.1 + vec2(0.0, 0.62);
+        lines += aaLine(sdHeart(hp) / 2.1, 0.006, aa) * 1.2;
+        detail += (1.0 - smoothstep(-0.02, 0.0, sdHeart(hp) / 2.1)) * 0.12;
+        for (int i = 0; i < 6; i++) {
+            float a = float(i) * FX_PI / 3.0 + rotation;
+            vec2 c = vec2(cos(a), sin(a)) * 0.755;
+            vec2 sp = (uv - c) * 9.0 + vec2(0.0, 0.5);
+            lines += aaLine(sdHeart(sp) / 9.0, 0.004, aa);
+        }
+        float a2 = mod(baseAngle - rotation * 0.6 + FX_TAU, FX_TAU);
+        float tick = abs(fract(a2 / FX_TAU * 40.0) - 0.5);
+        detail += (1.0 - smoothstep(0.1, 0.1 + aa * 25.0, tick)) * step(0.915, r) * step(r, 0.965);
+        detail += runeBand(mod(baseAngle + rotation * 0.8 + FX_TAU, FX_TAU), r, 0.42, 0.56, 22.0, seed, aa) * 0.8;
+    } else if (grand > 0.5) {
         lines += aaLine(r - 0.985, 0.006, aa) + aaLine(r - 0.95, 0.003, aa);
         lines += aaLine(r - 0.80, 0.004, aa) + aaLine(r - 0.74, 0.003, aa);
         lines += aaLine(r - 0.42, 0.004, aa) + aaLine(r - 0.38, 0.0025, aa);
@@ -245,7 +293,7 @@ vec3 styleCurtain(vec2 uv) {
     float crest = exp(-abs(h - rise) * 30.0) * 0.8 * step(rise, 0.995);
     float scan = pow(0.5 + 0.5 * sin(h * 120.0 - FxTime * 8.0), 18.0) * 0.35 * FxParams.y;
     float gx = abs(fract(x * 16.0) - 0.5);
-    float vline = (1.0 - smoothstep(0.02, 0.02 + fwidth(x * 16.0) * 1.5, gx)) * 0.25 * FxParams.y;
+    float vline = (1.0 - smoothstep(0.02, 0.02 + gCurtainWidth * 1.5, gx)) * 0.25 * FxParams.y;
     float ends = 1.0 - smoothstep(0.96, 1.0, abs(x));
     float dissolve = FxParams.w > 0.0 ? smoothstep(FxParams.w - 0.15, FxParams.w + 0.15, fxNoise3(vec3(x * 9.0, h * 6.0, seed + 9.0)) * 0.8 + h * 0.2) : 1.0;
     float intensity = (streak * (1.0 - h * 0.6) + base + crest + scan + vline) * topFade * ends * dissolve;
@@ -270,7 +318,51 @@ vec3 styleDisk(vec2 uv) {
     return (tint * (bands * 0.8 + fine * 0.4) + vec3(1.0, 0.95, 0.9) * hot * 2.0) * profile * max(doppler, 0.1);
 }
 
+// 龙鳞护盾（球面网格，uv = 经度/纬度）：错位排列的鳞片纹 + 菲涅尔边缘光 + 逐片龟裂点亮。
+// params: x = 鳞片行数, y = 龟裂比例 0..1, z = 鳞片闪烁相位, w = 边缘光强度。
+
+vec3 styleShield(vec2 uv) {
+    vec3 normal = gFaceNormal;
+    vec3 viewDir = normalize(-relativePos);
+    float ndv = abs(dot(normal, viewDir));
+    float rim = pow(1.0 - ndv, 2.2);
+    float rows = max(FxParams.x, 4.0);
+    vec2 q = vec2(uv.x * rows * 2.0, uv.y * rows);
+    float row = floor(q.y);
+    q.x += mod(row, 2.0) * 0.5;
+    vec2 cell = floor(q);
+    vec2 f = fract(q);
+    float d = length(vec2(f.x - 0.5, f.y * 1.15)) - 0.62;
+    float edge = exp(-abs(d) * 18.0);
+    float h = fxHash12(cell + 7.0);
+    float shimmer = 0.5 + 0.5 * sin(FxParams.z * 3.0 + h * 20.0 + uv.y * 12.0);
+    float crack = 1.0 - smoothstep(FxParams.y - 0.05, FxParams.y, h);
+    float intensity = rim * (0.6 + FxParams.w) + edge * (0.25 + 0.35 * shimmer) * (0.4 + rim) + crack * (0.55 + edge * 0.6) + 0.04;
+    return vertexColor.rgb * intensity + vec3(rim * rim * 0.4 + crack * edge * 0.3);
+}
+
+// 精灵图形：params.x = 形状（0 爱心 / 1 四芒闪光 / 2 五角星），实心柔光 + 白色描边 + 外辉光。
+vec3 styleSprite(vec2 uv) {
+    float shape = FxParams.x;
+    float d;
+    if (shape < 0.5) {
+        d = sdHeart(uv * 0.95 + vec2(0.0, 0.5)) / 0.95;
+    } else if (shape < 1.5) {
+        vec2 a = abs(uv);
+        d = (pow(a.x, 0.5) + pow(a.y, 0.5)) - 0.75;
+    } else {
+        d = sdStar5(uv * 1.05, 0.8, 0.45) / 1.05;
+    }
+    float fill = 1.0 - smoothstep(-0.03, 0.02, d);
+    float edge = exp(-abs(d) * 28.0);
+    float glow = exp(-max(d, 0.0) * 5.0) * 0.45 * (1.0 - smoothstep(0.85, 1.0, length(uv)));
+    return vertexColor.rgb * (fill * 0.65 + glow) + vec3(edge * 0.9 + fill * 0.15);
+}
+
 void main() {
+    gFaceNormal = normalize(cross(dFdx(relativePos), dFdy(relativePos)) + vec3(0.0, 1.0e-7, 0.0));
+    gRadialWidth = fwidth(length(texCoord0));
+    gCurtainWidth = fwidth(texCoord0.x * 16.0);
     float mask = depthMask() * occluderMask();
     if (mask <= 0.0 || vertexColor.a <= 0.0) {
         discard;
@@ -288,8 +380,12 @@ void main() {
         color = styleBeam(texCoord0);
     } else if (FxStyle < 5.5) {
         color = styleCurtain(texCoord0);
-    } else {
+    } else if (FxStyle < 6.5) {
         color = styleDisk(texCoord0);
+    } else if (FxStyle < 7.5) {
+        color = styleShield(texCoord0);
+    } else {
+        color = styleSprite(texCoord0);
     }
     fragColor = vec4(max(color, vec3(0.0)) * vertexColor.a * FxEmission * mask, 1.0);
 }

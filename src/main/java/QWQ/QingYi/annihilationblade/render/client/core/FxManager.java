@@ -33,7 +33,7 @@ import org.joml.Matrix4f;
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(modid = Annihilationblade.MODID, value = Dist.CLIENT)
 public final class FxManager {
-   private static final int MAX_ACTIVE = 32;
+   private static final int MAX_ACTIVE = 64;
    private static final List<FxInstance> ACTIVE = new ArrayList<>();
    private static final it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<FxInstance> SUSTAINED = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<>();
    private static ClientLevel lastLevel;
@@ -55,7 +55,15 @@ public final class FxManager {
          clear();
       }
       while (ACTIVE.size() >= MAX_ACTIVE) {
-         remove(ACTIVE.remove(0));
+         // 优先淘汰最旧的一次性特效；持续特效（领域/结界）承载服务端时间轴与终幕，尽量保留
+         int victim = 0;
+         for (int i = 0; i < ACTIVE.size(); i++) {
+            if (ACTIVE.get(i).handle() < 0) {
+               victim = i;
+               break;
+            }
+         }
+         remove(ACTIVE.remove(victim));
       }
       ACTIVE.add(instance);
       if (instance.handle() >= 0) {

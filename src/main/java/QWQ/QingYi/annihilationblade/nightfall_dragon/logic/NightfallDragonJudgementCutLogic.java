@@ -3,8 +3,11 @@ package QWQ.QingYi.annihilationblade.nightfall_dragon.logic;
 import QWQ.QingYi.annihilationblade.common.ServerTickScheduler;
 import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
-import QWQ.QingYi.annihilationblade.infinity_stellaris.logic.GammaThunderburstLogic;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.NightfallDragonDefinitions;
+import QWQ.QingYi.annihilationblade.render.FxEvents;
+import QWQ.QingYi.annihilationblade.render.FxSustained;
+import QWQ.QingYi.annihilationblade.render.FxTypes;
+import QWQ.QingYi.annihilationblade.render.network.FxEventPacket;
 import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.item.NightfallDragonItemSupport;
 import java.util.ArrayList;
@@ -97,11 +100,25 @@ public final class NightfallDragonJudgementCutLogic {
       level.playSound(null, center.x, center.y, center.z, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.PLAYERS, 1.3F,
             0.55F);
 
+      // 启动客户端持续特效：夜陨法阵、次元边界与最后的「次元斩·终」碎裂终幕（JudgementDomainFx）
+      int interval = getIntervalTicks();
+      int duration = Math.max(1, (anchors.size() - 1) * interval) + 2;
+      int fxHandle = FxSustained.start(level, new FxEventPacket(
+            FxTypes.JUDGEMENT_DOMAIN,
+            serverPlayer.position(),
+            serverPlayer.getLookAngle(),
+            (float) getRadius(),
+            getScale(),
+            anchors.size(),
+            serverPlayer.getRandom().nextLong(),
+            serverPlayer.getId(),
+            new int[0]), duration);
+
       // 2. 将 100 次次元斩以 index * getIntervalTicks() 的时间差注册到定时任务队列中
       for (int i = 0; i < anchors.size(); i++) {
          int index = i;
-         ServerTickScheduler.schedule(index * getIntervalTicks(),
-               () -> spawnScheduledCut(serverPlayer, anchors.get(index), index));
+         ServerTickScheduler.schedule(index * interval,
+               () -> spawnScheduledCut(serverPlayer, anchors.get(index), index, fxHandle));
       }
    }
 
@@ -218,8 +235,10 @@ public final class NightfallDragonJudgementCutLogic {
    /**
     * 定时任务回调：在到达指定 Tick 时间时生成单个次元斩实体。
     */
-   private static void spawnScheduledCut(ServerPlayer player, CutAnchor anchor, int index) {
+   private static void spawnScheduledCut(ServerPlayer player, CutAnchor anchor, int index, int fxHandle) {
       if (!player.isAlive() || !canUseSealedArt(player)) {
+         // 连斩被打断：通知客户端取消终幕并收起领域
+         FxSustained.stop(fxHandle);
          return;
       }
 
@@ -261,23 +280,19 @@ public final class NightfallDragonJudgementCutLogic {
       cut.setPos(position.x, position.y + 0.15, position.z);
 
       // 读取武器本身的刀色设定
-      player.getMainHandItem().getCapability(ItemSlashBlade.BLADESTATE)
-            .ifPresent(state -> cut.setColor(state.getColorCode()));
+      int color = player.getMainHandItem().getCapability(ItemSlashBlade.BLADESTATE)
+            .map(state -> state.getColorCode())
+            .orElse(NightfallDragonDefinitions.SEALED_SUMMONED_SWORD_COLOR);
+      cut.setColor(color);
 
       // 生成实体加入世界
       level.addFreshEntity(cut);
 
-      // 附带紫红色伽马闪电特效
-      GammaThunderburstLogic.spawnBolt(level, position, 0xB026FF);
-
-      // 粒子与声效支持
-      double pScale = Math.max(0.5, getScale());
-      int pCount1 = (int) Math.round(5 * pScale);
-      int pCount2 = (int) Math.round(8 * pScale);
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, position.x, position.y + 0.2, position.z, pCount1,
-            0.45 * pScale, 0.08 * pScale, 0.45 * pScale, 0.05);
-      level.sendParticles(ParticleTypes.ENCHANT, position.x, position.y + 0.25, position.z, pCount2, 0.55 * pScale,
-            0.1 * pScale, 0.55 * pScale, 0.04);
+      // 切痕、空间裂片与紫电由客户端 JudgementCutFx 绘制（原先为纯视觉的伽马雷电实体 + 粒子）。
+      // 种子低 24 位携带刀色，高 32 位为随机种子。
+      long seed = ((long) player.getRandom().nextInt() << 32) | (color & 0xFFFFFFL);
+      FxEvents.send(level, new FxEventPacket(FxTypes.JUDGEMENT_CUT, position, Vec3.ZERO, getScale(), 1.0F, index, seed,
+            player.getId(), new int[0]));
       level.playSound(null, position.x, position.y, position.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS,
             0.45F, 0.85F + index % 4 * 0.08F);
    }

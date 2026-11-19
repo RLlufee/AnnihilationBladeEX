@@ -351,8 +351,7 @@ public class ScaleGuardSwordEntity extends Entity {
       }
 
       if (this.level() instanceof ServerLevel serverLevel) {
-         serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 3, 0.35D * SWORD_SIZE_SCALE, 0.15D, 0.35D * SWORD_SIZE_SCALE, 0.0D);
-         serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH, this.getX(), this.getY(), this.getZ(), 24, 0.75D * SWORD_SIZE_SCALE, 0.22D, 0.75D * SWORD_SIZE_SCALE, 0.08D);
+         // 落地闪光、冲击环与龙纹印由客户端 ScaleGuardFx 绘制；此处只保留震屏
          NightfallDragonScreenShakeEntity.spawn(serverLevel, this.position(), 18.0F, 0.13F, 2, 10);
       }
 

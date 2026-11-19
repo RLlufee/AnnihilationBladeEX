@@ -46,7 +46,14 @@ public final class FxGeometry {
        * 吸积盘（用 quad 绘制）：差速旋转的噪声光带、内缘白热、多普勒增亮。
        * params: x=内径(0..1), y=旋转速度, z=随机种子, w=多普勒强度。
        */
-      DISK(6);
+      DISK(6),
+      /**
+       * 龙鳞护盾（配合 {@link #sphere} 使用）：鳞片纹 + 菲涅尔边缘光 + 逐片龟裂点亮。
+       * params: x=鳞片行数, y=龟裂比例(0..1), z=闪烁相位, w=边缘光强度。
+       */
+      SHIELD(7),
+      /** 精灵图形公告板，params: x=形状(0 爱心 / 1 四芒闪光 / 2 五角星)。 */
+      SPRITE(8);
 
       final float id;
 
@@ -205,6 +212,42 @@ public final class FxGeometry {
          this.vertex(c.x + sc.x, c.y + sc.y, c.z + sc.z, r, g, b, ac, u1, 1.0F);
          this.vertex(a.x + sa.x, a.y + sa.y, a.z + sa.z, r, g, b, aa, u0, 1.0F);
       }
+   }
+
+   /**
+    * 经纬球面网格，uv.x = 经度 0..1（加上 spin 旋转），uv.y = 纬度 0..1。
+    * 用于护盾、结界球壳等需要菲涅尔边缘光的曲面。
+    */
+   public void sphere(Vector3f center, float radius, int rings, int segments, float spin, float r, float g, float b, float a) {
+      if (this.builder == null || radius <= 0.0F || a <= 0.0F) {
+         return;
+      }
+      rings = Math.max(3, rings);
+      segments = Math.max(4, segments);
+      for (int i = 0; i < rings; i++) {
+         float v0 = (float)i / rings;
+         float v1 = (float)(i + 1) / rings;
+         float p0 = (float)Math.PI * v0;
+         float p1 = (float)Math.PI * v1;
+         for (int j = 0; j < segments; j++) {
+            float u0 = (float)j / segments;
+            float u1 = (float)(j + 1) / segments;
+            float t0 = FxMath.TAU * u0 + spin;
+            float t1 = FxMath.TAU * u1 + spin;
+            this.sphereVertex(center, radius, p0, t0, r, g, b, a, u0, v0);
+            this.sphereVertex(center, radius, p0, t1, r, g, b, a, u1, v0);
+            this.sphereVertex(center, radius, p1, t1, r, g, b, a, u1, v1);
+            this.sphereVertex(center, radius, p1, t0, r, g, b, a, u0, v1);
+         }
+      }
+   }
+
+   private void sphereVertex(Vector3f center, float radius, float polar, float azimuth, float r, float g, float b, float a, float u, float v) {
+      float sinPolar = (float)Math.sin(polar);
+      float x = center.x + radius * sinPolar * (float)Math.cos(azimuth);
+      float y = center.y + radius * (float)Math.cos(polar);
+      float z = center.z + radius * sinPolar * (float)Math.sin(azimuth);
+      this.vertex(x, y, z, r, g, b, a, u, v);
    }
 
    /** 两点间的直线拖尾（火花、流星），头部宽、尾部尖。 */

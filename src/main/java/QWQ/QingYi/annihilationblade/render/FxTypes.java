@@ -18,6 +18,14 @@ public final class FxTypes {
    public static final int BLOOD_DASH = 5;
    /** 血狱十印幻影剑爆破（一次性）。intParam = 剑数 | 命中延迟 << 8。 */
    public static final int BLOOD_BURST = 6;
+   /** 魔龙夜陨 SA「夜陨次元斩」整体领域与终幕（持续特效）。intParam = 总斩数。 */
+   public static final int JUDGEMENT_DOMAIN = 7;
+   /** 夜陨次元斩单次切痕（一次性）。intParam = 斩序号，seed 低 24 位携带刀色。 */
+   public static final int JUDGEMENT_CUT = 8;
+   /** 魔龙夜陨 SA「鳞之卫」（一次性，客户端按剑阵公式复现每柄剑的轨迹）。intParam = 剑数。 */
+   public static final int SCALE_GUARD = 9;
+   /** 萝莉刀审判（一次性）。intParam = 0 锥形（SE）/ 1 范围（SA）；entityIds = 被审判的目标。 */
+   public static final int LOLI_JUDGEMENT = 10;
 
    private FxTypes() {
    }

@@ -6,7 +6,11 @@ import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodBurstFx;
 import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodDashFx;
 import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodDomainFx;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.client.fx.VacuumDecayFx;
+import QWQ.QingYi.annihilationblade.loli_blade.client.fx.LoliJudgementFx;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.client.fx.CosmicDescentFx;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.client.fx.JudgementCutFx;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.client.fx.JudgementDomainFx;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.client.fx.ScaleGuardFx;
 import QWQ.QingYi.annihilationblade.render.network.FxSustainPacket;
 import QWQ.QingYi.annihilationblade.render.FxTypes;
 import QWQ.QingYi.annihilationblade.render.client.core.FxInstance;
@@ -33,6 +37,10 @@ public final class FxClientDispatcher {
       FACTORIES.put(FxTypes.BLOOD_DOMAIN, BloodDomainFx::new);
       FACTORIES.put(FxTypes.BLOOD_DASH, BloodDashFx::new);
       FACTORIES.put(FxTypes.BLOOD_BURST, BloodBurstFx::new);
+      FACTORIES.put(FxTypes.JUDGEMENT_DOMAIN, JudgementDomainFx::new);
+      FACTORIES.put(FxTypes.JUDGEMENT_CUT, JudgementCutFx::new);
+      FACTORIES.put(FxTypes.SCALE_GUARD, ScaleGuardFx::new);
+      FACTORIES.put(FxTypes.LOLI_JUDGEMENT, LoliJudgementFx::new);
    }
 
    private FxClientDispatcher() {

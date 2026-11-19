@@ -4,6 +4,9 @@ import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.NightfallDragonDefinitions;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.entity.ScaleGuardSwordEntity;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.item.NightfallDragonItemSupport;
+import QWQ.QingYi.annihilationblade.render.FxEvents;
+import QWQ.QingYi.annihilationblade.render.FxTypes;
+import QWQ.QingYi.annihilationblade.render.network.FxEventPacket;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,7 +51,10 @@ public final class ScaleGuardLogic {
 
       level.playSound(null, center.x, center.y, center.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 1.8F, 0.55F);
       level.playSound(null, center.x, center.y, center.z, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 1.3F, 0.65F);
-      level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, center.x, center.y, center.z, 48, 1.9D, 0.55D, 1.9D, 0.035D);
+      // 龙鳞护盾、剑光拖尾、能量丝与砸地冲击由客户端 ScaleGuardFx 按剑阵公式复现绘制
+      FxEvents.send(level, new FxEventPacket(FxTypes.SCALE_GUARD, serverPlayer.position(), serverPlayer.getLookAngle(),
+            (float) ((ScaleGuardSwordEntity.ORBIT_RADIUS + ScaleGuardSwordEntity.OUTWARD_DISTANCE) * ScaleGuardSwordEntity.SWORD_SIZE_SCALE),
+            1.0F, swordCount, serverPlayer.getRandom().nextLong(), serverPlayer.getId(), new int[0]));
    }
 
    private static boolean canUseAwakenedArt(ServerPlayer player) {

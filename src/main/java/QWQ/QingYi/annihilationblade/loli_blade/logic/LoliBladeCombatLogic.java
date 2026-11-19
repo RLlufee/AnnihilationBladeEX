@@ -5,6 +5,9 @@ import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.loli_blade.LoliBladeDefinitions;
 import QWQ.QingYi.annihilationblade.registry.ModSounds;
+import QWQ.QingYi.annihilationblade.render.FxEvents;
+import QWQ.QingYi.annihilationblade.render.FxTypes;
+import QWQ.QingYi.annihilationblade.render.network.FxEventPacket;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -175,12 +178,26 @@ public final class LoliBladeCombatLogic {
          List<Entity> targets = action == Action.FACING
             ? facingTargets(level, attacker, range, config.maxTargets.getValue())
             : areaTargets(level, attacker, range, config.maxTargets.getValue());
+         // 审判视觉（爱心法阵、审判波 / 星光锥、坠星与爱心爆发）由客户端 LoliJudgementFx 绘制；
+         // 必须在处决之前发送，客户端才能解析到尚未被移除的目标实体
+         sendJudgementFx(level, attacker, action, range, targets);
          for (Entity target : targets) {
             executeEntity(target, attacker);
          }
       } finally {
          ACTIVE_ACTIONS.remove(id);
       }
+   }
+
+   private static void sendJudgementFx(ServerLevel level, Player attacker, Action action, double range, List<Entity> targets) {
+      int count = Math.min(targets.size(), FxEventPacket.MAX_ENTITIES);
+      int[] ids = new int[count];
+      for (int i = 0; i < count; i++) {
+         ids[i] = targets.get(i).getId();
+      }
+      Vec3 origin = action == Action.FACING ? attacker.getEyePosition() : attacker.position();
+      FxEvents.send(level, new FxEventPacket(FxTypes.LOLI_JUDGEMENT, origin, attacker.getLookAngle(), (float) range, 1.0F,
+         action == Action.AREA ? 1 : 0, attacker.getRandom().nextLong(), attacker.getId(), ids));
    }
 
    public static void handleFacingSpecialEffect(Player attacker) {
