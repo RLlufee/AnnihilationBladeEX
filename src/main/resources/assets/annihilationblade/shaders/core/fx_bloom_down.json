@@ -1,0 +1,14 @@
+{
+  "vertex": "annihilationblade:fx_screen",
+  "fragment": "annihilationblade:fx_bloom_down",
+  "attributes": ["Position"],
+  "samplers": [
+    { "name": "Sampler0" },
+    { "name": "Sampler1" }
+  ],
+  "uniforms": [
+    { "name": "TexelSize", "type": "float", "count": 2, "values": [0.0, 0.0] },
+    { "name": "Prefilter", "type": "float", "count": 1, "values": [0.0] },
+    { "name": "VolumeWeight", "type": "float", "count": 1, "values": [0.0] }
+  ]
+}

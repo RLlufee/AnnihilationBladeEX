@@ -1,6 +1,7 @@
 package QWQ.QingYi.annihilationblade.network;
 
 import QWQ.QingYi.annihilationblade.blood_prison.network.BloodPrisonDomainPacket;
+import QWQ.QingYi.annihilationblade.render.network.FxEventPacket;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,11 +11,11 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-   @SuppressWarnings("unused")
-   private static final String PROTOCOL_VERSION = "1";
+   /** 2：新增通用特效事件包 FxEventPacket，新旧版本客户端/服务端互相拒绝连接以免解析错乱。 */
+   private static final String PROTOCOL_VERSION = "2";
    private static int messageId;
    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-      ResourceLocation.fromNamespaceAndPath("annihilationblade", "main"), () -> "1", "1"::equals, "1"::equals
+      ResourceLocation.fromNamespaceAndPath("annihilationblade", "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals
    );
 
    private ModNetwork() {
@@ -60,6 +61,14 @@ public final class ModNetwork {
          NightfallDragonModeSwitchPacket::decode,
          NightfallDragonModeSwitchPacket::handle,
          Optional.of(NetworkDirection.PLAY_TO_SERVER)
+      );
+      CHANNEL.registerMessage(
+         messageId++,
+         FxEventPacket.class,
+         FxEventPacket::encode,
+         FxEventPacket::decode,
+         FxEventPacket::handle,
+         Optional.of(NetworkDirection.PLAY_TO_CLIENT)
       );
    }
 

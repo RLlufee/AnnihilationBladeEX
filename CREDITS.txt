@@ -63,3 +63,21 @@ with credit to it's authors.
 Forge Mod Loader downloads components from the Minecraft Coder Pack
 (http://mcp.ocean-labs.de/index.php/Main_Page) with kind permission from the MCP team.
 
+
+#=========================================================================
+
+SlashBlade: Finale Blade Sanctum - FX Renderer / 专属特效渲染器
+
+The dedicated FX renderer (package QWQ.QingYi.annihilationblade.render) was written
+for this mod. Its design was informed by the following projects:
+
+  * ArcaneVortex by Luoee (MIT License)
+      Shader-pack (Iris/Oculus) compatibility strategy: draw custom effects after the
+      shader-pack composite and skip the shadow pass; additive/screen FX blending ideas.
+  * Fantasy Ending by Luoee (MIT License)
+      In-level render task dispatching, beam/sphere/trail primitive ideas.
+  * The Shooting Star (Demo) by rimuru.dev (All Rights Reserved)
+      Architecture reference only (depth snapshot, FX-only HDR bloom chain, screen
+      composite with flash / aberration / radial blur). No code or shaders were copied.
+
+Thank you to these authors.

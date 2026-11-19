@@ -57,11 +57,35 @@ public final class ModConfig {
 
    public static final class Client extends AutoInitConfigContainer {
       public final ClientTooltips clientTooltips = new ClientTooltips();
+      public final ClientRenderer clientRenderer = new ClientRenderer();
 
       private Client() {
          super(ResourceLocation.fromNamespaceAndPath(Annihilationblade.MODID, "client"), "config.annihilationblade.client.title", "./config/annihilationblade/client.json");
       }
 
+   }
+
+   /**
+    * 专属特效渲染器（客户端）配置。只包含纯视觉、低风险参数。
+    */
+   public static final class ClientRenderer extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
+      /** 渲染器总开关；关闭或渲染器初始化失败时回退为客户端简化粒子。 */
+      public final BooleanEntry enabled = boolValue("fx_renderer_enabled", true, "config.annihilationblade.fx_renderer_enabled.tooltip");
+      /** B 档全屏体积/空间扭曲通道（光线步进）。 */
+      public final BooleanEntry volumetric = boolValue("fx_volumetric_enabled", true, "config.annihilationblade.fx_volumetric_enabled.tooltip");
+      public final IntegerEntry volumetricQuality = intKey("fx_volumetric_quality", 2, 1, 3);
+      public final BooleanEntry bloom = boolValue("fx_bloom_enabled", true, "config.annihilationblade.fx_bloom_enabled.tooltip");
+      public final DoubleEntry bloomStrength = doubleKey("fx_bloom_strength", 1.0, 0.0, 2.5);
+      public final DoubleEntry screenShake = doubleKey("fx_screen_shake", 1.0, 0.0, 2.0);
+      /** 闪白强度，光敏玩家可调低至 0。 */
+      public final DoubleEntry screenFlash = doubleKey("fx_screen_flash", 1.0, 0.0, 1.0);
+      public final DoubleEntry chromaticAberration = doubleKey("fx_chromatic_aberration", 1.0, 0.0, 2.0);
+      /** 检测到 Iris/Oculus 光影包时是否仍启用渲染器（延迟到光影合成之后绘制）。 */
+      public final BooleanEntry withShaderPack = boolValue("fx_with_shader_pack", true, "config.annihilationblade.fx_with_shader_pack.tooltip");
+
+      private ClientRenderer() {
+         super("client_renderer", "config.annihilationblade.client_renderer.title");
+      }
    }
 
    public static final class ClientTooltips extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
@@ -463,6 +487,24 @@ public final class ModConfig {
          .range(min, max)
          .key(name)
          .tooltip(Component.literal(chineseComment + " 推荐最小/最大值: " + min + "-" + max + ".\n" + englishComment + " Suggested min/max: " + min + "-" + max + "."))
+         .build();
+   }
+
+   /** 名称与提示均使用本地化键：config.annihilationblade.{name} / config.annihilationblade.{name}.tooltip。 */
+   private static IntegerEntry intKey(String name, int defaultValue, int min, int max) {
+      return IntegerEntry.builder("config.annihilationblade." + name, defaultValue)
+         .range(min, max)
+         .key(name)
+         .tooltip("config.annihilationblade." + name + ".tooltip")
+         .build();
+   }
+
+   /** 名称与提示均使用本地化键：config.annihilationblade.{name} / config.annihilationblade.{name}.tooltip。 */
+   private static DoubleEntry doubleKey(String name, double defaultValue, double min, double max) {
+      return DoubleEntry.builder("config.annihilationblade." + name, defaultValue)
+         .range(min, max)
+         .key(name)
+         .tooltip("config.annihilationblade." + name + ".tooltip")
          .build();
    }
 

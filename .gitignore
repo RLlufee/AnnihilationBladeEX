@@ -37,3 +37,7 @@ local_backups/
 *.ipr
 *.iws
 
+# 个性化
+libs/
+.backup/
+CHANGELOG.md

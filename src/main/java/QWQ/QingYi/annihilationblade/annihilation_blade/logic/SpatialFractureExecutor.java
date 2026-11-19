@@ -1,17 +1,16 @@
 package QWQ.QingYi.annihilationblade.annihilation_blade.logic;
 
-import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationVisuals;
 import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.config.ModConfig;
+import QWQ.QingYi.annihilationblade.render.FxEvents;
+import QWQ.QingYi.annihilationblade.render.FxTypes;
+import QWQ.QingYi.annihilationblade.render.network.FxEventPacket;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import mods.flammpfeil.slashblade.util.AttackManager;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -36,23 +35,49 @@ public final class SpatialFractureExecutor {
             Vec3 center = getFractureCenter(level, player, config);
             Set<LivingEntity> targets = gatherTargets(level, player, center, config);
             playOpeningRupture(level, player, center);
-            AnnihilationVisuals.spawnOpeningHalo(level, center, radius * visualScale);
-            spawnFractureField(level, player, center, config);
-            spawnBladeStorm(level, player, center, config);
+            // 视觉全部交给客户端专属渲染器：必须在处决之前发送，保证客户端解析目标实体时它们尚未被移除。
+            sendFractureFx(level, player, center, targets, radius * visualScale, visualScale, config);
+            spawnCenterSlashes(player, config);
             int visualized = 0;
 
             for (LivingEntity target : targets) {
                if (visualized < config.maxVisualizedTargets.getValue()) {
-                  spawnSlash(level, player, target);
+                  AttackManager.doSlash(player, player.getRandom().nextInt(360), Vec3.ZERO, true, true, 9999.0);
                }
 
                TerminusLogic.execute(target, player);
                visualized++;
             }
-
-            playDetonation(level, player, center, targets.size());
          }
       }
+   }
+
+   /**
+    * 发送「空间破碎」特效事件。爆炸音效随特效时间轴在客户端湮灭时刻播放，因此服务端不再播放。
+    */
+   private static void sendFractureFx(
+      ServerLevel level, Player player, Vec3 center, Set<LivingEntity> targets, double visualRadius, double visualScale, ModConfig.SpatialFracture config
+   ) {
+      int limit = Math.min(Math.min(targets.size(), config.maxVisualizedTargets.getValue()), FxEventPacket.MAX_ENTITIES);
+      int[] ids = new int[limit];
+      int index = 0;
+      for (LivingEntity target : targets) {
+         if (index >= limit) {
+            break;
+         }
+         ids[index++] = target.getId();
+      }
+      FxEvents.send(level, new FxEventPacket(
+         FxTypes.SPATIAL_FRACTURE,
+         center,
+         player.getLookAngle(),
+         (float)visualRadius,
+         (float)visualScale,
+         config.fractureSlashes.getValue(),
+         player.getRandom().nextLong(),
+         player.getId(),
+         ids
+      ));
    }
 
    private static Vec3 getFractureCenter(ServerLevel level, Player player, ModConfig.SpatialFracture config) {
@@ -149,130 +174,13 @@ public final class SpatialFractureExecutor {
       level.playSound(null, center.x, center.y, center.z, SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.PLAYERS, 2.0F, 0.55F);
    }
 
-   private static void spawnFractureField(ServerLevel level, Player player, Vec3 center, ModConfig.SpatialFracture config) {
-      double radius = config.fractureRadius.getValue();
-      double visualScale = config.visualScale.getValue();
-      double visualRadius = radius * visualScale;
-      level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 1.0, center.z, 5, 0.2, 0.2, 0.2, 0.0);
-      level.sendParticles(ParticleTypes.END_ROD, center.x, center.y + 1.0, center.z, visualCount(140, visualScale), visualRadius * 0.4, 4.0 * visualScale, visualRadius * 0.4, 0.25);
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, center.x, center.y + 1.0, center.z, visualCount(200, visualScale), visualRadius * 0.6, 5.0 * visualScale, visualRadius * 0.6, 0.7);
-      level.sendParticles(ParticleTypes.PORTAL, center.x, center.y + 1.0, center.z, visualCount(260, visualScale), visualRadius, 5.0 * visualScale, visualRadius, 1.0);
-      level.sendParticles(ParticleTypes.DRAGON_BREATH, center.x, center.y + 1.0, center.z, visualCount(110, visualScale), visualRadius * 0.35, 3.0 * visualScale, visualRadius * 0.35, 0.15);
-      spawnRing(level, center.add(0.0, 0.25, 0.0), visualRadius, ParticleTypes.ELECTRIC_SPARK, visualCount(96, visualScale));
-      spawnRing(level, center.add(0.0, 2.4, 0.0), visualRadius * 0.7, ParticleTypes.END_ROD, visualCount(72, visualScale));
-      spawnRing(level, center.add(0.0, 4.2, 0.0), visualRadius * 0.42, ParticleTypes.REVERSE_PORTAL, visualCount(54, visualScale));
-      spawnVerticalRing(level, center.add(0.0, 1.5, 0.0), visualRadius * 0.9, ParticleTypes.END_ROD, visualCount(72, visualScale), true);
-      spawnVerticalRing(level, center.add(0.0, 1.5, 0.0), visualRadius * 0.9, ParticleTypes.ELECTRIC_SPARK, visualCount(72, visualScale), false);
-      RandomSource random = player.getRandom();
-      AnnihilationVisuals.spawnWorldRiftBloom(level, center.add(0.0, 1.0, 0.0), visualRadius * 0.58);
-      AnnihilationVisuals.spawnFractureWeb(level, center, visualRadius, random);
-
-      for (int i = 0; i < visualCount(18, visualScale); i++) {
-         Vec3 end = center.add(randomUnit(random).scale(6.0 * visualScale + random.nextDouble() * visualRadius));
-         spawnParticleLine(level, center, end, ParticleTypes.REVERSE_PORTAL, visualCount(12, visualScale), 0.05);
-      }
-   }
-
-   private static void spawnBladeStorm(ServerLevel level, Player player, Vec3 center, ModConfig.SpatialFracture config) {
-      RandomSource random = player.getRandom();
-      double radius = config.fractureRadius.getValue();
-      double visualScale = config.visualScale.getValue();
-
+   /**
+    * 中心环形 SlashBlade 原生斩击（伤害/判定由 SlashBlade 处理，此处不涉及任何视觉粒子）。
+    */
+   private static void spawnCenterSlashes(Player player, ModConfig.SpatialFracture config) {
       int centerSlashes = config.centerSlashes.getValue();
       for (int i = 0; i < centerSlashes; i++) {
          AttackManager.doSlash(player, 360.0F * i / Math.max(1, centerSlashes), Vec3.ZERO, true, true, 9999.0);
       }
-
-      for (int i = 0; i < config.fractureSlashes.getValue(); i++) {
-         Vec3 direction = randomUnit(random);
-         Vec3 offset = randomUnit(random).scale(random.nextDouble() * radius * 0.65 * visualScale);
-         double length = (12.0 + random.nextDouble() * 32.0) * visualScale;
-         Vec3 middle = center.add(offset).add(0.0, (1.0 + random.nextDouble() * 5.0) * visualScale, 0.0);
-         Vec3 start = middle.add(direction.scale(-length * 0.5));
-         Vec3 end = middle.add(direction.scale(length * 0.5));
-         spawnParticleLine(level, start, end, ParticleTypes.END_ROD, visualCount(18, visualScale), 0.02);
-         spawnParticleLine(level, start, end, ParticleTypes.ELECTRIC_SPARK, visualCount(10, visualScale), 0.04);
-         if (i % 4 == 0) {
-            AnnihilationVisuals.spawnSlashBridge(level, start, end, 1.2 + random.nextDouble() * 0.8, random);
-         }
-
-         if (i % 3 == 0) {
-            spawnParticleLine(level, start, end, ParticleTypes.SWEEP_ATTACK, visualCount(6, visualScale), 0.0);
-         }
-      }
-   }
-
-   private static void spawnSlash(ServerLevel level, Player player, LivingEntity target) {
-      double y = target.getY() + target.getBbHeight() * 0.5;
-      Vec3 center = new Vec3(target.getX(), y, target.getZ());
-      level.sendParticles(ParticleTypes.FLASH, target.getX(), y, target.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-      level.sendParticles(ParticleTypes.END_ROD, target.getX(), y, target.getZ(), 35, 0.8, 0.8, 0.8, 0.08);
-      level.sendParticles(ParticleTypes.PORTAL, target.getX(), target.getY() + 1.0, target.getZ(), 60, 1.2, 1.2, 1.2, 0.45);
-      level.sendParticles(ParticleTypes.REVERSE_PORTAL, target.getX(), target.getY() + 1.0, target.getZ(), 45, 0.9, 0.9, 0.9, 0.35);
-      spawnParticleLine(level, center.add(-2.5, 1.8, -2.5), center.add(2.5, -1.4, 2.5), ParticleTypes.END_ROD, 18, 0.0);
-      spawnParticleLine(level, center.add(2.5, 1.8, -2.5), center.add(-2.5, -1.4, 2.5), ParticleTypes.ELECTRIC_SPARK, 18, 0.0);
-      AnnihilationVisuals.spawnExecutionBurst(level, target, player.getRandom());
-      AttackManager.doSlash(player, player.getRandom().nextInt(360), Vec3.ZERO, true, true, 9999.0);
-   }
-
-   private static void playDetonation(ServerLevel level, Player player, Vec3 center, int count) {
-      float volume = Math.min(4.0F, 1.0F + count / 20.0F);
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, volume, 0.35F);
-      level.playSound(null, center.x, center.y, center.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, volume, 0.65F);
-      level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, Math.min(2.5F, volume), 1.7F);
-      level.sendParticles(ParticleTypes.SONIC_BOOM, center.x, center.y + 1.0, center.z, 1, 0.0, 0.0, 0.0, 0.0);
-      level.sendParticles(ParticleTypes.DRAGON_BREATH, center.x, center.y + 1.0, center.z, 180, 5.0, 2.0, 5.0, 0.25);
-      AnnihilationVisuals.spawnCollapsePulse(level, center, 20.0, count);
-   }
-
-   private static void spawnRing(ServerLevel level, Vec3 center, double radius, ParticleOptions particle, int points) {
-      if (points <= 0) {
-         return;
-      }
-
-      for (int i = 0; i < points; i++) {
-         double angle = (Math.PI * 2) * i / points;
-         double x = center.x + Math.cos(angle) * radius;
-         double z = center.z + Math.sin(angle) * radius;
-         level.sendParticles(particle, x, center.y, z, 1, 0.02, 0.02, 0.02, 0.0);
-      }
-   }
-
-   private static void spawnVerticalRing(ServerLevel level, Vec3 center, double radius, ParticleOptions particle, int points, boolean alongX) {
-      if (points <= 0) {
-         return;
-      }
-
-      for (int i = 0; i < points; i++) {
-         double angle = (Math.PI * 2) * i / points;
-         double horizontal = Math.cos(angle) * radius;
-         double y = center.y + Math.sin(angle) * radius * 0.65;
-         double x = center.x + (alongX ? horizontal : 0.0);
-         double z = center.z + (alongX ? 0.0 : horizontal);
-         level.sendParticles(particle, x, y, z, 1, 0.02, 0.02, 0.02, 0.0);
-      }
-   }
-
-   private static void spawnParticleLine(ServerLevel level, Vec3 start, Vec3 end, ParticleOptions particle, int points, double jitter) {
-      if (points <= 0) {
-         return;
-      }
-
-      for (int i = 0; i <= points; i++) {
-         double progress = (double)i / points;
-         Vec3 pos = start.lerp(end, progress);
-         level.sendParticles(particle, pos.x, pos.y, pos.z, 1, jitter, jitter, jitter, 0.0);
-      }
-   }
-
-   private static Vec3 randomUnit(RandomSource random) {
-      double yaw = random.nextDouble() * Math.PI * 2.0;
-      double pitch = (random.nextDouble() - 0.5) * Math.PI;
-      double horizontal = Math.cos(pitch);
-      return new Vec3(Math.cos(yaw) * horizontal, Math.sin(pitch), Math.sin(yaw) * horizontal).normalize();
-   }
-
-   private static int visualCount(int base, double visualScale) {
-      return Math.max(1, (int)Math.round(base * visualScale));
    }
 }

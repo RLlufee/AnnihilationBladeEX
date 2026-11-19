@@ -1,0 +1,9 @@
+{
+  "vertex": "annihilationblade:fx_screen",
+  "fragment": "annihilationblade:fx_depth_copy",
+  "attributes": ["Position"],
+  "samplers": [
+    { "name": "Sampler0" }
+  ],
+  "uniforms": []
+}
