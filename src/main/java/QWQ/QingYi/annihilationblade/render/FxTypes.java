@@ -10,6 +10,8 @@ public final class FxTypes {
    public static final int SPATIAL_FRACTURE = 1;
    /** 无尽星空 SA「真空衰变·坍缩」（持续特效）。 */
    public static final int VACUUM_DECAY = 2;
+   /** 魔龙夜陨 SA「神陨·宇宙夜陨降临」（持续特效）。 */
+   public static final int COSMIC_DESCENT = 3;
 
    private FxTypes() {
    }

@@ -2,6 +2,8 @@ package QWQ.QingYi.annihilationblade.client;
 
 import QWQ.QingYi.annihilationblade.Annihilationblade;
 import QWQ.QingYi.annihilationblade.config.ModConfig;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.client.NightfallDragonClientRuntimeEvents;
+import QWQ.QingYi.annihilationblade.render.client.core.FxCameraShake;
 import com.iafenvoy.jupiter.ConfigManager;
 import com.iafenvoy.jupiter.render.screen.ConfigSelectScreen;
 import QWQ.QingYi.annihilationblade.registry.ModItems;
@@ -31,6 +33,8 @@ public final class AnnihilationBladeClientHandler {
    @SubscribeEvent
    public static void onClientSetup(FMLClientSetupEvent event) {
       ConfigManager.getInstance().registerConfigHandler(ModConfig.CLIENT);
+      // 魔龙夜陨震屏实体并入统一的镜头震动出口（倍率 + 上限）
+      FxCameraShake.addSource(NightfallDragonClientRuntimeEvents::contributeShake);
       ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
          () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> ConfigSelectScreen
             .builder(Component.translatable("config.annihilationblade.title"), parent)

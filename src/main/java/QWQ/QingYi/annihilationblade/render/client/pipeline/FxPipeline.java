@@ -274,6 +274,9 @@ public final class FxPipeline {
          composite.safeGetUniform("Center").set(screen.centerX, screen.centerY);
          composite.safeGetUniform("Vignette").set(screen.vignetteR, screen.vignetteG, screen.vignetteB, screen.vignette);
          composite.safeGetUniform("Desaturate").set(screen.desaturate);
+         // 冲击帧属于强闪烁画面，受「闪白强度」配置约束（设为 0 即关闭）
+         float impact = (float)(screen.impactFrame * config.screenFlash.getValue());
+         composite.safeGetUniform("ImpactFrame").set(Math.min(1.0F, impact), screen.impactInvert ? 1.0F : 0.0F);
          fullscreen(composite);
       } catch (Throwable throwable) {
          this.fail("frame", throwable);

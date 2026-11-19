@@ -77,6 +77,8 @@ public final class ModConfig {
       public final BooleanEntry bloom = boolValue("fx_bloom_enabled", true, "config.annihilationblade.fx_bloom_enabled.tooltip");
       public final DoubleEntry bloomStrength = doubleKey("fx_bloom_strength", 1.0, 0.0, 2.5);
       public final DoubleEntry screenShake = doubleKey("fx_screen_shake", 1.0, 0.0, 2.0);
+      /** 本模组所有镜头震动（含魔龙夜陨原有震屏）合并后每个轴的最大偏转角度。 */
+      public final DoubleEntry screenShakeMax = doubleKey("fx_screen_shake_max", 6.0, 0.0, 25.0);
       /** 闪白强度，光敏玩家可调低至 0。 */
       public final DoubleEntry screenFlash = doubleKey("fx_screen_flash", 1.0, 0.0, 1.0);
       public final DoubleEntry chromaticAberration = doubleKey("fx_chromatic_aberration", 1.0, 0.0, 2.0);

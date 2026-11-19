@@ -15,6 +15,7 @@ uniform float ZoomBlur;
 uniform vec2 Center;
 uniform vec4 Vignette;
 uniform float Desaturate;
+uniform vec2 ImpactFrame; // x = 冲击帧强度, y = 是否反相 (>0.5)
 
 in vec2 texCoord;
 
@@ -72,6 +73,14 @@ void main() {
 
     if (Flash.a > 0.001) {
         color = mix(color, Flash.rgb, Flash.a * 0.85);
+    }
+
+    // 冲击帧：按亮度二值化为高对比黑白（发光特效处为白），可反相，带一点暖色
+    if (ImpactFrame.x > 0.001) {
+        float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+        float edge = smoothstep(0.42, 0.52, luma);
+        vec3 mono = vec3(ImpactFrame.y > 0.5 ? 1.0 - edge : edge) * vec3(1.0, 0.93, 0.82);
+        color = mix(color, mono, ImpactFrame.x);
     }
 
     fragColor = vec4(clamp(color, 0.0, 1.0), 1.0);

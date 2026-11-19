@@ -42,6 +42,7 @@ public final class FxManager {
    private static final Matrix4f PROJECTION = new Matrix4f();
    private static boolean matricesCaptured;
    private static float shake;
+   private static float fovKick;
 
    private FxManager() {
    }
@@ -151,6 +152,7 @@ public final class FxManager {
 
    private static void renderFrame(Camera camera, float partialTick) {
       shake = 0.0F;
+      fovKick = 0.0F;
       if (ACTIVE.isEmpty() || !matricesCaptured || !FxPipeline.INSTANCE.active()) {
          return;
       }
@@ -176,25 +178,30 @@ public final class FxManager {
          }
       }
       shake = strongestShake;
+      fovKick = SCREEN.fovKick;
       if (!visible.isEmpty()) {
          FxPipeline.INSTANCE.render(frame, visible, SCREEN);
       }
    }
 
-   /** 镜头震动：在相机角度计算阶段叠加多频正弦抖动，强度按平方衰减更自然。 */
-   @SubscribeEvent
-   public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
-      float amount = shake * shake * (float)(double)ModConfig.CLIENT.clientRenderer.screenShake.getValue();
+   /**
+    * 本管理器的镜头震动来源（由 {@link FxCameraShake} 统一乘倍率并截断上限）。
+    * 多频正弦抖动，强度按平方衰减更自然。
+    */
+   static void contributeShake(float partialTick, float[] out) {
+      float amount = shake * shake;
       if (amount <= 1.0E-4F) {
          return;
       }
       double t = (System.nanoTime() % 100_000_000_000L) / 1.0E9;
-      float yaw = (float)(Math.sin(t * 37.0) * 0.6 + Math.sin(t * 61.0) * 0.4) * 2.4F * amount;
-      float pitch = (float)(Math.sin(t * 43.0 + 1.3) * 0.6 + Math.sin(t * 71.0) * 0.4) * 2.0F * amount;
-      float roll = (float)Math.sin(t * 29.0 + 0.7) * 2.6F * amount;
-      event.setYaw(event.getYaw() + yaw);
-      event.setPitch(event.getPitch() + pitch);
-      event.setRoll(event.getRoll() + roll);
+      out[0] += (float)(Math.sin(t * 37.0) * 0.6 + Math.sin(t * 61.0) * 0.4) * 2.4F * amount;
+      out[1] += (float)(Math.sin(t * 43.0 + 1.3) * 0.6 + Math.sin(t * 71.0) * 0.4) * 2.0F * amount;
+      out[2] += (float)Math.sin(t * 29.0 + 0.7) * 2.6F * amount;
+   }
+
+   /** 上一帧特效给出的视野冲击比例。 */
+   static float fovKick() {
+      return fovKick;
    }
 
    @SubscribeEvent

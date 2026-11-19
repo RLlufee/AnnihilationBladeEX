@@ -13,10 +13,11 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
    /**
-    * 2：新增通用特效事件包 FxEventPacket；3：新增持续特效通道 FxSustainPacket。
-    * 新旧版本客户端/服务端互相拒绝连接以免解析错乱。
+    * 2：新增通用特效事件包 FxEventPacket；3：新增持续特效通道 FxSustainPacket；
+    * 4：新增特效类型 COSMIC_DESCENT（旧客户端无法识别，且服务端已不再发送对应粒子）。
+    * 新旧版本客户端/服务端互相拒绝连接，避免解析错乱或特效缺失。
     */
-   private static final String PROTOCOL_VERSION = "3";
+   private static final String PROTOCOL_VERSION = "4";
    private static int messageId;
    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       ResourceLocation.fromNamespaceAndPath("annihilationblade", "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals

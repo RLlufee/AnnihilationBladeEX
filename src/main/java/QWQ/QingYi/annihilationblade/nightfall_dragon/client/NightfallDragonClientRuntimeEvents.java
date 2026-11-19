@@ -1,28 +1,33 @@
 package QWQ.QingYi.annihilationblade.nightfall_dragon.client;
 
-import QWQ.QingYi.annihilationblade.Annihilationblade;
 import QWQ.QingYi.annihilationblade.nightfall_dragon.entity.NightfallDragonScreenShakeEntity;
+import QWQ.QingYi.annihilationblade.render.client.core.FxCameraShake;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@EventBusSubscriber(modid = Annihilationblade.MODID, value = Dist.CLIENT)
+/**
+ * 魔龙夜陨震屏实体的镜头震动来源。
+ * <p>
+ * 原先直接在相机角度事件里叠加（最大 ±25°）；现改为 {@link FxCameraShake} 的一个来源，
+ * 与其他特效的震动合并后统一乘「镜头震动强度」倍率并截断到「镜头震动上限」。
+ * 由 {@code AnnihilationBladeClientHandler} 在客户端初始化时注册。
+ */
+@OnlyIn(Dist.CLIENT)
 public final class NightfallDragonClientRuntimeEvents {
+   private static final float MAX_DEGREES = 25.0F;
+
    private NightfallDragonClientRuntimeEvents() {
    }
 
-   @SubscribeEvent
-   public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+   public static void contributeShake(float partialTick, float[] out) {
       Minecraft minecraft = Minecraft.getInstance();
       Player player = minecraft.player;
-      if (player == null || minecraft.isPaused()) {
+      if (player == null) {
          return;
       }
 
-      float partialTick = minecraft.getFrameTime();
       float age = player.tickCount + partialTick;
       float shakeAmplitude = 0.0F;
       for (NightfallDragonScreenShakeEntity shake : player.level().getEntitiesOfClass(NightfallDragonScreenShakeEntity.class, player.getBoundingBox().inflate(24.0D))) {
@@ -36,8 +41,8 @@ public final class NightfallDragonClientRuntimeEvents {
       }
 
       shakeAmplitude = Math.min(shakeAmplitude, 1.0F);
-      event.setPitch((float)(event.getPitch() + shakeAmplitude * Math.cos(age * 3.0F + 2.0F) * 25.0F));
-      event.setYaw((float)(event.getYaw() + shakeAmplitude * Math.cos(age * 5.0F + 1.0F) * 25.0F));
-      event.setRoll((float)(event.getRoll() + shakeAmplitude * Math.cos(age * 4.0F) * 25.0F));
+      out[0] += (float)(shakeAmplitude * Math.cos(age * 5.0F + 1.0F) * MAX_DEGREES);
+      out[1] += (float)(shakeAmplitude * Math.cos(age * 3.0F + 2.0F) * MAX_DEGREES);
+      out[2] += (float)(shakeAmplitude * Math.cos(age * 4.0F) * MAX_DEGREES);
    }
 }

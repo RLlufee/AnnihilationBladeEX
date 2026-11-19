@@ -3,6 +3,7 @@ package QWQ.QingYi.annihilationblade.render.client;
 import QWQ.QingYi.annihilationblade.Annihilationblade;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.SpatialFractureFx;
 import QWQ.QingYi.annihilationblade.infinity_stellaris.client.fx.VacuumDecayFx;
+import QWQ.QingYi.annihilationblade.nightfall_dragon.client.fx.CosmicDescentFx;
 import QWQ.QingYi.annihilationblade.render.network.FxSustainPacket;
 import QWQ.QingYi.annihilationblade.render.FxTypes;
 import QWQ.QingYi.annihilationblade.render.client.core.FxInstance;
@@ -25,6 +26,7 @@ public final class FxClientDispatcher {
    static {
       FACTORIES.put(FxTypes.SPATIAL_FRACTURE, SpatialFractureFx::new);
       FACTORIES.put(FxTypes.VACUUM_DECAY, VacuumDecayFx::new);
+      FACTORIES.put(FxTypes.COSMIC_DESCENT, CosmicDescentFx::new);
    }
 
    private FxClientDispatcher() {

@@ -6,6 +6,7 @@ import QWQ.QingYi.annihilationblade.render.client.core.FxPass;
 import QWQ.QingYi.annihilationblade.render.client.core.FxScreenState;
 import QWQ.QingYi.annihilationblade.render.client.geometry.FxGeometry;
 import QWQ.QingYi.annihilationblade.render.client.geometry.FxGeometry.Style;
+import QWQ.QingYi.annihilationblade.render.client.geometry.FxLightningBolt;
 import QWQ.QingYi.annihilationblade.render.client.geometry.FxMath;
 import QWQ.QingYi.annihilationblade.render.client.pipeline.FxShaders;
 import QWQ.QingYi.annihilationblade.render.network.FxEventPacket;
@@ -70,7 +71,7 @@ public final class VacuumDecayFx extends FxInstance {
    private final float seedFloat;
    private final int boltsPerTick;
    private final RandomSource random;
-   private final List<Bolt> bolts = new ArrayList<>();
+   private final List<FxLightningBolt> bolts = new ArrayList<>();
    private final List<Ember> embers = new ArrayList<>();
    private int endAge = DEFAULT_DURATION;
    private float strike;
@@ -157,9 +158,9 @@ public final class VacuumDecayFx extends FxInstance {
       Vec3 camera = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
       this.strike *= 0.8F;
 
-      Iterator<Bolt> boltIterator = this.bolts.iterator();
+      Iterator<FxLightningBolt> boltIterator = this.bolts.iterator();
       while (boltIterator.hasNext()) {
-         Bolt bolt = boltIterator.next();
+         FxLightningBolt bolt = boltIterator.next();
          bolt.tick(this.random);
          if (bolt.dead()) {
             boltIterator.remove();
@@ -167,10 +168,10 @@ public final class VacuumDecayFx extends FxInstance {
       }
 
       if (age >= 2 && age < this.endAge) {
-         Bolt nearest = null;
+         FxLightningBolt nearest = null;
          double nearestDistance = Double.MAX_VALUE;
          for (int i = 0; i < this.boltsPerTick && this.bolts.size() < MAX_BOLTS; i++) {
-            Bolt bolt = this.spawnBolt(level);
+            FxLightningBolt bolt = this.spawnBolt(level);
             if (bolt == null) {
                continue;
             }
@@ -220,7 +221,7 @@ public final class VacuumDecayFx extends FxInstance {
       }
    }
 
-   private Bolt spawnBolt(ClientLevel level) {
+   private FxLightningBolt spawnBolt(ClientLevel level) {
       double x = this.center.x + (this.random.nextDouble() * 2.0 - 1.0) * this.half;
       double z = this.center.z + (this.random.nextDouble() * 2.0 - 1.0) * this.half;
       int bx = (int)Math.floor(x);
@@ -231,7 +232,7 @@ public final class VacuumDecayFx extends FxInstance {
       int height = level.getHeight(Heightmap.Types.MOTION_BLOCKING, bx, bz);
       double ground = height <= level.getMinBuildHeight() ? this.groundY : height;
       double top = Math.min(level.getMaxBuildHeight(), ground + 70.0 + this.random.nextDouble() * 40.0);
-      return new Bolt(x, z, top, ground, this.random.nextLong(), 1 + this.random.nextInt(3), BOLT_COLORS[this.random.nextInt(BOLT_COLORS.length)]);
+      return new FxLightningBolt(x, z, top, ground, this.random.nextLong(), 1 + this.random.nextInt(3), BOLT_COLORS[this.random.nextInt(BOLT_COLORS.length)]);
    }
 
    @Override
@@ -255,8 +256,8 @@ public final class VacuumDecayFx extends FxInstance {
          }
       }
       Vec3 camera = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-      for (Bolt bolt : this.bolts) {
-         if (bolt.fresh && camera.distanceToSqr(bolt.x, bolt.ground, bolt.z) < 96.0 * 96.0) {
+      for (FxLightningBolt bolt : this.bolts) {
+         if (bolt.fresh() && camera.distanceToSqr(bolt.x, bolt.ground, bolt.z) < 96.0 * 96.0) {
             for (int k = 0; k < 8; k++) {
                level.addParticle(ParticleTypes.ELECTRIC_SPARK, bolt.x, bolt.ground + k * 1.5, bolt.z, 0.0, 0.0, 0.0);
             }
@@ -385,19 +386,19 @@ public final class VacuumDecayFx extends FxInstance {
       // 4. 伽马雷电
       if (!this.bolts.isEmpty()) {
          g.begin(Style.RIBBON, 2.5F, 0.4F, 2.0F, 9.0F, 18.0F, 0.9F);
-         for (Bolt bolt : this.bolts) {
+         for (FxLightningBolt bolt : this.bolts) {
             if (bolt.visible()) {
                bolt.draw(g, frame, 4.0F, 0.55F, VIOLET);
             }
          }
          g.begin(Style.RIBBON, 10.0F, 0.4F, 9.0F, 12.0F, 24.0F, 0.2F);
-         for (Bolt bolt : this.bolts) {
+         for (FxLightningBolt bolt : this.bolts) {
             if (bolt.visible()) {
                bolt.draw(g, frame, 1.0F, 1.0F, bolt.color);
             }
          }
          g.begin(Style.GLOW, 6.0F, 0.6F, 5.0F, 2.2F, 1.0F, 0.0F);
-         for (Bolt bolt : this.bolts) {
+         for (FxLightningBolt bolt : this.bolts) {
             if (bolt.visible()) {
                g.billboard(frame.rel(new Vec3(bolt.x, bolt.ground + 0.6, bolt.z)), 3.5F, 0.0F, bolt.color[0], bolt.color[1], bolt.color[2], 1.0F);
             }
@@ -555,97 +556,6 @@ public final class VacuumDecayFx extends FxInstance {
    }
 
    // ───────────────────────────── 数据结构 ─────────────────────────────
-
-   /** 伽马雷电：生命周期与原版闪电一致（显示 → 熄灭 → 随机再闪 1~3 次），形状由种子决定。 */
-   private static final class Bolt {
-      final double x;
-      final double z;
-      final double top;
-      final double ground;
-      final float[] color;
-      int life = 2;
-      int flashes;
-      boolean fresh = true;
-      private List<Vec3> trunk;
-      private List<Vec3> branch;
-
-      Bolt(double x, double z, double top, double ground, long seed, int flashes, float[] color) {
-         this.x = x;
-         this.z = z;
-         this.top = top;
-         this.ground = ground;
-         this.flashes = flashes;
-         this.color = color;
-         this.reshape(seed);
-      }
-
-      private void reshape(long seed) {
-         RandomSource random = RandomSource.create(seed);
-         Vec3 from = new Vec3(this.x + (random.nextDouble() - 0.5) * 8.0, this.top, this.z + (random.nextDouble() - 0.5) * 8.0);
-         Vec3 to = new Vec3(this.x, this.ground, this.z);
-         this.trunk = displace(from, to, 5, (this.top - this.ground) * 0.06, random);
-         int index = this.trunk.size() / 4 + random.nextInt(Math.max(1, this.trunk.size() / 3));
-         Vec3 start = this.trunk.get(Math.min(index, this.trunk.size() - 2));
-         double length = (this.top - this.ground) * (0.2 + random.nextDouble() * 0.15);
-         double angle = random.nextDouble() * Math.PI * 2.0;
-         Vec3 end = start.add(Math.cos(angle) * length * 0.6, -length, Math.sin(angle) * length * 0.6);
-         this.branch = displace(start, end, 3, length * 0.12, random);
-      }
-
-      private static List<Vec3> displace(Vec3 from, Vec3 to, int depth, double amplitude, RandomSource random) {
-         List<Vec3> points = new ArrayList<>();
-         points.add(from);
-         points.add(to);
-         for (int level = 0; level < depth; level++) {
-            List<Vec3> next = new ArrayList<>(points.size() * 2);
-            for (int i = 0; i < points.size() - 1; i++) {
-               Vec3 a = points.get(i);
-               Vec3 b = points.get(i + 1);
-               next.add(a);
-               next.add(a.add(b).scale(0.5).add((random.nextDouble() - 0.5) * 2.0 * amplitude, 0.0, (random.nextDouble() - 0.5) * 2.0 * amplitude));
-            }
-            next.add(points.get(points.size() - 1));
-            points = next;
-            amplitude *= 0.55;
-         }
-         return points;
-      }
-
-      void tick(RandomSource random) {
-         this.fresh = false;
-         this.life--;
-         if (this.life < 0 && this.flashes > 0 && this.life < -random.nextInt(10)) {
-            this.flashes--;
-            this.life = 1;
-            this.reshape(random.nextLong());
-         }
-      }
-
-      boolean visible() {
-         return this.life >= 0;
-      }
-
-      boolean dead() {
-         return this.life < 0 && this.flashes <= 0;
-      }
-
-      void draw(FxGeometry g, FxFrame frame, float widthScale, float alphaScale, float[] tint) {
-         drawLine(g, frame, this.trunk, 0.32F * widthScale, alphaScale, tint);
-         drawLine(g, frame, this.branch, 0.18F * widthScale, alphaScale * 0.8F, tint);
-      }
-
-      private static void drawLine(FxGeometry g, FxFrame frame, List<Vec3> line, float width, float alpha, float[] tint) {
-         List<Vector3f> points = new ArrayList<>(line.size());
-         float[] widths = new float[line.size()];
-         float[] alphas = new float[line.size()];
-         for (int i = 0; i < line.size(); i++) {
-            points.add(frame.rel(line.get(i)));
-            widths[i] = width;
-            alphas[i] = alpha;
-         }
-         g.ribbon(points, widths, alphas, tint[0], tint[1], tint[2]);
-      }
-   }
 
    private static final class Ember {
       double x;
