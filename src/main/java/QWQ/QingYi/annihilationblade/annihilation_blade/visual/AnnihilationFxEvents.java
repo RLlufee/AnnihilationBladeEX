@@ -108,6 +108,67 @@ public final class AnnihilationFxEvents {
       ));
    }
 
+   /** 虚无权域：在 center 展开半径 range 的穹顶并抹除 targets，必须在处决之前调用。 */
+   public static void voidDominion(ServerLevel level, Player player, Vec3 center, double range, double visualScale, List<LivingEntity> targets) {
+      int size = Math.min(targets.size(), FxEventPacket.MAX_ENTITIES);
+      int[] ids = new int[size];
+      for (int i = 0; i < size; i++) {
+         ids[i] = targets.get(i).getId();
+      }
+      FxEvents.send(level, new FxEventPacket(
+         FxTypes.VOID_DOMINION, center, player.getLookAngle(), (float)range, (float)visualScale, 0,
+         level.getRandom().nextLong(), player.getId(), ids
+      ));
+   }
+
+   /** 幻影审判事件种类：搜索期（环绕剑阵 + 锁定）。 */
+   public static final int PHANTOM_SEARCH = 0;
+   /** 幻影审判事件种类：降下剑雨。 */
+   public static final int PHANTOM_RAIN = 1;
+
+   /** 幻影审判：intParam = 环绕剑数 | 每目标落剑数 << 5 | 种类 << 10 | 搜索 tick << 12 | 残留 tick/2 << 19。 */
+   public static int packPhantom(int kind) {
+      ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
+      int swords = Math.min(31, config.swordCount.getValue());
+      int rain = Math.min(31, config.rainSwordsPerTarget.getValue());
+      int search = Math.min(127, config.searchTicks.getValue());
+      int linger = Math.min(127, config.lingerTicks.getValue() / 2);
+      return swords | (rain << 5) | ((kind & 0x3) << 10) | (search << 12) | (linger << 19);
+   }
+
+   /** 颜色放在 seed 低 32 位，高位为随机数。 */
+   private static long phantomSeed(ServerLevel level, int color) {
+      return ((long)level.getRandom().nextInt() << 32) | (color & 0xFFFFFFFFL);
+   }
+
+   /** 幻影审判开始（持续特效 START）：center = 环绕中心，lockedIds = 锁定的目标（按锁定顺序）。 */
+   public static int phantomSearch(ServerLevel level, Player player, Vec3 center, int color, int[] lockedIds) {
+      ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
+      return FxSustained.start(level, new FxEventPacket(
+         FxTypes.PHANTOM_JUDGEMENT, center, Vec3.ZERO, config.range.getValue().floatValue(), config.visualScale.getValue().floatValue(),
+         packPhantom(PHANTOM_SEARCH), phantomSeed(level, color), player.getId(), lockedIds
+      ), config.searchTicks.getValue() + 10);
+   }
+
+   /** 幻影审判降下剑雨（持续特效 UPDATE），必须在处决这些目标之前调用。center = 审判时剑阵中心。 */
+   public static void phantomRain(int handle, ServerLevel level, Player player, Vec3 center, int color, List<LivingEntity> targets) {
+      ModConfig.PhantomJudgement config = ModConfig.COMMON.annihilationBlade.phantomJudgement;
+      int size = Math.min(targets.size(), FxEventPacket.MAX_ENTITIES);
+      int[] ids = new int[size];
+      for (int i = 0; i < size; i++) {
+         ids[i] = targets.get(i).getId();
+      }
+      FxSustained.update(handle, new FxEventPacket(
+         FxTypes.PHANTOM_JUDGEMENT, center, Vec3.ZERO, config.range.getValue().floatValue(), config.visualScale.getValue().floatValue(),
+         packPhantom(PHANTOM_RAIN), phantomSeed(level, color), player.getId(), ids
+      ));
+   }
+
+   /** 幻影审判结束（持续特效 STOP）：客户端继续播放剑雨与残留剑光直至结束。 */
+   public static void phantomEnd(int handle) {
+      FxSustained.stop(handle);
+   }
+
    /** 归墟天诏事件种类（intParam 低 4 位）：开场构筑星冕。 */
    public static final int DECREE_BEGIN = 0;
    /** 归墟天诏事件种类（intParam 低 4 位）：一次敕裁，高位为序号。 */

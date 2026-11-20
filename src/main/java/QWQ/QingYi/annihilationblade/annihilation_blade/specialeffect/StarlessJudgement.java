@@ -46,7 +46,6 @@ public class StarlessJudgement extends SpecialEffect {
                   double width = config.width.getValue();
                   double visualScale = config.visualScale.getValue();
                   Vec3 direction = player.getLookAngle().normalize();
-                  Vec3 right = SpecialEffectSupport.rightOf(direction);
                   Vec3 start = player.getEyePosition().add(direction.scale(1.4));
                   level.playSound(null, start.x, start.y, start.z, SoundEvents.TRIDENT_THUNDER, SoundSource.PLAYERS, 1.2F, 1.75F);
                   level.playSound(null, start.x, start.y, start.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 0.8F, 1.35F);

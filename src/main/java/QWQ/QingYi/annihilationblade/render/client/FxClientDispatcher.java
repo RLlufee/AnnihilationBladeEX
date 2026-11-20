@@ -4,10 +4,12 @@ import QWQ.QingYi.annihilationblade.Annihilationblade;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.AbyssalDecreeFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.CausalityCollapseFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.DankongFx;
+import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.PhantomJudgementFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.SpatialFractureFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.StarlessJudgementFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.TerminusEchoFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.TerminusMarkPool;
+import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.VoidDominionFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.WorldRiftFx;
 import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodBurstFx;
 import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodDashFx;
@@ -56,6 +58,8 @@ public final class FxClientDispatcher {
       FACTORIES.put(FxTypes.TERMINUS_ECHO, TerminusEchoFx::new);
       FACTORIES.put(FxTypes.STARLESS_JUDGEMENT, StarlessJudgementFx::new);
       FACTORIES.put(FxTypes.ABYSSAL_DECREE, AbyssalDecreeFx::new);
+      FACTORIES.put(FxTypes.PHANTOM_JUDGEMENT, PhantomJudgementFx::new);
+      FACTORIES.put(FxTypes.VOID_DOMINION, VoidDominionFx::new);
    }
 
    private FxClientDispatcher() {

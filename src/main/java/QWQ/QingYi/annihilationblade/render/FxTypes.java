@@ -63,6 +63,18 @@ public final class FxTypes {
     * origin = 星冕位置（施法者头顶 +3.2），scale = 视觉倍率；敕裁时 radius = 目标体高（兜底），entityIds = [目标]。
     */
    public static final int ABYSSAL_DECREE = 17;
+   /**
+    * 湮灭之刃 SE「幻影审判·九剑星轨」（持续特效：搜索期 START，降剑 UPDATE，随后 STOP）。
+    * origin = 剑阵中心，radius = 搜索范围，scale = 视觉倍率，seed 低 32 位 = 刀色，
+    * intParam 见 {@code AnnihilationFxEvents.packPhantom}，entityIds = 锁定 / 审判的目标。
+    * 剑阵几何与服务端共用 {@code PhantomJudgementPattern}。
+    */
+   public static final int PHANTOM_JUDGEMENT = 18;
+   /**
+    * 湮灭之刃 SE「虚无权域·万象湮灭」（一次性）。origin = 穹顶中心，direction = 视线，radius = 穹顶半径，
+    * scale = 视觉倍率，entityIds = 被抹除的目标。
+    */
+   public static final int VOID_DOMINION = 19;
 
    private FxTypes() {
    }

@@ -1,11 +1,13 @@
 package QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect;
 
 import QWQ.QingYi.annihilationblade.annihilation_blade.logic.TerminusLogic;
-import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationVisuals;
+import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationFxEvents;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
 import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.registry.ModSpecialEffects;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import mods.flammpfeil.slashblade.capability.slashblade.ISlashBladeState;
@@ -46,24 +48,19 @@ public class VoidDominion extends SpecialEffect {
                   double visualScale = config.visualScale.getValue();
                   Vec3 direction = player.getLookAngle().normalize();
                   Vec3 center = player.getEyePosition().add(direction.scale(10.0));
-                  AnnihilationVisuals.spawnOpeningHalo(level, center, range * 0.62 * visualScale);
-                  AnnihilationVisuals.spawnWorldRiftBloom(level, center, range * 0.42 * visualScale);
-                  AnnihilationVisuals.spawnFractureWeb(level, center, range * 0.78 * visualScale, player.getRandom());
-                  int count = 0;
-
+                  List<LivingEntity> targets = new ArrayList<>();
                   for (LivingEntity target : SpecialEffectSupport.radialTargets(level, player, center, range)) {
-                     if (count >= config.maxTargets.getValue()) {
+                     if (targets.size() >= config.maxTargets.getValue()) {
                         break;
                      }
-
-                     Vec3 targetCenter = SpecialEffectSupport.centerOf(target);
-                     AnnihilationVisuals.spawnSlashBridge(level, center, targetCenter, 1.4, player.getRandom());
-                     AnnihilationVisuals.spawnExecutionBurst(level, target, player.getRandom());
-                     TerminusLogic.execute(target, player);
-                     count++;
+                     targets.add(target);
                   }
+                  // 先发事件再处决：客户端需要在目标被移除前解析到它们
+                  AnnihilationFxEvents.voidDominion(level, player, center, range, visualScale, targets);
 
-                  AnnihilationVisuals.spawnCollapsePulse(level, center, range * 0.72 * visualScale, count);
+                  for (LivingEntity target : targets) {
+                     TerminusLogic.execute(target, player);
+                  }
                }
             }
          }

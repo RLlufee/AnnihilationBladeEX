@@ -709,7 +709,8 @@ vec4 styleAfterimage(vec2 uv) {
     float burn = dissolve > 0.001 ? (1.0 - smoothstep(dissolve, dissolve + 0.12, noise)) : 0.0;
 
     if (FxBlendMode > 0.5) {
-        float fill = (0.22 + rim * 0.3) * alive;
+        // 本体层：半透明暗色剪影；y（面内填充）> 0 时可得到实心暗块（虚无权域的涂黑框）
+        float fill = clamp(0.22 + rim * 0.3 + FxParams.y, 0.0, 1.0) * alive;
         return vec4(vertexColor.rgb * 0.25, fill);
     }
     float intensity = edgeLine * 1.5 + rim * 0.8 + FxParams.y + scan * 0.22;
