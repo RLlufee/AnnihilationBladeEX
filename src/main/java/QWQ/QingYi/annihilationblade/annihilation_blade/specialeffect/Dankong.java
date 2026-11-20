@@ -1,7 +1,7 @@
 package QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect;
 
 import QWQ.QingYi.annihilationblade.annihilation_blade.logic.TerminusLogic;
-import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationVisuals;
+import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationFxEvents;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
 import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.registry.ModSpecialEffects;
@@ -14,7 +14,6 @@ import mods.flammpfeil.slashblade.capability.slashblade.ISlashBladeState;
 import mods.flammpfeil.slashblade.event.SlashBladeEvent.DoSlashEvent;
 import mods.flammpfeil.slashblade.registry.specialeffects.SpecialEffect;
 import mods.flammpfeil.slashblade.util.AttackManager;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -80,9 +79,17 @@ public class Dankong extends SpecialEffect {
                         Vec3 origin = player.position();
                         List<UUID> targets = collectTargets(player, origin);
                         if (!targets.isEmpty()) {
-                           ACTIVE.put(player.getUUID(), new Dankong.Sequence(origin, player.getYRot(), player.getXRot(), targets));
-                           AnnihilationVisuals.spawnBlinkGate(
-                              player.serverLevel(), origin.add(0.0, 1.0, 0.0), 2.0 * ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue()
+                           Dankong.Sequence sequence = new Dankong.Sequence(origin, player.getYRot(), player.getXRot(), targets);
+                           ACTIVE.put(player.getUUID(), sequence);
+                           int stepInterval = ModConfig.COMMON.annihilationBlade.dankong.stepInterval.getValue();
+                           sequence.fxHandle = AnnihilationFxEvents.dankongOpen(
+                              player.serverLevel(),
+                              player,
+                              chestOf(player, origin),
+                              ModConfig.COMMON.annihilationBlade.dankong.range.getValue(),
+                              ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue(),
+                              targets.size() * stepInterval + stepInterval * 2 + 20,
+                              entityIds(player.serverLevel(), targets)
                            );
                            player.level()
                               .playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.2F, 1.8F);
@@ -113,7 +120,7 @@ public class Dankong extends SpecialEffect {
                   while (sequence.index < sequence.targets.size()) {
                      LivingEntity target = findTarget(level, sequence.targets.get(sequence.index++));
                      if (target != null && canTarget(player, target)) {
-                        strikeTarget(level, player, target, sequence.origin);
+                        strikeTarget(level, player, target, sequence);
                         return;
                      }
                   }
@@ -126,7 +133,10 @@ public class Dankong extends SpecialEffect {
    }
 
    private static void cancelActiveSequence(UUID playerId) {
-      ACTIVE.remove(playerId);
+      Dankong.Sequence sequence = ACTIVE.remove(playerId);
+      if (sequence != null) {
+         AnnihilationFxEvents.dankongFinish(sequence.fxHandle);
+      }
    }
 
    private static void finishSequence(ServerPlayer player, Dankong.Sequence sequence) {
@@ -134,20 +144,28 @@ public class Dankong extends SpecialEffect {
       player.teleportTo(level, sequence.origin.x, sequence.origin.y, sequence.origin.z, sequence.yRot, sequence.xRot);
       player.setDeltaMovement(Vec3.ZERO);
       level.playSound(null, sequence.origin.x, sequence.origin.y, sequence.origin.z, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.PLAYERS, 1.4F, 0.6F);
-      double visualScale = ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue();
-      level.sendParticles(
-         ParticleTypes.REVERSE_PORTAL,
-         sequence.origin.x,
-         sequence.origin.y + 1.0,
-         sequence.origin.z,
-         visualCount(90, visualScale),
-         1.4 * visualScale,
-         0.9 * visualScale,
-         1.4 * visualScale,
-         0.35
-      );
-      AnnihilationVisuals.spawnBlinkGate(level, sequence.origin.add(0.0, 1.0, 0.0), 2.4 * visualScale);
+      AnnihilationFxEvents.dankongFinish(sequence.fxHandle);
       ACTIVE.remove(player.getUUID());
+   }
+
+   /** 锁定目标的实体 ID（仅用于客户端视觉：死兆星）。 */
+   private static int[] entityIds(ServerLevel level, List<UUID> targets) {
+      int[] ids = new int[Math.min(targets.size(), 256)];
+      int count = 0;
+      for (UUID uuid : targets) {
+         if (count >= ids.length) {
+            break;
+         }
+         LivingEntity entity = findTarget(level, uuid);
+         if (entity != null) {
+            ids[count++] = entity.getId();
+         }
+      }
+      return count == ids.length ? ids : java.util.Arrays.copyOf(ids, count);
+   }
+
+   private static Vec3 chestOf(Player player, Vec3 feet) {
+      return feet.add(0.0, player.getBbHeight() * 0.5, 0.0);
    }
 
    private static List<UUID> collectTargets(ServerPlayer player, Vec3 origin) {
@@ -181,7 +199,8 @@ public class Dankong extends SpecialEffect {
       return SpecialEffectSupport.findLivingEntity(level, uuid);
    }
 
-   private static void strikeTarget(ServerLevel level, ServerPlayer player, LivingEntity target, Vec3 origin) {
+   private static void strikeTarget(ServerLevel level, ServerPlayer player, LivingEntity target, Dankong.Sequence sequence) {
+      Vec3 origin = sequence.origin;
       Vec3 targetCenter = target.position().add(0.0, target.getBbHeight() * 0.5, 0.0);
       Vec3 away = target.position().subtract(origin);
       if (away.lengthSqr() < 0.01) {
@@ -191,17 +210,14 @@ public class Dankong extends SpecialEffect {
       Vec3 attackPos = target.position().add(away.normalize().scale(1.8)).add(0.0, 0.15, 0.0);
       float yaw = yawToFace(attackPos, targetCenter);
       float pitch = pitchToFace(attackPos, targetCenter);
-      Vec3 travelStart = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+      Vec3 travelStart = chestOf(player, player.position());
       player.teleportTo(level, attackPos.x, attackPos.y, attackPos.z, yaw, pitch);
       player.setDeltaMovement(Vec3.ZERO);
-      AnnihilationVisuals.spawnBlinkTrail(level, travelStart, targetCenter, player.getRandom());
-      double visualScale = ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue();
-      level.sendParticles(ParticleTypes.FLASH, targetCenter.x, targetCenter.y, targetCenter.z, 1, 0.0, 0.0, 0.0, 0.0);
-      level.sendParticles(ParticleTypes.END_ROD, targetCenter.x, targetCenter.y, targetCenter.z, visualCount(55, visualScale), 0.8 * visualScale, 0.8 * visualScale, 0.8 * visualScale, 0.12);
-      level.sendParticles(
-         ParticleTypes.REVERSE_PORTAL, targetCenter.x, targetCenter.y, targetCenter.z, visualCount(80, visualScale), 1.2 * visualScale, 1.0 * visualScale, 1.2 * visualScale, 0.45
+      // 先发事件再斩击：客户端需要在目标被处决前解析到它
+      AnnihilationFxEvents.dankongStrike(
+         sequence.fxHandle, level, player, travelStart, chestOf(player, attackPos), target, sequence.strikes++,
+         ModConfig.COMMON.annihilationBlade.dankong.visualScale.getValue()
       );
-      AnnihilationVisuals.spawnExecutionBurst(level, target, player.getRandom());
       level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 1.9F);
       AttackManager.doSlash(player, player.getRandom().nextInt(360), Vec3.ZERO, true, true, 9999.0);
       TerminusLogic.execute(target, player);
@@ -222,10 +238,6 @@ public class Dankong extends SpecialEffect {
       return (float)(-(Mth.atan2(diff.y, horizontal) * 180.0F / (float)Math.PI));
    }
 
-   private static int visualCount(int base, double visualScale) {
-      return Math.max(1, (int)Math.round(base * visualScale));
-   }
-
    private static class Sequence {
       private final Vec3 origin;
       private final float yRot;
@@ -233,6 +245,8 @@ public class Dankong extends SpecialEffect {
       private final List<UUID> targets;
       private int index;
       private int age;
+      private int strikes;
+      private int fxHandle = -1;
 
       private Sequence(Vec3 origin, float yRot, float xRot, List<UUID> targets) {
          this.origin = origin;

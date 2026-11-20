@@ -3,7 +3,7 @@
 #moj_import <annihilationblade:fx_common.glsl>
 
 // 网格特效统一着色器：
-// 支持 13 种程序化 + 流场贴图驱动着色风格，兼容 HDR 加法发光层（FxBlendMode = 0）
+// 支持 16 种程序化 + 流场贴图驱动着色风格，兼容 HDR 加法发光层（FxBlendMode = 0）
 // 与预乘 Alpha 实体/暗部衬底层（FxBlendMode = 1）。
 uniform sampler2D Sampler0; // 场景原始深度（R32F）
 uniform sampler2D Sampler1; // 256x256 无缝四通道流场噪声贴图（R=fBm云雾, G=Worley脊线, BA=旋度偏移）
@@ -636,6 +636,98 @@ vec4 styleCorona(vec2 uv) {
     return vec4(col, clamp(energy, 0.0, 1.0));
 }
 
+// 断空全息残影：模型逐面绘制（rawQuad，uv 为每个面的 [-1,1]），棱边发光 + 菲涅尔轮廓 + 流动扫描线；
+// w 为溶解进度，按流场噪声逐片烧蚀并在烧蚀前沿留下白热边。
+// 本体层输出半透明暗色剪影，让残影在明亮天空下依然有体积。
+vec4 styleAfterimage(vec2 uv) {
+    vec2 a = abs(uv);
+    float edge = max(a.x, a.y);
+    float lineWidth = max(gRadialWidth * 2.5, 0.05) * max(FxParams.x, 0.1);
+    float edgeLine = smoothstep(1.0 - lineWidth * 2.2, 1.0 - lineWidth * 0.3, edge);
+
+    vec3 viewDir = normalize(-relativePos);
+    float ndv = clamp(abs(dot(gFaceNormal, viewDir)), 0.0, 1.0);
+    float rim = pow(1.0 - ndv, 2.2);
+
+    float scan = 0.5 + 0.5 * sin(relativePos.y * FxParams.z * 6.2831 - FxTime * 9.0);
+    scan = smoothstep(0.55, 1.0, scan);
+
+    float noise = texture(Sampler1, fract(uv * 0.23 + vec2(relativePos.x + relativePos.z, relativePos.y) * 0.17)).g;
+    float dissolve = FxParams.w;
+    float alive = smoothstep(dissolve - 0.02, dissolve + 0.02, noise);
+    if (alive <= 0.001) {
+        return vec4(0.0);
+    }
+    float burn = dissolve > 0.001 ? (1.0 - smoothstep(dissolve, dissolve + 0.12, noise)) : 0.0;
+
+    if (FxBlendMode > 0.5) {
+        float fill = (0.22 + rim * 0.3) * alive;
+        return vec4(vertexColor.rgb * 0.25, fill);
+    }
+    float intensity = edgeLine * 1.5 + rim * 0.8 + FxParams.y + scan * 0.22;
+    vec3 col = vertexColor.rgb * intensity * alive;
+    col += vec3(1.0) * (edgeLine * edgeLine * 0.55 + burn * 2.2) * alive;
+    return vec4(col, clamp(intensity * alive, 0.0, 1.0));
+}
+
+// 虚空裂口半宽轮廓（uv.y 沿裂口方向 [-1,1]，返回 uv.x 方向半宽）。
+float slitHalfWidth(float y, float open, float jag, float variant) {
+    float ay = abs(y);
+    float profile = variant < 0.5 ? pow(max(1.0 - ay * ay, 0.0), 0.75) : (1.0 - smoothstep(0.82, 1.0, ay));
+    float ridge = texture(Sampler1, fract(vec2(0.13 + variant * 0.37, y * 0.45 + FxTime * 0.07))).g;
+    float fine = fxNoise1(y * 23.0 + FxTime * 3.0);
+    float tear = (ridge - 0.5) * 0.7 + (fine - 0.5) * 0.3;
+    return max(0.0, 0.5 * open * profile + tear * jag * 0.18 * open * sqrt(profile));
+}
+
+// 虚空裂口（quad：uv.x 横跨裂口，uv.y 沿裂口方向）。
+// params: x=张开度, y=边缘撕裂强度, z=变体(0 眼形伤口 / 1 直刃裂缝), w=内部细节（眼形：因果之眼睁开程度；直刃：星点密度）
+// 本体层画深紫→纯黑的暗腔；发光层画锯齿刃口、内侧白热边、外侧晕光、内部暗星与因果之眼。
+vec4 styleVoidSlit(vec2 uv) {
+    float open = FxParams.x;
+    float variant = FxParams.z;
+    float w = slitHalfWidth(uv.y, open, FxParams.y, variant);
+    float d = abs(uv.x) - w;
+    float aa = max(gRadialWidth * 1.5, 0.004);
+    float inside = 1.0 - smoothstep(-aa, aa, d);
+    float endFade = 1.0 - smoothstep(0.9, 1.0, abs(uv.y));
+
+    if (FxBlendMode > 0.5) {
+        float depth01 = w > 1.0e-4 ? clamp(1.0 - abs(uv.x) / w, 0.0, 1.0) : 0.0;
+        vec3 cavity = mix(vec3(0.16, 0.02, 0.2), vec3(0.008, 0.0, 0.02), sqrt(depth01));
+        return vec4(cavity, inside * 0.97 * endFade);
+    }
+
+    float rimWidth = 0.022 + 0.02 * FxParams.y;
+    float rim = exp(-abs(d) / rimWidth);
+    float innerHot = exp(-max(-d, 0.0) / 0.012) * inside;
+    float halo = exp(-max(d, 0.0) / 0.18) * (1.0 - inside) * 0.35;
+    vec3 col = vertexColor.rgb * (rim * 1.4 + halo) + vec3(1.0, 0.75, 0.95) * innerHot * 0.9;
+    float alpha = rim + halo + innerHot;
+
+    if (inside > 0.0) {
+        vec2 grid = vec2(uv.x * 14.0, uv.y * 9.0 + FxTime * 0.15);
+        vec2 cell = floor(grid);
+        vec2 f = fract(grid) - 0.5;
+        float h = fxHash12(cell);
+        float threshold = variant < 0.5 ? 0.82 : mix(0.95, 0.72, clamp(FxParams.w, 0.0, 1.0));
+        float star = step(threshold, h) * exp(-dot(f, f) * 60.0) * (0.5 + 0.5 * sin(FxTime * 5.0 + h * 40.0));
+        col += vec3(0.9, 0.6, 1.0) * star * inside * 0.8;
+        alpha += star * inside * 0.5;
+        if (variant < 0.5 && FxParams.w > 0.0) {
+            float eye = FxParams.w;
+            vec2 e = vec2(uv.x / max(w, 0.05), uv.y / 0.38);
+            float r = length(e);
+            float iris = exp(-abs(r - 0.62 * eye) / 0.05) * eye;
+            float pupil = (1.0 - smoothstep(0.035 * eye, 0.055 * eye, abs(uv.x))) * (1.0 - smoothstep(0.24 * eye, 0.3 * eye, abs(uv.y)));
+            vec3 gold = vec3(1.0, 0.76, 0.36);
+            col += gold * (iris * 1.2 + pupil * 2.0) * inside;
+            alpha += (iris + pupil) * inside;
+        }
+    }
+    return vec4(col * endFade, clamp(alpha * endFade, 0.0, 1.0));
+}
+
 void main() {
     gFaceNormal = normalize(cross(dFdx(relativePos), dFdy(relativePos)) + vec3(0.0, 1.0e-7, 0.0));
     gRadialWidth = fwidth(length(texCoord0));
@@ -671,8 +763,12 @@ void main() {
         res = styleSlashArc(texCoord0);
     } else if (FxStyle < 12.5) {
         res = styleShockCone(texCoord0);
-    } else {
+    } else if (FxStyle < 13.5) {
         res = styleCorona(texCoord0);
+    } else if (FxStyle < 14.5) {
+        res = styleAfterimage(texCoord0);
+    } else {
+        res = styleVoidSlit(texCoord0);
     }
 
     if (FxBlendMode > 0.5) {

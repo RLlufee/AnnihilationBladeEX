@@ -1,7 +1,10 @@
 package QWQ.QingYi.annihilationblade.render.client;
 
 import QWQ.QingYi.annihilationblade.Annihilationblade;
+import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.DankongFx;
 import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.SpatialFractureFx;
+import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.TerminusMarkPool;
+import QWQ.QingYi.annihilationblade.annihilation_blade.client.fx.WorldRiftFx;
 import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodBurstFx;
 import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodDashFx;
 import QWQ.QingYi.annihilationblade.blood_prison.client.fx.BloodDomainFx;
@@ -41,6 +44,10 @@ public final class FxClientDispatcher {
       FACTORIES.put(FxTypes.JUDGEMENT_CUT, JudgementCutFx::new);
       FACTORIES.put(FxTypes.SCALE_GUARD, ScaleGuardFx::new);
       FACTORIES.put(FxTypes.LOLI_JUDGEMENT, LoliJudgementFx::new);
+      // 池化特效：工厂把事件并入已有实例并返回 null，不新建实例
+      FACTORIES.put(FxTypes.TERMINUS_MARK, TerminusMarkPool::accept);
+      FACTORIES.put(FxTypes.DANKONG, DankongFx::new);
+      FACTORIES.put(FxTypes.WORLD_RIFT, WorldRiftFx::new);
    }
 
    private FxClientDispatcher() {

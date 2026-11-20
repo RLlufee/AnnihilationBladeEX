@@ -19,7 +19,7 @@ public final class ModNetwork {
     * 6：新增 JUDGEMENT_DOMAIN / JUDGEMENT_CUT / SCALE_GUARD / LOLI_JUDGEMENT。
     * 新旧版本客户端/服务端互相拒绝连接，避免解析错乱或特效缺失。
     */
-   private static final String PROTOCOL_VERSION = "6";
+   private static final String PROTOCOL_VERSION = "7";
    private static int messageId;
    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       ResourceLocation.fromNamespaceAndPath("annihilationblade", "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals

@@ -56,7 +56,11 @@ public final class FxGeometry {
       /** 3D 喇叭形多层冲击波锥（cylinder 锥台），params: x=扩散进度(0..1), y=波速, z=边缘撕裂强度, w=喉部核心亮核。 */
       SHOCK_CONE(12),
       /** 360° 三平面无缝沸腾日冕/日蚀球壳（配合 deformedSphere + geoCenter），params: x=边缘日冕锐度, y=湍流对比度, z=流动速度, w=脉动强度。 */
-      CORONA(13);
+      CORONA(13),
+      /** 全息残影（rawQuad 逐面绘制模型），params: x=棱边线宽倍率, y=面内填充, z=扫描线密度, w=溶解进度(0..1)。 */
+      AFTERIMAGE(14),
+      /** 虚空裂口（quad，uv.x 横跨 / uv.y 沿裂口），params: x=张开度, y=边缘撕裂强度, z=变体(0 眼形伤口 / 1 直刃裂缝), w=内部细节。 */
+      VOID_SLIT(15);
 
       final float id;
 
@@ -516,6 +520,20 @@ public final class FxGeometry {
       this.vertex(p3x, p3y, p3z, r, g, b, a, 0.0F, -1.0F);
       this.vertex(p0.x, p0.y, p0.z, r, g, b, a, 1.0F, 0.0F);
       this.vertex(bot.x, bot.y, bot.z, r, g, b, a, 0.0F, 0.0F);
+   }
+
+   /**
+    * 任意四边形（按环绕顺序给出四个顶点），uv 依次为 (-1,-1) (1,-1) (1,1) (-1,1)。
+    * 用于把截取到的模型面原样画进特效层（例如断空的全息残影）。
+    */
+   public void rawQuad(Vector3f v0, Vector3f v1, Vector3f v2, Vector3f v3, float r, float g, float b, float a) {
+      if (this.builder == null || a <= 0.0F) {
+         return;
+      }
+      this.vertex(v0.x, v0.y, v0.z, r, g, b, a, -1.0F, -1.0F);
+      this.vertex(v1.x, v1.y, v1.z, r, g, b, a, 1.0F, -1.0F);
+      this.vertex(v2.x, v2.y, v2.z, r, g, b, a, 1.0F, 1.0F);
+      this.vertex(v3.x, v3.y, v3.z, r, g, b, a, -1.0F, 1.0F);
    }
 
    /** 两点间的直线拖尾（火花、流星），头部宽、尾部尖。 */

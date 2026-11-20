@@ -10,7 +10,7 @@ import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.PhantomJudg
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.StarlessJudgement;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.TerminusEcho;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.VoidDominion;
-import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationVisuals;
+import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationFxEvents;
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
@@ -203,7 +203,7 @@ public class ModEventHandler {
                event.setAmount(10000.0F);
                TerminusLogic.markForDeath(event.getEntity());
                if (event.getEntity().level() instanceof ServerLevel level) {
-                  AnnihilationVisuals.spawnExecutionBurst(level, event.getEntity(), player.getRandom());
+                  AnnihilationFxEvents.terminusMark(level, player, event.getEntity());
                }
 
                if (player.distanceTo(event.getEntity()) < 6.0F) {

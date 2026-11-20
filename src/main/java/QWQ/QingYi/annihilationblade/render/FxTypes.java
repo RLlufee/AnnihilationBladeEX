@@ -26,6 +26,21 @@ public final class FxTypes {
    public static final int SCALE_GUARD = 9;
    /** 萝莉刀审判（一次性）。intParam = 0 锥形（SE）/ 1 范围（SA）；entityIds = 被审判的目标。 */
    public static final int LOLI_JUDGEMENT = 10;
+   /**
+    * 湮灭之刃 · 终焉印记（普通命中的终焉判定，一次性，客户端并入同一个池化实例）。
+    * radius = 目标体宽，scale = 目标体高，entityIds = [目标]。
+    */
+   public static final int TERMINUS_MARK = 11;
+   /**
+    * 湮灭之刃 SE「断空·瞬狱终闪」（持续特效）。intParam 低 4 位为种类：0 开场 / 1 闪现（高位为斩序号）。
+    * 开场：origin = 起点胸口；闪现：origin = 落点胸口，direction = 落点 − 出发点，entityIds = [目标]。scale = 视觉倍率。
+    */
+   public static final int DANKONG = 12;
+   /**
+    * 湮灭之刃 SE「裂界·因果伤痕」（一次性，连锁时每层一个包）。origin = 伤口中心，radius = 牵引半径 × 视觉倍率，
+    * scale = 视觉倍率，intParam = 当前层数 | 最大层数 << 4，entityIds = 被拖入伤口的目标。
+    */
+   public static final int WORLD_RIFT = 13;
 
    private FxTypes() {
    }
