@@ -1,5 +1,6 @@
 package QWQ.QingYi.annihilationblade.annihilation_blade.visual;
 
+import QWQ.QingYi.annihilationblade.config.ModConfig;
 import QWQ.QingYi.annihilationblade.render.FxEvents;
 import QWQ.QingYi.annihilationblade.render.FxSustained;
 import QWQ.QingYi.annihilationblade.render.FxTypes;
@@ -85,6 +86,102 @@ public final class AnnihilationFxEvents {
          attacker.getId(),
          ids
       ));
+   }
+
+   /** 因果坍缩：从 start 出发按顺序串起 chain，必须在处决链上目标之前调用。 */
+   public static void causalityCollapse(ServerLevel level, Player attacker, Vec3 start, double radius, double visualScale, List<LivingEntity> chain) {
+      int count = Math.min(chain.size(), FxEventPacket.MAX_ENTITIES);
+      int[] ids = new int[count];
+      for (int i = 0; i < count; i++) {
+         ids[i] = chain.get(i).getId();
+      }
+      FxEvents.send(level, new FxEventPacket(
+         FxTypes.CAUSALITY_COLLAPSE,
+         start,
+         attacker.getLookAngle(),
+         (float)(radius * visualScale),
+         (float)visualScale,
+         count,
+         level.getRandom().nextLong(),
+         attacker.getId(),
+         ids
+      ));
+   }
+
+   /** 归墟天诏事件种类（intParam 低 4 位）：开场构筑星冕。 */
+   public static final int DECREE_BEGIN = 0;
+   /** 归墟天诏事件种类（intParam 低 4 位）：一次敕裁，高位为序号。 */
+   public static final int DECREE_STRIKE = 1;
+
+   /** 归墟天诏开始（持续特效 START）：在施法者头顶构筑星冕。 */
+   public static int decreeBegin(ServerLevel level, Player player, Vec3 crown, double range, double visualScale, int duration) {
+      return FxSustained.start(level, new FxEventPacket(
+         FxTypes.ABYSSAL_DECREE, crown, Vec3.ZERO, (float)range, (float)visualScale, DECREE_BEGIN,
+         level.getRandom().nextLong(), player.getId(), new int[0]
+      ), duration);
+   }
+
+   /** 归墟天诏一次敕裁（持续特效 UPDATE），必须在处决该目标之前调用。 */
+   public static void decreeStrike(int handle, ServerLevel level, Player player, LivingEntity target, int index) {
+      FxSustained.update(handle, new FxEventPacket(
+         FxTypes.ABYSSAL_DECREE, player.position().add(0.0, player.getBbHeight() + 3.2, 0.0), Vec3.ZERO,
+         target.getBbHeight(), ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.getValue().floatValue(), DECREE_STRIKE | (index << 4),
+         level.getRandom().nextLong(), player.getId(), new int[]{target.getId()}
+      ));
+   }
+
+   /** 归墟天诏结束（持续特效 STOP）：星冕收拢成诏。 */
+   public static void decreeEnd(int handle) {
+      FxSustained.stop(handle);
+   }
+
+   /** 星寂裁决：沿 direction 劈开天幕并审判 targets（按投影由近到远），必须在处决之前调用。 */
+   public static void starlessJudgement(ServerLevel level, Player player, Vec3 start, Vec3 direction, double range, double width, double visualScale, List<LivingEntity> targets) {
+      int size = Math.min(targets.size(), FxEventPacket.MAX_ENTITIES);
+      int[] ids = new int[size];
+      for (int i = 0; i < size; i++) {
+         ids[i] = targets.get(i).getId();
+      }
+      int scale = (int)Math.max(1, Math.min(255, Math.round(visualScale * 10.0)));
+      FxEvents.send(level, new FxEventPacket(
+         FxTypes.STARLESS_JUDGEMENT, start, direction, (float)range, (float)width, scale, level.getRandom().nextLong(), player.getId(), ids
+      ));
+   }
+
+   /** 归墟回响：打包 intParam = 波序号 | 总波数 << 4 | 波间隔 << 8 | 视觉倍率×10 << 12。 */
+   public static int packEcho(int wave, int count, int interval, double visualScale) {
+      int scale = (int)Math.max(1, Math.min(255, Math.round(visualScale * 10.0)));
+      return (wave & 0xF) | ((count & 0xF) << 4) | ((interval & 0xF) << 8) | (scale << 12);
+   }
+
+   private static FxEventPacket echoPacket(ServerLevel level, Player player, Vec3 sequenceStart, Vec3 direction, double baseRange, double baseWidth,
+                                           int wave, int count, int interval, double visualScale, List<LivingEntity> targets) {
+      int size = Math.min(targets.size(), FxEventPacket.MAX_ENTITIES);
+      int[] ids = new int[size];
+      for (int i = 0; i < size; i++) {
+         ids[i] = targets.get(i).getId();
+      }
+      return new FxEventPacket(
+         FxTypes.TERMINUS_ECHO, sequenceStart, direction, (float)baseRange, (float)baseWidth,
+         packEcho(wave, count, interval, visualScale), level.getRandom().nextLong(), player.getId(), ids
+      );
+   }
+
+   /** 归墟回响开始（持续特效 START，携带第 0 波）。必须在处决第 0 波目标之前调用。 */
+   public static int echoBegin(ServerLevel level, Player player, Vec3 sequenceStart, Vec3 direction, double baseRange, double baseWidth,
+                               int count, int interval, double visualScale, List<LivingEntity> targets, int duration) {
+      return FxSustained.start(level, echoPacket(level, player, sequenceStart, direction, baseRange, baseWidth, 0, count, interval, visualScale, targets), duration);
+   }
+
+   /** 归墟回响后续一波（持续特效 UPDATE）。必须在处决本波目标之前调用。 */
+   public static void echoWave(int handle, ServerLevel level, Player player, Vec3 sequenceStart, Vec3 direction, double baseRange, double baseWidth,
+                               int wave, int count, int interval, double visualScale, List<LivingEntity> targets) {
+      FxSustained.update(handle, echoPacket(level, player, sequenceStart, direction, baseRange, baseWidth, wave, count, interval, visualScale, targets));
+   }
+
+   /** 归墟回响结束（持续特效 STOP）：客户端在最后一波走完后回放乐章。 */
+   public static void echoEnd(int handle) {
+      FxSustained.stop(handle);
    }
 
    /** 断空收刀（持续特效 STOP）：客户端播放「納刀」。 */

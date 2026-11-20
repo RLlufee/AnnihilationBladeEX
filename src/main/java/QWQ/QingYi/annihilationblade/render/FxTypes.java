@@ -41,6 +41,28 @@ public final class FxTypes {
     * scale = 视觉倍率，intParam = 当前层数 | 最大层数 << 4，entityIds = 被拖入伤口的目标。
     */
    public static final int WORLD_RIFT = 13;
+   /**
+    * 湮灭之刃 SE「因果坍缩·连锁抹消」（一次性）。origin = 链起点（施法者刀身），direction = 视线，
+    * radius = 链半径 × 视觉倍率，scale = 视觉倍率，entityIds = 按链顺序排列的目标。
+    */
+   public static final int CAUSALITY_COLLAPSE = 14;
+   /**
+    * 湮灭之刃 SE「归墟回响·终焉余律」（持续特效：START 携带第 0 波，之后每波一个 UPDATE，序列结束 STOP）。
+    * origin = 序列起点，direction = 朝向，radius = 基础射程，scale = 基础宽度，
+    * intParam = 波序号 | 总波数 << 4 | 波间隔 << 8 | 视觉倍率×10 << 12，entityIds = 本波命中的目标。
+    * 每波的实际起点、射程、宽度由 {@code TerminusEchoPattern} 推出。
+    */
+   public static final int TERMINUS_ECHO = 15;
+   /**
+    * 湮灭之刃 SE「星寂裁决·断天终判」（一次性）。origin = 判定带起点，direction = 朝向，radius = 射程，scale = 宽度，
+    * intParam = 视觉倍率×10，entityIds = 判定带内的目标（按投影由近到远）。
+    */
+   public static final int STARLESS_JUDGEMENT = 16;
+   /**
+    * 湮灭之刃 SE「归墟天诏·星冕敕裁」（持续特效）。intParam 低 4 位为种类：0 开场 / 1 敕裁（高位为序号）。
+    * origin = 星冕位置（施法者头顶 +3.2），scale = 视觉倍率；敕裁时 radius = 目标体高（兜底），entityIds = [目标]。
+    */
+   public static final int ABYSSAL_DECREE = 17;
 
    private FxTypes() {
    }

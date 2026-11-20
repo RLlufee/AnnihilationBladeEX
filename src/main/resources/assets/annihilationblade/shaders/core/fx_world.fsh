@@ -209,7 +209,55 @@ vec4 styleRibbon(vec2 uv) {
     return vec4(col, alpha);
 }
 
+// 归墟天诏「敕印」（RUNE 变体 3）：金色方形印框 + 角饰 + 紫色程序化篆文。
+// params: x=旋转, y=种子, z=3, w=篆文浮现进度（各笔画按哈希顺序逐格显现）
+vec4 styleSeal(vec2 uv) {
+    vec2 p = rotate2(uv, FxParams.x);
+    float aa = max(gRadialWidth * 1.2, 0.0015);
+    float box = max(abs(p.x), abs(p.y));
+    if (box > 1.0) {
+        return vec4(0.0);
+    }
+    float border = aaLine(box - 0.95, 0.03, aa) + aaLine(box - 0.84, 0.01, aa);
+    vec2 q = abs(p) - vec2(0.9);
+    border += aaLine(max(abs(q.x), abs(q.y)) - 0.05, 0.008, aa);
+
+    float glyph = 0.0;
+    vec2 inner = p / 0.76;
+    if (max(abs(inner.x), abs(inner.y)) < 1.0) {
+        vec2 grid = (inner * 0.5 + 0.5) * 4.0;
+        vec2 cell = floor(grid);
+        vec2 f = fract(grid) - 0.5;
+        float h = fxHash12(cell + FxParams.y * 7.13);
+        float h2 = fxHash12(cell * 1.7 + FxParams.y);
+        float order = fxHash12(cell + 3.1);
+        float shown = smoothstep(order, order + 0.08, FxParams.w * 1.08);
+        float w = 0.09;
+        float horizontal = 1.0 - smoothstep(w, w + 0.05, abs(f.y + (h2 - 0.5) * 0.4));
+        float vertical = 1.0 - smoothstep(w, w + 0.05, abs(f.x + (h - 0.5) * 0.4));
+        float stroke;
+        if (h < 0.3) {
+            stroke = horizontal;
+        } else if (h < 0.55) {
+            stroke = vertical;
+        } else if (h < 0.8) {
+            stroke = max(horizontal, vertical);
+        } else {
+            stroke = max(horizontal * step(f.x, 0.1), vertical * step(-0.1, f.y));
+        }
+        glyph = stroke * shown;
+    }
+    float shimmer = 0.85 + 0.15 * sin(FxTime * 6.0 + p.x * 5.0 + p.y * 3.0);
+    float fillMask = 1.0 - smoothstep(0.84, 0.86, box);
+    vec3 purple = vec3(0.62, 0.28, 1.0);
+    vec3 col = (vertexColor.rgb * border * 1.2 + purple * glyph * 1.1 + vertexColor.rgb * fillMask * 0.05 + vec3(1.0) * border * 0.25) * shimmer;
+    return vec4(col, clamp(border + glyph * 0.9 + fillMask * 0.05, 0.0, 1.0));
+}
+
 vec4 styleRune(vec2 uv) {
+    if (FxParams.z > 2.5) {
+        return styleSeal(uv);
+    }
     float r = length(uv);
     if (r > 1.0) {
         return vec4(0.0);
@@ -702,7 +750,7 @@ vec4 styleVoidSlit(vec2 uv) {
     float rim = exp(-abs(d) / rimWidth);
     float innerHot = exp(-max(-d, 0.0) / 0.012) * inside;
     float halo = exp(-max(d, 0.0) / 0.18) * (1.0 - inside) * 0.35;
-    vec3 col = vertexColor.rgb * (rim * 1.4 + halo) + vec3(1.0, 0.75, 0.95) * innerHot * 0.9;
+    vec3 col = vertexColor.rgb * (rim * 1.4 + halo) + mix(vertexColor.rgb, vec3(1.0), 0.65) * innerHot * 0.9;
     float alpha = rim + halo + innerHot;
 
     if (inside > 0.0) {
