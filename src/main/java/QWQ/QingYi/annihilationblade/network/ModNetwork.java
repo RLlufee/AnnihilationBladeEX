@@ -16,10 +16,12 @@ public final class ModNetwork {
     * 2：新增通用特效事件包 FxEventPacket；3：新增持续特效通道 FxSustainPacket；
     * 4：新增特效类型 COSMIC_DESCENT（旧客户端无法识别，且服务端已不再发送对应粒子）；
     * 5：新增血狱特效 BLOOD_DOMAIN / BLOOD_DASH / BLOOD_BURST，魔龙夜陨常驻光环改为客户端绘制；
-    * 6：新增 JUDGEMENT_DOMAIN / JUDGEMENT_CUT / SCALE_GUARD / LOLI_JUDGEMENT。
+    * 6：新增 JUDGEMENT_DOMAIN / JUDGEMENT_CUT / SCALE_GUARD / LOLI_JUDGEMENT；
+    * 7：迁移湮灭之刃全部 SE 至专属渲染器；
+    * 8：移除已废弃的 TERMINUS_MARK（11）与 ABYSSAL_DECREE（17）特效事件。
     * 新旧版本客户端/服务端互相拒绝连接，避免解析错乱或特效缺失。
     */
-   private static final String PROTOCOL_VERSION = "7";
+   private static final String PROTOCOL_VERSION = "8";
    private static int messageId;
    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
       ResourceLocation.fromNamespaceAndPath("annihilationblade", "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals

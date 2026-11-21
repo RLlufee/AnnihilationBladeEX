@@ -32,8 +32,7 @@ public final class AnnihilationBladeDefinitions {
       "annihilationblade:void_dominion",
       "annihilationblade:causality_collapse",
       "annihilationblade:starless_judgement",
-      "annihilationblade:phantom_judgement",
-      "annihilationblade:abyssal_decree"
+      "annihilationblade:phantom_judgement"
    };
 
    private AnnihilationBladeDefinitions() {

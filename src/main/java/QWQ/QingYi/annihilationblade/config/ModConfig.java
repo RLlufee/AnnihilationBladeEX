@@ -29,7 +29,6 @@ public final class ModConfig {
       public final CausalityCollapse causalityCollapse;
       public final StarlessJudgement starlessJudgement;
       public final PhantomJudgement phantomJudgement;
-      public final AbyssalDecree abyssalDecree;
       public final Domain bloodPrisonDomain;
       public final PhantomBurst bloodPrisonPhantomBurst;
 
@@ -48,7 +47,6 @@ public final class ModConfig {
          this.causalityCollapse = this.annihilationBlade.causalityCollapse;
          this.starlessJudgement = this.annihilationBlade.starlessJudgement;
          this.phantomJudgement = this.annihilationBlade.phantomJudgement;
-         this.abyssalDecree = this.annihilationBlade.abyssalDecree;
          this.bloodPrisonDomain = this.bloodPrison.domain;
          this.bloodPrisonPhantomBurst = this.bloodPrison.phantomBurst;
       }
@@ -108,7 +106,6 @@ public final class ModConfig {
       public final CausalityCollapse causalityCollapse;
       public final StarlessJudgement starlessJudgement;
       public final PhantomJudgement phantomJudgement;
-      public final AbyssalDecree abyssalDecree;
 
       private AnnihilationBlade() {
          this.spatialFracture = new SpatialFracture();
@@ -119,7 +116,6 @@ public final class ModConfig {
          this.causalityCollapse = new CausalityCollapse();
          this.starlessJudgement = new StarlessJudgement();
          this.phantomJudgement = new PhantomJudgement();
-         this.abyssalDecree = new AbyssalDecree();
       }
    }
 
@@ -325,23 +321,6 @@ public final class ModConfig {
          this.maxTargets = intValue("max_targets", 24, 1, 96, "幻影审判最多目标数，建议 12-36。", "Maximum Phantom Judgement targets. Suggested: 12-36.");
          this.maxLingeringSwords = intValue("max_lingering_swords", 96, 0, 256, "同一玩家最多残留剑数量，建议 48-128。", "Maximum lingering swords per player. Suggested: 48-128.");
          this.cooldownTicks = intValue("cooldown_ticks", 44, 0, 200, "触发冷却 tick，建议 34-80。", "Trigger cooldown in ticks. Suggested: 34-80.");
-         this.visualScale = visualScale(1.0);
-      }
-   }
-
-   public static final class AbyssalDecree extends AutoInitConfigContainer.AutoInitConfigCategoryBase {
-      public final DoubleEntry range;
-      public final IntegerEntry maxTargets;
-      public final IntegerEntry strikeInterval;
-      public final IntegerEntry cooldownTicks;
-      public final DoubleEntry visualScale;
-
-      private AbyssalDecree() {
-         super("annihilation_blade.abyssal_decree", "config.annihilationblade.annihilation_blade.abyssal_decree.title");
-         this.range = doubleValue("range", 34.0, 6.0, 96.0, "归墟天诏搜索范围，建议 20-48。", "Abyssal Decree search range. Suggested: 20-48.");
-         this.maxTargets = intValue("max_targets", 16, 1, 80, "归墟天诏最多目标数，建议 8-24。", "Maximum Abyssal Decree targets. Suggested: 8-24.");
-         this.strikeInterval = intValue("strike_interval_ticks", 3, 1, 12, "逐个裁决间隔 tick，建议 2-5。", "Ticks between decree strikes. Suggested: 2-5.");
-         this.cooldownTicks = intValue("cooldown_ticks", 82, 0, 240, "触发冷却 tick，建议 70-120。", "Trigger cooldown in ticks. Suggested: 70-120.");
          this.visualScale = visualScale(1.0);
       }
    }

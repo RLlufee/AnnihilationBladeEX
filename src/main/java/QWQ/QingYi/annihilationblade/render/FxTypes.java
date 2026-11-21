@@ -26,11 +26,7 @@ public final class FxTypes {
    public static final int SCALE_GUARD = 9;
    /** 萝莉刀审判（一次性）。intParam = 0 锥形（SE）/ 1 范围（SA）；entityIds = 被审判的目标。 */
    public static final int LOLI_JUDGEMENT = 10;
-   /**
-    * 湮灭之刃 · 终焉印记（普通命中的终焉判定，一次性，客户端并入同一个池化实例）。
-    * radius = 目标体宽，scale = 目标体高，entityIds = [目标]。
-    */
-   public static final int TERMINUS_MARK = 11;
+   // 编号 11 原为 TERMINUS_MARK（终焉印记），已移除，按末尾追加规则留空不复用。
    /**
     * 湮灭之刃 SE「断空·瞬狱终闪」（持续特效）。intParam 低 4 位为种类：0 开场 / 1 闪现（高位为斩序号）。
     * 开场：origin = 起点胸口；闪现：origin = 落点胸口，direction = 落点 − 出发点，entityIds = [目标]。scale = 视觉倍率。
@@ -58,11 +54,7 @@ public final class FxTypes {
     * intParam = 视觉倍率×10，entityIds = 判定带内的目标（按投影由近到远）。
     */
    public static final int STARLESS_JUDGEMENT = 16;
-   /**
-    * 湮灭之刃 SE「归墟天诏·星冕敕裁」（持续特效）。intParam 低 4 位为种类：0 开场 / 1 敕裁（高位为序号）。
-    * origin = 星冕位置（施法者头顶 +3.2），scale = 视觉倍率；敕裁时 radius = 目标体高（兜底），entityIds = [目标]。
-    */
-   public static final int ABYSSAL_DECREE = 17;
+   // 编号 17 原为 ABYSSAL_DECREE（归墟天诏），已移除，按末尾追加规则留空不复用。
    /**
     * 湮灭之刃 SE「幻影审判·九剑星轨」（持续特效：搜索期 START，降剑 UPDATE，随后 STOP）。
     * origin = 剑阵中心，radius = 搜索范围，scale = 视觉倍率，seed 低 32 位 = 刀色，

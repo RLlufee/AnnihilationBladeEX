@@ -78,10 +78,15 @@ void main() {
             float boundary = 1.0 - smoothstep(0.82, 1.0, rel);
             fieldMask = front * boundary * fade;
             vor = fxVoronoi3(p / max(Extra.z, 0.25) + seed, cell);
+            float cut = clamp(Extra.w, 0.0, 1.5);
             vec3 h = fxHash33(cell + 17.0);
-            vec2 shard = (h.xy - 0.5) * (0.018 + 0.05 * collapse);
-            shard += (cuv - uv) * collapse * 0.12 * h.z;
-            offset += shard * fieldMask;
+            vec2 shard = (h.xy - 0.5) * (0.022 + 0.055 * collapse + 0.028 * cut);
+            shard += (cuv - uv) * (collapse * 0.12 + cut * 0.05) * h.z;
+            // 单块碎片的独立棱镜倍镜折射，呈现玻璃碎裂与错位放大感
+            float facetZoom = 1.0 + (0.14 + 0.34 * cut) * (0.35 + 0.65 * h.z);
+            vec2 facetPivot = clamp(cuv + (h.xy - 0.5) * 0.24, 0.05, 0.95);
+            vec2 prismZoom = clamp((facetPivot - uv) * (1.0 - 1.0 / facetZoom), vec2(-0.08), vec2(0.08));
+            offset += (shard + prismZoom) * fieldMask;
         }
     }
 
@@ -90,12 +95,20 @@ void main() {
     vec3 color = texture(Sampler0, sampleUv).rgb;
 
     if (fieldMask > 0.0) {
-        color = mix(color, color * vec3(0.78, 0.72, 1.05) + vec3(0.02, 0.0, 0.04), 0.45 * fieldMask);
+        float cut = clamp(Extra.w, 0.0, 1.5);
+        vec3 hEdge = fxHash33(cell + 17.0);
         float isVoid = 1.0 - smoothstep(Extra.y - 0.05, Extra.y, vor.z);
-        color = mix(color, fxVoidSky(rd, cell, FxTime), isVoid * fieldMask);
-        float crack = 1.0 - smoothstep(0.0, 0.07, vor.y);
-        color *= 1.0 - crack * 0.8 * fieldMask;
-        color *= 1.0 + (fxHash13(cell + 5.0) - 0.5) * 0.25 * fieldMask;
+        float crack = 1.0 - smoothstep(0.0, 0.075, vor.y);
+        float bevel = exp(-max(vor.y - 0.015, 0.0) * 58.0) * (0.25 + 0.95 * cut);
+
+        float tintStrength = (0.45 + 0.22 * cut) * fieldMask;
+        vec3 shardColor = mix(color, color * vec3(0.76, 0.74, 1.08) + vec3(0.02, 0.005, 0.045), tintStrength);
+        shardColor = mix(shardColor, fxVoidSky(rd, cell, FxTime), isVoid * fieldMask);
+        shardColor *= 1.0 + (fxHash13(cell + 5.0) - 0.5) * (0.28 + 0.24 * cut) * fieldMask;
+        shardColor = mix(shardColor, clamp((shardColor - 0.5) * (1.12 + 0.14 * cut) + 0.5, 0.0, 2.5), cut * 0.45 * fieldMask * (1.0 - isVoid));
+        shardColor *= 1.0 - crack * 0.85 * fieldMask;
+        vec3 bevelCol = mix(vec3(0.72, 0.48, 1.0), vec3(0.85, 0.96, 1.0), hEdge.z);
+        color = shardColor + bevelCol * bevel * (1.0 - crack * 0.65) * fieldMask;
     }
 
     // 事件视界：纯黑核心与外围暗晕

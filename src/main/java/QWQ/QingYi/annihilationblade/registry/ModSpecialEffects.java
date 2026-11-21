@@ -1,6 +1,5 @@
 package QWQ.QingYi.annihilationblade.registry;
 
-import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.AbyssalDecree;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.CausalityCollapse;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.Dankong;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.PhantomJudgement;
@@ -35,7 +34,6 @@ public class ModSpecialEffects {
    public static final RegistryObject<SpecialEffect> CAUSALITY_COLLAPSE = SPECIAL_EFFECTS.register("causality_collapse", CausalityCollapse::new);
    public static final RegistryObject<SpecialEffect> STARLESS_JUDGEMENT = SPECIAL_EFFECTS.register("starless_judgement", StarlessJudgement::new);
    public static final RegistryObject<SpecialEffect> PHANTOM_JUDGEMENT = SPECIAL_EFFECTS.register("phantom_judgement", PhantomJudgement::new);
-   public static final RegistryObject<SpecialEffect> ABYSSAL_DECREE = SPECIAL_EFFECTS.register("abyssal_decree", AbyssalDecree::new);
    public static final RegistryObject<SpecialEffect> BLOOD_LEECH = SPECIAL_EFFECTS.register("blood_leech", () -> new SpecialEffect(0, false, false));
    public static final RegistryObject<SpecialEffect> SPIRIT_SHIELD = SPECIAL_EFFECTS.register("spirit_shield", () -> new SpecialEffect(0, false, false));
    public static final RegistryObject<SpecialEffect> PHANTOM_MARK = SPECIAL_EFFECTS.register("phantom_mark", () -> new SpecialEffect(0, false, false));

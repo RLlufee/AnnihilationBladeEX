@@ -85,4 +85,9 @@ for this mod. Its design was informed by the following projects:
       Architecture reference only (depth snapshot, FX-only HDR bloom chain, screen
       composite with flash / aberration / radial blur). No code or shaders were copied.
 
+  * Epic Fight Nightfall (efn)
+      Visual concept reference only for faceted glass space-shattering and flying prism
+      shards (Yamato SpaceBroken) applied conceptually in SpatialFractureFx and
+      fx_fracture_scene.fsh. No code or shaders were copied.
+
 Thank you to these authors.

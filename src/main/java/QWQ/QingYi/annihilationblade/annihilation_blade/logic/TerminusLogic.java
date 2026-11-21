@@ -10,17 +10,6 @@ import net.minecraft.world.item.ItemStack;
 public class TerminusLogic {
    private static final float EXECUTION_DAMAGE = 1.0E9F;
 
-   public static void markForDeath(LivingEntity target) {
-      if (target.getHealth() > 0.0F) {
-         target.setHealth(0.1F);
-         target.invulnerableTime = 0;
-      }
-   }
-
-   public static boolean isMarkedForDeath(LivingEntity target) {
-      return target.getHealth() <= 0.1F && target.invulnerableTime == 0;
-   }
-
    public static void execute(LivingEntity target, Player attacker) {
       if (!target.level().isClientSide && SlashBladeTargeting.canAttack(attacker, target)) {
          target.invulnerableTime = 0;

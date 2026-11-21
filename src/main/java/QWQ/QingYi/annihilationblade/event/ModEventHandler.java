@@ -1,16 +1,13 @@
 package QWQ.QingYi.annihilationblade.event;
 
 import QWQ.QingYi.annihilationblade.annihilation_blade.AnnihilationBladeDefinitions;
-import QWQ.QingYi.annihilationblade.annihilation_blade.logic.TerminusLogic;
 import QWQ.QingYi.annihilationblade.annihilation_blade.logic.WorldRiftChain;
-import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.AbyssalDecree;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.CausalityCollapse;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.Dankong;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.PhantomJudgement;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.StarlessJudgement;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.TerminusEcho;
 import QWQ.QingYi.annihilationblade.annihilation_blade.specialeffect.VoidDominion;
-import QWQ.QingYi.annihilationblade.annihilation_blade.visual.AnnihilationFxEvents;
 import QWQ.QingYi.annihilationblade.blood_prison.logic.BloodPrisonLogic;
 import QWQ.QingYi.annihilationblade.common.SlashBladeTargeting;
 import QWQ.QingYi.annihilationblade.common.SpecialEffectSupport;
@@ -26,8 +23,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -198,29 +193,6 @@ public class ModEventHandler {
             if (event.getEntity().level() instanceof ServerLevel level) {
                WorldRiftChain.scheduleFromDamage(level, player, event.getEntity());
             }
-
-            if (!TerminusLogic.isMarkedForDeath(event.getEntity())) {
-               event.setAmount(10000.0F);
-               TerminusLogic.markForDeath(event.getEntity());
-               if (event.getEntity().level() instanceof ServerLevel level) {
-                  AnnihilationFxEvents.terminusMark(level, player, event.getEntity());
-               }
-
-               if (player.distanceTo(event.getEntity()) < 6.0F) {
-                  event.getEntity()
-                     .level()
-                     .playSound(
-                        null,
-                        event.getEntity().getX(),
-                        event.getEntity().getY(),
-                        event.getEntity().getZ(),
-                        SoundEvents.TRIDENT_THUNDER,
-                        SoundSource.PLAYERS,
-                        0.5F,
-                        2.0F
-                     );
-               }
-            }
          }
       }
    }
@@ -313,7 +285,6 @@ public class ModEventHandler {
       LAST_BLADE_SCAN_TICK.remove(id);
       Dankong.clearPlayer(id);
       TerminusEcho.clearPlayer(id);
-      AbyssalDecree.clearPlayer(id);
       PhantomJudgement.clearPlayer(player.level(), id);
       CausalityCollapse.clearPlayer(id);
       StarlessJudgement.clearPlayer(id);

@@ -169,33 +169,6 @@ public final class AnnihilationFxEvents {
       FxSustained.stop(handle);
    }
 
-   /** 归墟天诏事件种类（intParam 低 4 位）：开场构筑星冕。 */
-   public static final int DECREE_BEGIN = 0;
-   /** 归墟天诏事件种类（intParam 低 4 位）：一次敕裁，高位为序号。 */
-   public static final int DECREE_STRIKE = 1;
-
-   /** 归墟天诏开始（持续特效 START）：在施法者头顶构筑星冕。 */
-   public static int decreeBegin(ServerLevel level, Player player, Vec3 crown, double range, double visualScale, int duration) {
-      return FxSustained.start(level, new FxEventPacket(
-         FxTypes.ABYSSAL_DECREE, crown, Vec3.ZERO, (float)range, (float)visualScale, DECREE_BEGIN,
-         level.getRandom().nextLong(), player.getId(), new int[0]
-      ), duration);
-   }
-
-   /** 归墟天诏一次敕裁（持续特效 UPDATE），必须在处决该目标之前调用。 */
-   public static void decreeStrike(int handle, ServerLevel level, Player player, LivingEntity target, int index) {
-      FxSustained.update(handle, new FxEventPacket(
-         FxTypes.ABYSSAL_DECREE, player.position().add(0.0, player.getBbHeight() + 3.2, 0.0), Vec3.ZERO,
-         target.getBbHeight(), ModConfig.COMMON.annihilationBlade.abyssalDecree.visualScale.getValue().floatValue(), DECREE_STRIKE | (index << 4),
-         level.getRandom().nextLong(), player.getId(), new int[]{target.getId()}
-      ));
-   }
-
-   /** 归墟天诏结束（持续特效 STOP）：星冕收拢成诏。 */
-   public static void decreeEnd(int handle) {
-      FxSustained.stop(handle);
-   }
-
    /** 星寂裁决：沿 direction 劈开天幕并审判 targets（按投影由近到远），必须在处决之前调用。 */
    public static void starlessJudgement(ServerLevel level, Player player, Vec3 start, Vec3 direction, double range, double width, double visualScale, List<LivingEntity> targets) {
       int size = Math.min(targets.size(), FxEventPacket.MAX_ENTITIES);
@@ -248,24 +221,5 @@ public final class AnnihilationFxEvents {
    /** 断空收刀（持续特效 STOP）：客户端播放「納刀」。 */
    public static void dankongFinish(int handle) {
       FxSustained.stop(handle);
-   }
-
-   /**
-    * 终焉印记：普通命中触发终焉判定时，目标身上的金色光圈收束归零。
-    * radius = 目标体宽，scale = 目标体高，entityIds = [目标]。
-    */
-   public static void terminusMark(ServerLevel level, Player attacker, LivingEntity target) {
-      Vec3 center = target.getBoundingBox().getCenter();
-      FxEvents.send(level, new FxEventPacket(
-         FxTypes.TERMINUS_MARK,
-         center,
-         Vec3.ZERO,
-         target.getBbWidth(),
-         target.getBbHeight(),
-         0,
-         level.getRandom().nextLong(),
-         attacker.getId(),
-         new int[]{target.getId()}
-      ));
    }
 }
